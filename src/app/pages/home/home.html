@@ -1,0 +1,111 @@
+<!-- <h2>Home remote</h2> -->
+
+@if (loading()) {
+  <lib-loading-animation variant="visualizer" label="Loading dashboard" />
+} @else if (error()) {
+  <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
+} @else {
+  @if (carouselItems().length > 0) {
+    <div class="carousel">
+      <div class="carousel-track" [style.transform]="'translateX(-' + carouselIndex() * 100 + '%)'">
+        @for (item of carouselItems(); track item.ID + item.Type) {
+          <div class="carousel-slide">
+            <img [src]="item.imageLg" [alt]="item.Name" loading="lazy" />
+            <div class="carousel-caption">
+              <div class="carousel-title">{{ item.Name }}</div>
+              @if (item.Caption) {
+                <div class="carousel-subtitle">{{ item.Caption }}</div>
+              }
+            </div>
+            <a class="carousel-artist-link" [routerLink]="['/list', item.Type, item.ID, 1]">
+              Open artist <i class="fa-solid fa-chevron-right"></i>
+            </a>
+          </div>
+        }
+      </div>
+
+      @if (carouselItems().length > 1) {
+        <button type="button" class="carousel-control carousel-control-prev" (click)="prevSlide()">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button type="button" class="carousel-control carousel-control-next" (click)="nextSlide()">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="carousel-indicators">
+          @for (item of carouselItems(); track item.ID + item.Type; let i = $index) {
+            <button
+              type="button"
+              class="carousel-dot"
+              [class.active]="i === carouselIndex()"
+              (click)="goToSlide(i)"
+            ></button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (featuredPlaylists().length > 0) {
+    <div class="section-header">
+      <h3><i class="fa-solid fa-list-ul"></i> Playlists</h3>
+      <a class="view-all-link" [routerLink]="['/grid', 'playlist', 1]"
+        >View all <i class="fa-solid fa-chevron-right"></i
+      ></a>
+    </div>
+    <div class="playlist-grid">
+      @for (playlist of featuredPlaylists(); track playlist.listKey) {
+        <a class="playlist-card" [routerLink]="['/list', 'playlist', playlist.listKey, 1]">
+          <img
+            class="playlist-card-img"
+            appImgFallback
+            [src]="playlist.image"
+            [alt]="playlist.Title"
+          />
+          <div class="playlist-card-info">
+            <div class="playlist-card-title">{{ playlist.Title }}</div>
+            <div class="playlist-card-caption">{{ playlist.TrackCount }} tracks</div>
+          </div>
+        </a>
+      }
+    </div>
+  }
+
+  <div class="section-header">
+    <h3><i class="fa-solid fa-microphone"></i> Top Artists</h3>
+    <a class="view-all-link" [routerLink]="['/grid', 'artist', 1]"
+      >View all <i class="fa-solid fa-chevron-right"></i
+    ></a>
+  </div>
+  <div class="dash-grid">
+    @for (item of topArtists(); track item.ID + item.Type) {
+      <lib-media-card
+        [thumbnail]="item.Thumbnail"
+        [title]="item.Name"
+        [eyebrow]="item.Type"
+        [caption]="item.Caption"
+        [routerLink]="['/list', item.Type, item.ID, 1]"
+      />
+    }
+  </div>
+
+  <div class="section-header">
+    <h3><i class="fa-solid fa-compact-disc"></i> Top Albums</h3>
+    <a class="view-all-link" [routerLink]="['/grid', 'album', 1]"
+      >View all <i class="fa-solid fa-chevron-right"></i
+    ></a>
+  </div>
+  <div class="dash-grid">
+    @for (item of topAlbums(); track item.ID + item.Type) {
+      <lib-media-card
+        [thumbnail]="item.Thumbnail"
+        [title]="item.Name"
+        [eyebrow]="item.Type"
+        [caption]="item.Caption"
+        [routerLink]="['/list', item.Type, item.ID, 1]"
+      />
+    }
+  </div>
+}
+
+<router-outlet />

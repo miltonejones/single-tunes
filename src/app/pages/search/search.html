@@ -1,0 +1,104 @@
+<h2>Search results for &ldquo;{{ query() }}&rdquo;</h2>
+
+@if (loading()) {
+  <lib-loading-animation variant="visualizer" label="Searching" />
+} @else if (error()) {
+  <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
+} @else if (!hasResults()) {
+  <p>No results found.</p>
+} @else {
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="activeTab() === 'artists'"
+        (click)="activeTab.set('artists')"
+      >
+        <i class="fa-solid fa-microphone"></i> Artists ({{ artists().length }})
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="activeTab() === 'albums'"
+        (click)="activeTab.set('albums')"
+      >
+        <i class="fa-solid fa-compact-disc"></i> Albums ({{ albums().length }})
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="activeTab() === 'tracks'"
+        (click)="activeTab.set('tracks')"
+      >
+        <i class="fa-solid fa-music"></i> Tracks ({{ tracks().length }})
+      </button>
+    </li>
+  </ul>
+
+  @if (activeTab() === 'artists') {
+    @if (artists().length > 0) {
+      <div class="search-grid">
+        @for (item of artists(); track item.ID) {
+          <lib-media-card
+            [thumbnail]="item.Thumbnail"
+            [title]="item.Name"
+            [caption]="item.TrackCount + ' tracks'"
+            [routerLink]="['/list', 'artist', item.ID, 1]"
+          />
+        }
+      </div>
+    } @else {
+      <p class="text-muted">No matching artists.</p>
+    }
+  }
+
+  @if (activeTab() === 'albums') {
+    @if (albums().length > 0) {
+      <div class="search-grid">
+        @for (item of albums(); track item.ID) {
+          <lib-media-card
+            [thumbnail]="item.Thumbnail"
+            [title]="item.Name"
+            [subtitle]="item.artistName ?? null"
+            [caption]="item.TrackCount + ' tracks'"
+            [routerLink]="['/list', 'album', item.ID, 1]"
+          />
+        }
+      </div>
+    } @else {
+      <p class="text-muted">No matching albums.</p>
+    }
+  }
+
+  @if (activeTab() === 'tracks') {
+    @if (tracks().length > 0) {
+      <div class="track-list">
+        @for (track of tracks(); track track.ID) {
+          <div class="track-row" (click)="playTrack(track)">
+            <img
+              class="track-icon"
+              appImgFallback
+              [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
+              [src]="track.albumImage"
+              [alt]="track.Title"
+            />
+            <div class="track-info">
+              <div class="track-title">{{ track.Title }}</div>
+              <div class="track-artist">{{ track.artistName }}</div>
+            </div>
+            <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="text-muted">No matching tracks.</p>
+    }
+  }
+}
+
+<router-outlet />

@@ -1,0 +1,45 @@
+@if (panel.isOpen()) {
+  <div class="offcanvas-backdrop fade show" (click)="panel.close()"></div>
+}
+
+<div
+  class="offcanvas offcanvas-end"
+  [class.show]="panel.isOpen()"
+  [style.visibility]="panel.isOpen() ? 'visible' : 'hidden'"
+  tabindex="-1"
+>
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title"><i class="fa-solid fa-list"></i> Up Next</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="panel.close()"></button>
+  </div>
+  <div class="offcanvas-body">
+    @if (queue().length === 0) {
+      <p class="text-muted">Nothing queued.</p>
+    } @else {
+      <div class="queue-list">
+        @for (track of queue(); track track.ID) {
+          <div
+            class="queue-row"
+            [class.active]="track.ID === currentTrackId()"
+            (click)="selectTrack(track)"
+          >
+            <img
+              class="queue-icon"
+              appImgFallback
+              [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
+              [src]="track.albumImage"
+              [alt]="track.Title"
+            />
+            <div class="queue-info">
+              <div class="queue-title">{{ track.Title }}</div>
+              <div class="queue-artist">{{ track.artistName }}</div>
+            </div>
+            @if (track.ID === currentTrackId()) {
+              <i class="fa-solid fa-volume-high queue-playing-icon"></i>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

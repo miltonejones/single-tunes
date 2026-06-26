@@ -1,0 +1,32 @@
+.grid-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 1rem 0;
+  font-size: 0.9rem;
+}
+
+.pager a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pager a:hover {
+  color: var(--accent-to);
+}
+
+.pager-disabled {
+  color: var(--text-tertiary);
+}
+
+.error {
+  color: var(--danger);
+}

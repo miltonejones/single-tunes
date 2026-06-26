@@ -1,0 +1,43 @@
+<!-- <h2>Grid remote</h2> -->
+
+@if (loading()) {
+  <lib-loading-animation variant="visualizer" [label]="'Loading ' + gridType() + 's'" />
+} @else if (error()) {
+  <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
+} @else {
+  <lib-breadcrumbs [items]="breadcrumbItems()" />
+
+  <div class="grid-grid">
+    @for (item of items(); track item.ID) {
+      <lib-media-card
+        [thumbnail]="item.Thumbnail"
+        [title]="item.Name"
+        [subtitle]="item.artistName ?? ''"
+        [caption]="item.TrackCount + ' tracks'"
+        [routerLink]="['/list', gridType(), item.ID, 1]"
+      />
+    }
+  </div>
+
+  <div class="pager">
+    @if (pageNum() > 1) {
+      <a [routerLink]="['/grid', gridType(), pageNum() - 1]"
+        ><i class="fa-solid fa-chevron-left"></i> Prev</a
+      >
+    } @else {
+      <span class="pager-disabled"><i class="fa-solid fa-chevron-left"></i> Prev</span>
+    }
+
+    <span>Page {{ pageNum() }} of {{ totalPages() }}</span>
+
+    @if (pageNum() < totalPages()) {
+      <a [routerLink]="['/grid', gridType(), pageNum() + 1]"
+        >Next <i class="fa-solid fa-chevron-right"></i
+      ></a>
+    } @else {
+      <span class="pager-disabled">Next <i class="fa-solid fa-chevron-right"></i></span>
+    }
+  </div>
+}
+
+<router-outlet />

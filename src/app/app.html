@@ -1,0 +1,92 @@
+<div
+  class="toolbar d-flex align-items-center justify-content-between flex-nowrap gap-2"
+  [class.search-active]="searchOpen()"
+>
+  <a routerLink="/" class="brand">
+    <img class="brand-mark" src="sky-tunes-logo.png" alt="SkyTunes logo" />
+    <span class="brand-name">SkyTunes</span>
+  </a>
+
+  <nav class="d-none d-sm-flex flex-nowrap gap-1" role="group">
+    @for (item of NAV_ITEMS; track item.section) {
+      <a
+        [routerLink]="item.routerLink"
+        [class.btn-primary]="activeSection() === item.section"
+        class="btn"
+      >
+        <i class="fa-solid" [class]="item.icon"></i>
+        <span class="btn-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="mobile-nav-dropdown d-sm-none">
+    <button
+      type="button"
+      class="btn mobile-nav-toggle"
+      (click)="navDropdownOpen.set(!navDropdownOpen())"
+      [class.active]="navDropdownOpen()"
+    >
+      @if (activeItem(); as active) {
+        <i class="fa-solid" [class]="active.icon"></i>
+        <span>{{ active.label }}</span>
+      }
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+
+    @if (navDropdownOpen()) {
+      <ul class="mobile-nav-menu">
+        @for (item of NAV_ITEMS; track item.section) {
+          <li>
+            <button
+              type="button"
+              class="mobile-nav-option"
+              [class.active]="activeSection() === item.section"
+              (click)="navigateTo(item)"
+            >
+              <i class="fa-solid" [class]="item.icon"></i>
+              <span>{{ item.label }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <button type="button" class="btn search-toggle" (click)="openSearch()">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+
+  <form class="d-flex gap-1 search-form" (submit)="onSearch($event, searchInput.value)">
+    <button type="button" class="btn search-back" (click)="closeSearch()">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <input #searchInput type="search" class="form-control" placeholder="Search..." />
+    <button type="submit" class="btn btn-outline-secondary">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
+  </form>
+
+  <button
+    type="button"
+    class="btn settings-toggle"
+    aria-label="Settings"
+    (click)="settingsPanel.toggle()"
+  >
+    <i class="fa-solid fa-gear"></i>
+  </button>
+</div>
+
+<router-outlet />
+
+<lib-toast />
+
+<div class="player-dock">
+  <app-audio-visualizer />
+
+  <app-audio-player />
+</div>
+
+<app-track-queue />
+
+<app-settings-modal />

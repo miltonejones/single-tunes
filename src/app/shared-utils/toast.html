@@ -1,0 +1,7 @@
+<div class="toast-stack">
+  @for (toast of toasts(); track toast.id) {
+    <div class="toast-item" role="status" (click)="dismiss(toast.id)">
+      {{ toast.text }}
+    </div>
+  }
+</div>

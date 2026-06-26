@@ -1,0 +1,11 @@
+@if (showPanel()) {
+  <div
+    class="audio-visualizer"
+    [style]="dockStyle()"
+    (click)="cycleMode()"
+    title="Click to change visualization style"
+  >
+    <canvas #canvasEl width="360" height="96"></canvas>
+    <span class="audio-visualizer__watermark">SkyTunes</span>
+  </div>
+}

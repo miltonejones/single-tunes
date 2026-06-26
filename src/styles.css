@@ -1,0 +1,273 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+  /* Surfaces */
+  --bg: #0a0a0f;
+  --surface: #15151d;
+  --surface-2: #1c1c27;
+  --surface-hover: #242433;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Text */
+  --text: rgba(255, 255, 255, 0.94);
+  --text-secondary: rgba(255, 255, 255, 0.62);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+
+  /* Brand accent (matches the visualizer gradient) */
+  --accent-from: #6366f1;
+  --accent-to: #ec4899;
+  --accent: #818cf8;
+  --accent-strong: #6366f1;
+  --accent-gradient: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  --accent-soft: rgba(99, 102, 241, 0.18);
+
+  /* Background glow (used in body radial-gradients) */
+  --glow-rgb-1: 99, 102, 241;
+  --glow-rgb-2: 236, 72, 153;
+  --glow-pos-1: 12% 0%;
+  --glow-pos-2: 100% 18%;
+
+  /* Button state colors */
+  --btn-hover-bg: #4f46e5;
+  --btn-active-bg: #4338ca;
+
+  /* Form switch toggle color */
+  --switch-bg-url: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23818cf8'/%3e%3c/svg%3e");
+
+  --danger: #f87171;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 8px 20px rgba(99, 102, 241, 0.35);
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --font-display: 'Manrope', 'Inter', sans-serif;
+
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  color-scheme: dark;
+}
+
+/* ── Midnight Synth (default) ─────────────────────────────────────────── */
+[data-theme='midnight-synth'] {
+  --bg: #0a0a0f;
+  --surface: #15151d;
+  --surface-2: #1c1c27;
+  --surface-hover: #242433;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: rgba(255, 255, 255, 0.94);
+  --text-secondary: rgba(255, 255, 255, 0.62);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+  --accent-from: #6366f1;
+  --accent-to: #ec4899;
+  --accent: #818cf8;
+  --accent-strong: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.18);
+  --glow-rgb-1: 99, 102, 241;
+  --glow-rgb-2: 236, 72, 153;
+  --glow-pos-1: 12% 0%;
+  --glow-pos-2: 100% 18%;
+  --btn-hover-bg: #4f46e5;
+  --btn-active-bg: #4338ca;
+  --switch-bg-url: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23818cf8'/%3e%3c/svg%3e");
+  --danger: #f87171;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 8px 20px rgba(99, 102, 241, 0.35);
+}
+
+/* ── Disco Inferno ────────────────────────────────────────────────────── */
+[data-theme='disco-inferno'] {
+  --bg: #0f0808;
+  --surface: #1f1210;
+  --surface-2: #2a1815;
+  --surface-hover: #3a201c;
+  --border: rgba(255, 120, 80, 0.12);
+  --border-strong: rgba(255, 120, 80, 0.22);
+  --text: rgba(255, 235, 220, 0.94);
+  --text-secondary: rgba(255, 200, 170, 0.62);
+  --text-tertiary: rgba(255, 180, 150, 0.4);
+  --accent-from: #f97316;
+  --accent-to: #ef4444;
+  --accent: #fb923c;
+  --accent-strong: #ea580c;
+  --accent-soft: rgba(249, 115, 22, 0.18);
+  --glow-rgb-1: 249, 115, 22;
+  --glow-rgb-2: 239, 68, 68;
+  --glow-pos-1: 0% 0%;
+  --glow-pos-2: 100% 100%;
+  --btn-hover-bg: #d97706;
+  --btn-active-bg: #b45309;
+  --switch-bg-url: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fb923c'/%3e%3c/svg%3e");
+  --danger: #f87171;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 8px 20px rgba(249, 115, 22, 0.35);
+}
+
+/* ── Minty Fresh ──────────────────────────────────────────────────────── */
+[data-theme='minty-fresh'] {
+  --bg: #080f0c;
+  --surface: #0f1a14;
+  --surface-2: #16261d;
+  --surface-hover: #1e3328;
+  --border: rgba(80, 200, 150, 0.12);
+  --border-strong: rgba(80, 200, 150, 0.22);
+  --text: rgba(220, 255, 240, 0.94);
+  --text-secondary: rgba(170, 230, 200, 0.62);
+  --text-tertiary: rgba(140, 210, 180, 0.4);
+  --accent-from: #10b981;
+  --accent-to: #06b6d4;
+  --accent: #34d399;
+  --accent-strong: #059669;
+  --accent-soft: rgba(16, 185, 129, 0.18);
+  --glow-rgb-1: 16, 185, 129;
+  --glow-rgb-2: 6, 182, 212;
+  --glow-pos-1: 50% 0%;
+  --glow-pos-2: 0% 100%;
+  --btn-hover-bg: #047857;
+  --btn-active-bg: #065f46;
+  --switch-bg-url: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2334d399'/%3e%3c/svg%3e");
+  --danger: #f87171;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 8px 20px rgba(16, 185, 129, 0.35);
+}
+
+/* Re-point Bootstrap's own design tokens at our palette so dark-theme-aware
+   components (modal, offcanvas, form-control, nav, dropdown, ...) match. */
+[data-bs-theme='dark'] {
+  --bs-body-bg: var(--surface);
+  --bs-body-color: var(--text);
+  --bs-border-color: var(--border-strong);
+  --bs-border-color-translucent: var(--border);
+  --bs-secondary-bg: var(--surface-2);
+  --bs-tertiary-bg: var(--surface-2);
+  --bs-secondary-color: var(--text-secondary);
+  --bs-tertiary-color: var(--text-tertiary);
+  --bs-emphasis-color: var(--text);
+  --bs-link-color: var(--accent);
+  --bs-link-color-rgb: var(--glow-rgb-1);
+  --bs-link-hover-color: var(--accent-to);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  padding-top: 4rem;
+  padding-bottom: 5.5rem;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at var(--glow-pos-1), rgba(var(--glow-rgb-1), 0.16), transparent 42%),
+    radial-gradient(circle at var(--glow-pos-2), rgba(var(--glow-rgb-2), 0.12), transparent 45%),
+    var(--bg);
+}
+
+body.track-playing {
+  padding-bottom: 8rem;
+}
+
+@media (max-width: 576px) {
+  body {
+    padding-top: 3.5rem;
+  }
+
+  body.track-playing {
+    padding-bottom: 9rem;
+  }
+}
+
+a {
+  color: var(--accent);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-hover);
+}
+
+/* Bootstrap accent overrides — buttons and form controls don't read
+   --bs-primary at runtime, so the brand color is applied directly. */
+.btn {
+  border-radius: var(--radius-pill);
+}
+
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--accent-strong);
+  --bs-btn-border-color: var(--accent-strong);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--btn-hover-bg);
+  --bs-btn-hover-border-color: var(--btn-hover-bg);
+  --bs-btn-active-bg: var(--btn-active-bg);
+  --bs-btn-active-border-color: var(--btn-active-bg);
+  --bs-btn-disabled-bg: var(--accent-strong);
+  --bs-btn-disabled-border-color: var(--accent-strong);
+  --bs-btn-focus-shadow-rgb: var(--glow-rgb-1);
+}
+
+.form-check-input:checked {
+  background-color: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.form-check-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.25rem var(--accent-soft);
+}
+
+.form-switch .form-check-input:focus {
+  --bs-form-switch-bg: var(--switch-bg-url);
+}
+
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(1.8);
+}
+
+[data-bs-theme='dark'] {
+  --bs-border-radius: 0.65rem;
+  --bs-border-radius-sm: 0.45rem;
+  --bs-border-radius-lg: 1rem;
+  --bs-border-radius-xl: 1.25rem;
+}

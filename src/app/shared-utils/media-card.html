@@ -1,0 +1,16 @@
+<a class="media-card" [routerLink]="routerLink()">
+  <div class="media-card-art">
+    <img appImgFallback [src]="thumbnail()" [alt]="alt() ?? title()" />
+    <span class="media-card-play"><i class="fa-solid fa-play"></i></span>
+  </div>
+  @if (eyebrow()) {
+    <div class="media-card-eyebrow">{{ eyebrow() }}</div>
+  }
+  <div class="media-card-title">{{ title() }}</div>
+  @if (subtitle()) {
+    <div class="media-card-subtitle">{{ subtitle() }}</div>
+  }
+  @if (caption()) {
+    <div class="media-card-caption">{{ caption() }}</div>
+  }
+</a>

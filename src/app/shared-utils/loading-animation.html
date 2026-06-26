@@ -1,0 +1,23 @@
+@switch (variant) {
+  @case ('visualizer') {
+    <div class="visualizer">
+      @for (bar of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track bar) {
+        <div class="bar"></div>
+      }
+    </div>
+  }
+  @case ('vinyl') {
+    <div class="vinyl"></div>
+  }
+  @case ('notes') {
+    <div class="notes">
+      <span class="note">♪</span>
+      <span class="note">♫</span>
+      <span class="note">♪</span>
+    </div>
+  }
+}
+
+@if (label) {
+  <div class="label">{{ label }}</div>
+}

@@ -1,0 +1,14 @@
+@if (isAvailable()) {
+  <button
+    type="button"
+    class="cast-button"
+    [class.cast-button--active]="isConnected()"
+    [title]="isConnected() ? 'Connected to ' + deviceName() : 'Cast to device'"
+    (click)="toggleCast()"
+  >
+    <i class="fa-solid fa-broadcast-tower"></i>
+    @if (isConnected()) {
+      <span class="cast-button__name">{{ deviceName() }}</span>
+    }
+  </button>
+}
