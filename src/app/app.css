@@ -192,6 +192,12 @@ nav .btn.btn-primary {
   .search-back {
     display: inline-flex;
   }
+
+  /* The compact nav dropdown frees up enough width to bring the title back
+     at this breakpoint, even though it's still hidden between 576-768px. */
+  .brand-name {
+    display: inline;
+  }
 }
 
 /* ── Mobile nav dropdown ──────────────────────────────────── */
