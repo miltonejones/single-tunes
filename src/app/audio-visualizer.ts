@@ -20,15 +20,7 @@ const GRID_LINE_SPACING = 20;
 /** Distance (px) from the bottom of the page at which the visualizer starts sliding away. */
 const SCROLL_HIDE_THRESHOLD_PX = 300;
 
-const VISUALIZER_MODES = [
-  'bars',
-  'mirroredBars',
-  // 'radial',
-  'area',
-  'waveform',
-  // 'blob',
-  // 'waterfall',
-] as const;
+const VISUALIZER_MODES = ['bars', 'mirroredBars', 'area', 'waveform'] as const;
 type VisualizerMode = (typeof VISUALIZER_MODES)[number];
 
 @Component({
@@ -146,10 +138,6 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
     const { width, height } = canvas;
     const mode = this.mode();
 
-    // Waterfall scrolls the existing canvas content rather than clearing it.
-    // if (mode !== 'waterfall') {
-    //
-    // }
     ctx.clearRect(0, 0, width, height);
     switch (mode) {
       case 'bars':
@@ -158,26 +146,15 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
       case 'mirroredBars':
         this.drawMirroredBars(ctx, width, height);
         break;
-      // case 'radial':
-      //   this.drawRadial(ctx, width, height);
-      //   break;
       case 'area':
         this.drawArea(ctx, width, height);
         break;
       case 'waveform':
         this.drawWaveform(ctx, width, height);
         break;
-      // case 'blob':
-      //   this.drawBlob(ctx, width, height);
-      //   break;
-      // case 'waterfall':
-      //   this.drawWaterfall(ctx, width, height);
-      //   break;
     }
 
-    // if (mode !== 'waterfall') {
     this.drawGridOverlay(ctx, width, height);
-    // }
   }
 
   private drawBars(ctx: CanvasRenderingContext2D, width: number, height: number): void {
@@ -211,28 +188,6 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
       ctx.fillStyle = gradient;
       ctx.fillRect(x, center - halfHeight, barWidth, halfHeight * 2);
       x += barWidth + 1;
-    }
-  }
-
-  private drawRadial(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-    const data = this.frequencyData!;
-    const cx = width / 2;
-    const cy = height / 2;
-    const innerRadius = Math.min(width, height) * 0.18;
-    const maxBarLength = Math.min(width, height) * 0.42;
-
-    ctx.lineWidth = 2;
-    for (let i = 0; i < data.length; i++) {
-      const angle = (i / data.length) * Math.PI * 2;
-      const magnitude = (data[i] / 255) * maxBarLength;
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-
-      ctx.strokeStyle = i % 2 === 0 ? BAR_GRADIENT_START : BAR_GRADIENT_END;
-      ctx.beginPath();
-      ctx.moveTo(cx + cos * innerRadius, cy + sin * innerRadius);
-      ctx.lineTo(cx + cos * (innerRadius + magnitude), cy + sin * (innerRadius + magnitude));
-      ctx.stroke();
     }
   }
 
@@ -279,45 +234,6 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
     ctx.strokeStyle = BAR_GRADIENT_END;
     ctx.lineWidth = 2;
     ctx.stroke();
-  }
-
-  private drawBlob(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-    const data = this.frequencyData!;
-    const bassBinCount = Math.max(1, Math.floor(data.length * 0.12));
-    let sum = 0;
-    for (let i = 0; i < bassBinCount; i++) {
-      sum += data[i];
-    }
-    const bassLevel = sum / bassBinCount / 255;
-
-    const cx = width / 2;
-    const cy = height / 2;
-    const baseRadius = Math.min(width, height) * 0.18;
-    const radius = baseRadius + bassLevel * baseRadius * 1.5;
-
-    const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-    gradient.addColorStop(0, BAR_GRADIENT_END);
-    gradient.addColorStop(1, BAR_GRADIENT_START);
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  /** Scrolls existing canvas content left by one pixel and paints a new frequency column
-   * at the right edge, building a scrolling spectrogram instead of redrawing each frame. */
-  private drawWaterfall(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-    const data = this.frequencyData!;
-    ctx.drawImage(ctx.canvas, -1, 0);
-
-    const binHeight = height / data.length;
-    for (let i = 0; i < data.length; i++) {
-      const value = data[i];
-      const hue = 260 - (value / 255) * 260;
-      const lightness = 10 + (value / 255) * 40;
-      ctx.fillStyle = `hsl(${hue}, 80%, ${lightness}%)`;
-      ctx.fillRect(width - 1, height - (i + 1) * binHeight, 1, binHeight + 1);
-    }
   }
 
   private drawGridOverlay(ctx: CanvasRenderingContext2D, width: number, height: number): void {
