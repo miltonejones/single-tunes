@@ -18,6 +18,7 @@ import {
   formatDuration,
   ImgFallbackDirective,
   ITrackItem,
+  PlayHistoryService,
   shouldAnnounceForFrequency,
   SpeechPlaybackService,
 } from 'shared-utils';
@@ -44,6 +45,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private speechPlayback = inject(SpeechPlaybackService);
   private audioAnalyser = inject(AudioAnalyserService);
   private castService = inject(CastService);
+  private playHistory = inject(PlayHistoryService);
   protected queuePanel = inject(TrackQueuePanelService);
   protected visualizerPanel = inject(AudioVisualizerPanelService);
   private subscriptions: Subscription[] = [];
@@ -57,6 +59,12 @@ export class AudioPlayer implements OnInit, OnDestroy {
   protected isCasting = signal(false);
 
   private playRequestId = 0;
+
+  /** The source context (list type + name) of the most recently played track. */
+  protected currentSource = computed(() => {
+    const h = this.playHistory.history();
+    return h.length > 0 ? { type: h[0].sourceType, name: h[0].sourceName } : null;
+  });
   private corsRetryAttempted = false;
   private castTransitioning = false;
   private wakeLock: WakeLockSentinel | null = null;

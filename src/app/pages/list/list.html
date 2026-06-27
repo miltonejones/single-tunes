@@ -11,6 +11,9 @@
         <div class="artist-banner-info">
           <div class="artist-banner-label">{{ bannerLabel() }}</div>
           <div class="artist-banner-title">{{ bannerTitle() }}</div>
+          @if (bannerTrackCount()) {
+            <div class="artist-banner-count">{{ bannerTrackCount() }}</div>
+          }
         </div>
         <div class="artist-banner-actions">
           <button

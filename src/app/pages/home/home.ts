@@ -7,6 +7,7 @@ import {
   IPlaylistSummary,
   LoadingAnimation,
   MediaCard,
+  PlayHistoryService,
   PodcastCard,
   PodcastSubscriptionsService,
 } from 'shared-utils';
@@ -38,6 +39,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   private catalogQuery = inject(CatalogQueryService);
   protected subscriptionsService = inject(PodcastSubscriptionsService);
+  protected playHistory = inject(PlayHistoryService);
   private carouselTimer?: ReturnType<typeof setInterval>;
 
   dashItems = signal<DashItem[]>([]);
@@ -105,6 +107,6 @@ export class HomePage implements OnInit, OnDestroy {
       .filter((item) => item.Type === type)
       .slice()
       .sort((a, b) => trackCountOf(b) - trackCountOf(a))
-      .slice(0, 20);
+      .slice(0, 12);
   }
 }

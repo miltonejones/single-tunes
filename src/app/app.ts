@@ -2,7 +2,11 @@ import { Component, computed, ElementRef, HostListener, inject, signal, ViewChil
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 import { AudioPlayerCommandService, PodcastAudioPlayerCommandService, Toast } from 'shared-utils';
+
+const SEARCH_HISTORY_KEY = 'toolbar-search-history';
+const MAX_SEARCH_HISTORY = 10;
 import { AudioPlayer } from './audio-player';
 import { AudioVisualizer } from './audio-visualizer';
 import { SettingsModal } from './settings-modal';
@@ -108,7 +112,7 @@ function pageTitleFromUrl(url: string): string {
   selector: 'app-root',
   imports: [
     RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, TrackQueue, SettingsModal, Toast,
-    PodcastAudioPlayer, EpisodeQueue,
+    PodcastAudioPlayer, EpisodeQueue, FormsModule,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -125,6 +129,7 @@ export class App {
   navDropdownOpen = signal(false);
   protected activeItem = computed(() => NAV_ITEMS.find((i) => i.section === this.activeSection()));
   protected podcastPlaying = signal(false);
+  protected searchHistory = signal<string[]>(this.loadSearchHistory());
 
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
 
@@ -170,9 +175,25 @@ export class App {
     event.preventDefault();
     const trimmed = query.trim();
     if (trimmed) {
+      this.saveSearchHistory(trimmed);
       this.router.navigate(['/search', trimmed]);
       this.searchOpen.set(false);
     }
+  }
+
+  private loadSearchHistory(): string[] {
+    try {
+      const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveSearchHistory(term: string): void {
+    const updated = [term, ...this.searchHistory().filter((h) => h !== term)].slice(0, MAX_SEARCH_HISTORY);
+    this.searchHistory.set(updated);
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updated));
   }
 
   protected navigateTo(item: NavItem): void {

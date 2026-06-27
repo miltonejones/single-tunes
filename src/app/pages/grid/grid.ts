@@ -34,6 +34,12 @@ export class GridPage implements OnInit {
 
   totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / PAGE_SIZE)));
 
+  sortedItems = computed(() => {
+    const items = this.items();
+    if (this.gridType() !== 'playlist') return items;
+    return [...items].sort((a, b) => (a.Name ?? '').localeCompare(b.Name ?? ''));
+  });
+
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
     { label: 'Home', link: ['/'] },
     { label: GRID_TYPE_LABELS[this.gridType()] },

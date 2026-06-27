@@ -10,6 +10,7 @@ import {
   ITrackItem,
   LoadingAnimation,
   MediaCard,
+  PlayHistoryService,
   PodcastCard,
   PodcastQueryService,
   TrackMenu,
@@ -31,6 +32,7 @@ export class SearchPage implements OnInit {
   private catalogQuery = inject(CatalogQueryService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private podcastQuery = inject(PodcastQueryService);
+  private playHistory = inject(PlayHistoryService);
 
   query = signal('');
   loading = signal(false);
@@ -58,6 +60,7 @@ export class SearchPage implements OnInit {
   }
 
   playTrack(track: ITrackItem): void {
+    this.playHistory.recordPlay('search', `Search: "${this.query()}"`, ['/search', this.query()], track);
     this.audioPlayerCommand.openTrack(track, this.tracks());
   }
 
