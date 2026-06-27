@@ -1,0 +1,360 @@
+:host {
+  position: fixed;
+  bottom: -200px;
+  left: 0;
+  width: 100%;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
+  z-index: 105;
+}
+
+:host-context(body.podcast-playing) {
+  bottom: 0;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .player-controls {
+    padding: 0.25rem;
+  }
+}
+
+.player-track-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 300px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .player-track-info {
+    min-width: auto;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-track-info {
+    gap: 0.5rem;
+  }
+}
+
+.player-track-image {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 768px) {
+  .player-track-image {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-track-image {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.player-track-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .player-track-title {
+    font-size: 0.8rem;
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-track-title {
+    font-size: 0.75rem;
+    max-width: 100px;
+  }
+}
+
+.player-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .player-buttons {
+    gap: 0.25rem;
+  }
+}
+
+.player-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition:
+    color 0.16s ease,
+    transform 0.16s ease;
+  position: relative;
+  padding: 0.25rem;
+  border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .player-btn {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-btn {
+    font-size: 1rem;
+  }
+}
+
+.player-btn:hover {
+  color: var(--accent);
+  transform: scale(1.08);
+}
+
+.player-btn-large {
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+.player-btn-large:hover {
+  color: var(--accent-strong);
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .player-btn-large {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-btn-large {
+    font-size: 1.5rem;
+  }
+}
+
+.skip-btn-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.5rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.player-progress {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .player-progress {
+    min-width: 150px;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-progress {
+    min-width: auto;
+    gap: 0.5rem;
+  }
+}
+
+.player-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  min-width: 40px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .player-time {
+    font-size: 0.7rem;
+    min-width: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-time {
+    font-size: 0.65rem;
+    min-width: 25px;
+  }
+}
+
+.player-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  outline: none;
+  min-width: 50px;
+  transition: background 0.16s ease;
+}
+
+@media (max-width: 480px) {
+  .player-slider {
+    height: 3px;
+  }
+}
+
+.player-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: box-shadow 0.16s ease;
+}
+
+.player-slider:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 6px var(--accent-soft);
+}
+
+@media (max-width: 480px) {
+  .player-slider::-webkit-slider-thumb {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.player-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+@media (max-width: 480px) {
+  .player-slider::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.audio-close {
+  display: none;
+}
+
+.menu-btn.mobile {
+  display: none;
+}
+
+/* Show the mobile menu button in the expanded fullscreen view */
+:host-context(body.podcast-playing) .menu-btn.mobile {
+  display: none;
+}
+
+/* Expanded mobile view — fullscreen player when user taps track info */
+@media (max-width: 768px) {
+  .desktop {
+    display: none;
+  }
+
+  :host.expanded {
+    bottom: 0;
+    top: 0;
+    height: 100vh;
+  }
+
+  /* In the collapsed mini-player, hide track info and show compact controls */
+  .player-track-info {
+    display: none;
+  }
+
+  :host.expanded .player-track-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 300px;
+    flex-direction: column;
+    position: absolute;
+    top: 160px;
+    width: 100%;
+  }
+
+  :host.expanded .player-track-info .player-track-image {
+    width: 180px;
+    height: 180px;
+    border-radius: 5px;
+    object-fit: cover;
+  }
+
+  :host.expanded .player-progress {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 200px;
+    width: 95%;
+    position: absolute;
+    top: 420px;
+  }
+
+  :host.expanded .audio-close {
+    display: block;
+    position: absolute;
+    top: 70px;
+    right: 18px;
+  }
+
+  :host.expanded .menu-btn.mobile {
+    display: block;
+    position: absolute;
+    top: 70px;
+    left: 18px;
+  }
+
+  :host.expanded .player-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 95%;
+    position: absolute;
+    top: 440px;
+    justify-content: center;
+  }
+
+  :host.expanded .player-buttons .skip-btn {
+    display: block;
+  }
+}

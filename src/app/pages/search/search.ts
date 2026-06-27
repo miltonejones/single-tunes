@@ -6,16 +6,19 @@ import {
   formatDuration,
   IGridItem,
   ImgFallbackDirective,
+  IPodcast,
   ITrackItem,
   LoadingAnimation,
   MediaCard,
+  PodcastCard,
+  PodcastQueryService,
 } from 'shared-utils';
 
-type ResultTab = 'artists' | 'albums' | 'tracks';
+type ResultTab = 'artists' | 'albums' | 'tracks' | 'podcasts';
 
 @Component({
   selector: 'app-search-page',
-  imports: [RouterOutlet, MediaCard, ImgFallbackDirective, LoadingAnimation],
+  imports: [RouterOutlet, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard],
   templateUrl: './search.html',
   styleUrl: './search.css',
 })
@@ -26,6 +29,7 @@ export class SearchPage implements OnInit {
   private route = inject(ActivatedRoute);
   private catalogQuery = inject(CatalogQueryService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
+  private podcastQuery = inject(PodcastQueryService);
 
   query = signal('');
   loading = signal(false);
@@ -33,10 +37,11 @@ export class SearchPage implements OnInit {
   artists = signal<IGridItem[]>([]);
   albums = signal<IGridItem[]>([]);
   tracks = signal<ITrackItem[]>([]);
+  podcasts = signal<IPodcast[]>([]);
   activeTab = signal<ResultTab>('artists');
 
   hasResults = computed(
-    () => this.artists().length > 0 || this.albums().length > 0 || this.tracks().length > 0,
+    () => this.artists().length > 0 || this.albums().length > 0 || this.tracks().length > 0 || this.podcasts().length > 0,
   );
 
   ngOnInit(): void {
@@ -62,11 +67,13 @@ export class SearchPage implements OnInit {
       this.catalogQuery.getSearch('artist', query),
       this.catalogQuery.getSearch('album', query),
       this.catalogQuery.getSearch('music', query),
+      this.podcastQuery.search(query).catch(() => ({ resultCount: 0, results: [] })),
     ])
-      .then(([artistRes, albumRes, musicRes]) => {
+      .then(([artistRes, albumRes, musicRes, podcastRes]) => {
         this.artists.set(artistRes.records);
         this.albums.set(albumRes.records);
         this.tracks.set(musicRes.records);
+        this.podcasts.set(podcastRes.results || []);
         this.activeTab.set(
           artistRes.records.length > 0 ? 'artists' : albumRes.records.length > 0 ? 'albums' : 'tracks',
         );

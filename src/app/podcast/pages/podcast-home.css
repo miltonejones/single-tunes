@@ -1,0 +1,371 @@
+/* Podcast home page — carousel and card grid */
+
+.podcast-carousel-container {
+  position: relative;
+  width: 100%;
+  height: 35vh;
+  margin: 1rem 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 768px) {
+  .podcast-carousel-container {
+    height: 25vh;
+    border-radius: 10px;
+    margin: 0.75rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .podcast-carousel-container {
+    height: 20vh;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+  }
+}
+
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease-in-out;
+}
+
+/* Slide Animations */
+.slide-in-right {
+  animation: slideInRight 0.5s ease-in-out forwards;
+}
+
+.slide-out-left {
+  animation: slideOutLeft 0.5s ease-in-out forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-in-out forwards;
+}
+
+.slide-out-right {
+  animation: slideOutRight 0.5s ease-in-out forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Slide Content */
+.podcast-slide-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.slide-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.slide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(
+    100deg,
+    rgba(10, 13, 18, 0.65) 0%,
+    rgba(10, 13, 18, 0.15) 55%,
+    rgba(10, 13, 18, 0) 80%
+  );
+}
+
+.podcast-info {
+  position: absolute;
+  left: 80px;
+  bottom: 30px;
+  background-color: rgba(10, 13, 18, 0.38);
+  padding: 1.5rem;
+  width: 80%;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+@media (max-width: 768px) {
+  .podcast-info {
+    left: 42px;
+    bottom: 20px;
+    padding: 0.75rem 1rem;
+    width: 65%;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .podcast-info {
+    left: 42px;
+    bottom: 15px;
+    padding: 0.5rem 0.75rem;
+    width: 70%;
+    border-radius: 6px;
+  }
+}
+
+.podcast-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 768px) {
+  .podcast-title {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .podcast-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+
+.podcast-meta {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .podcast-meta {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .podcast-meta {
+    font-size: 0.75rem;
+  }
+}
+
+.podcast-actions {
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 480px) {
+  .podcast-actions {
+    margin-top: 0.1rem;
+  }
+}
+
+/* Navigation Arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(20, 24, 31, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .carousel-arrow {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-arrow {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+}
+
+.carousel-arrow:hover:not(:disabled) {
+  background: rgba(20, 24, 31, 0.65);
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: var(--shadow-md);
+}
+
+.carousel-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.carousel-arrow-prev {
+  left: 20px;
+}
+
+@media (max-width: 768px) {
+  .carousel-arrow-prev {
+    left: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-arrow-prev {
+    left: 5px;
+  }
+}
+
+.carousel-arrow-next {
+  right: 20px;
+}
+
+@media (max-width: 768px) {
+  .carousel-arrow-next {
+    right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-arrow-next {
+    right: 5px;
+  }
+}
+
+/* Indicators */
+.carousel-indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+@media (max-width: 768px) {
+  .carousel-indicators {
+    bottom: 15px;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-indicators {
+    bottom: 10px;
+    gap: 4px;
+  }
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition:
+    background 0.24s ease,
+    transform 0.24s ease,
+    width 0.24s ease,
+    border-radius 0.24s ease;
+}
+
+@media (max-width: 768px) {
+  .indicator {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .indicator {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+.indicator.active {
+  background: #fff;
+  width: 22px;
+  border-radius: 5px;
+  transform: scale(1);
+}
+
+.indicator:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.75);
+  transform: scale(1.15);
+}
+
+.indicator:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

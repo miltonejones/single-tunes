@@ -1,0 +1,36 @@
+@if (panel.isOpen()) {
+  <div class="offcanvas-backdrop fade show" (click)="panel.close()"></div>
+}
+
+<div
+  class="offcanvas offcanvas-start"
+  [class.show]="panel.isOpen()"
+  [style.visibility]="panel.isOpen() ? 'visible' : 'hidden'"
+  tabindex="-1"
+>
+  <div class="offcanvas-header p-1">
+    <b class="offcanvas-title p-1">{{ podcastSelection.current()?.collectionName || 'Up Next' }}</b>
+    <button type="button" class="btn-close" aria-label="Close" (click)="panel.close()"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <div class="list-group">
+      @for (item of queue(); track item.guid) {
+        <div
+          class="list-group-item d-flex gap-3 align-items-start"
+          [class.bg-primary]="item.guid === currentGuid()"
+          [class.text-white]="item.guid === currentGuid()"
+          style="cursor: pointer;"
+          (click)="selectTrack(item)"
+        >
+          <div>
+            <div class="fw-bold text-truncate" style="max-width: 50vw;">{{ item.title }}</div>
+            @if (item.duration) {
+              <span class="badge bg-secondary me-2">{{ formatDuration(+item.duration) }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
