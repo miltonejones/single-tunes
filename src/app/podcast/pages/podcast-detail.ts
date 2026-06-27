@@ -2,6 +2,8 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  Breadcrumbs,
+  BreadcrumbItem,
   LoadingAnimation,
   PodcastAudioPlayerCommandService,
   PodcastQueryService,
@@ -23,7 +25,7 @@ const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-podcast-detail',
-  imports: [DatePipe, LoadingAnimation],
+  imports: [DatePipe, LoadingAnimation, Breadcrumbs],
   templateUrl: './podcast-detail.html',
   styleUrl: './podcast-detail.css',
 })
@@ -52,6 +54,12 @@ export class PodcastDetailPage {
 
   sortedEpisodes = computed(() => sortTrackList(this.episodes(), this.sortField(), this.ascOffset()));
   pages = computed(() => usePagination(this.sortedEpisodes(), { page: this.page(), pageSize: PAGE_SIZE }));
+
+  breadcrumbItems = computed<BreadcrumbItem[]>(() => [
+    { label: 'Home', link: ['/'] },
+    { label: 'Podcasts', link: ['/podcasts'] },
+    { label: this.podcast()?.collectionName ?? 'Podcast' },
+  ]);
 
   protected readonly formatDuration = formatDuration;
 

@@ -1,1 +1,26 @@
-/* Podcast search page — card grid handled by Bootstrap row/col */
+/* Podcast search page — matches home page section-header typography */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.75rem 0 0.85rem;
+  padding: 0 1rem;
+}
+
+.section-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.section-header h3 i {
+  color: var(--accent);
+  font-size: 0.85rem;
+}

@@ -1,11 +1,18 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { IPodcast, PodcastCard, PodcastQueryService } from 'shared-utils';
+import {
+  Breadcrumbs,
+  BreadcrumbItem,
+  IPodcast,
+  LoadingAnimation,
+  PodcastCard,
+  PodcastQueryService,
+} from 'shared-utils';
 
 const MIN_GROUP_SIZE = 5;
 
 @Component({
   selector: 'app-podcast-categories',
-  imports: [PodcastCard],
+  imports: [PodcastCard, Breadcrumbs, LoadingAnimation],
   templateUrl: './podcast-categories.html',
   styleUrl: './podcast-categories.css',
 })
@@ -15,6 +22,12 @@ export class PodcastCategoriesPage implements OnInit {
   podcasts = signal<IPodcast[] | null>(null);
   loading = signal(false);
   error = signal('');
+
+  breadcrumbItems = computed<BreadcrumbItem[]>(() => [
+    { label: 'Home', link: ['/'] },
+    { label: 'Podcasts', link: ['/podcasts'] },
+    { label: 'Categories' },
+  ]);
 
   groups = computed(() => {
     const byGenre = (this.podcasts() || []).reduce<Record<string, IPodcast[]>>((out, podcast) => {
