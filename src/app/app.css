@@ -142,6 +142,13 @@ nav .btn.btn-primary {
   color: var(--text);
 }
 
+/* ── Route transition container ──────────────────────────── */
+.route-container {
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
 @media (max-width: 768px) {
   .brand-name {
     display: none;

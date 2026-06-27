@@ -1,5 +1,6 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { animate, group, query, style, transition, trigger } from '@angular/animations';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -108,6 +109,19 @@ function pageTitleFromUrl(url: string): string {
   return 'SkyTunes';
 }
 
+const routeAnimation = trigger('routeAnimation', [
+  transition('* => *', [
+    query(':leave', [
+      style({ transform: 'translateX(0)', opacity: 1 }),
+      animate('200ms ease-in', style({ transform: 'translateX(-25%)', opacity: 0.4 })),
+    ], { optional: true }),
+    query(':enter', [
+      style({ transform: 'translateX(100%)', opacity: 0 }),
+      animate('350ms ease-out', style({ transform: 'translateX(0)', opacity: 1 })),
+    ], { optional: true }),
+  ]),
+]);
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -115,7 +129,8 @@ function pageTitleFromUrl(url: string): string {
     PodcastAudioPlayer, EpisodeQueue, FormsModule,
   ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
+  animations: [routeAnimation],
 })
 export class App {
   private router = inject(Router);
@@ -209,5 +224,10 @@ export class App {
         this.navDropdownOpen.set(false);
       }
     }
+  }
+
+  /** Returns a unique key per route so the slide animation fires on every navigation. */
+  protected getRouteAnimationState(): string {
+    return this.router.url.split('?')[0];
   }
 }

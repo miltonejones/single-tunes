@@ -82,7 +82,9 @@
   </button>
 </div>
 
-<router-outlet />
+<div class="route-container" [@routeAnimation]="getRouteAnimationState()">
+  <router-outlet />
+</div>
 
 <lib-toast />
 
