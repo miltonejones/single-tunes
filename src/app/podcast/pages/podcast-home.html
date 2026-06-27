@@ -6,6 +6,8 @@
     <p class="text-muted">Try refreshing the page or check your connection.</p>
   </div>
 } @else {
+  <lib-breadcrumbs [items]="breadcrumbItems()" />
+
   @if (currentSlide(); as slide) {
     <div class="section-header">
       <h3><i class="fa-solid fa-headphones"></i> Listen Now</h3>

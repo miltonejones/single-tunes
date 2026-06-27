@@ -11,6 +11,8 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
+  Breadcrumbs,
+  BreadcrumbItem,
   IPodcast,
   LoadingAnimation,
   PodcastCard,
@@ -29,7 +31,7 @@ type SlideDirection = 'forward' | 'backward';
 
 @Component({
   selector: 'app-podcast-home',
-  imports: [RouterLink, PodcastCard, NgTemplateOutlet, LoadingAnimation],
+  imports: [RouterLink, PodcastCard, NgTemplateOutlet, LoadingAnimation, Breadcrumbs],
   templateUrl: './podcast-home.html',
   styleUrl: './podcast-home.css',
 })
@@ -57,6 +59,11 @@ export class PodcastHomePage implements OnInit, OnDestroy {
   featuredPodcasts = computed(() => this.podcasts().slice(0, FEATURED_COUNT));
   subscriptionsPreview = computed(() => this.subscriptionsService.subscriptions().slice(0, SUBSCRIPTIONS_PREVIEW_COUNT));
   currentSlide = computed<IPodcast | null>(() => this.podcasts()[this.carouselIndex()] ?? null);
+
+  breadcrumbItems = computed<BreadcrumbItem[]>(() => [
+    { label: 'Home', link: ['/'] },
+    { label: 'Podcasts' },
+  ]);
 
   ngOnInit(): void {
     this.loading.set(true);

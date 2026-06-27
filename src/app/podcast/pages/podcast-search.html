@@ -1,18 +1,17 @@
+<lib-breadcrumbs [items]="breadcrumbItems()" />
+
 @if (loading()) {
-  <div class="text-center py-5">
-    <div class="spinner-border"></div>
-    <p class="mt-2">Searching for "{{ query() }}"...</p>
-  </div>
+  <lib-loading-animation variant="visualizer" label="Searching for podcasts" />
 } @else if (results()?.length === 0) {
   <div class="text-center py-5">
     <h3>No results for your search</h3>
     <p class="text-muted">Start by searching for podcasts and subscribing to your favorites!</p>
   </div>
 } @else if (results()) {
-  <div class="row">
-    <div class="col-12">
-      <h2 class="mb-4">Search Results</h2>
-    </div>
+  <div class="section-header">
+    <h3><i class="fa-solid fa-magnifying-glass"></i> Search Results</h3>
+  </div>
+  <div class="row g-2" style="padding: 0 1rem">
     @for (podcast of results(); track podcast.feedUrl) {
       <lib-podcast-card [podcast]="podcast" />
     }

@@ -1,3 +1,5 @@
+<lib-breadcrumbs [items]="breadcrumbItems()" />
+
 @if (loading() && episodes().length === 0) {
   <lib-loading-animation variant="visualizer" label="Loading episodes" />
 }

@@ -1,10 +1,17 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IPodcast, PodcastCard, PodcastQueryService } from 'shared-utils';
+import {
+  Breadcrumbs,
+  BreadcrumbItem,
+  IPodcast,
+  LoadingAnimation,
+  PodcastCard,
+  PodcastQueryService,
+} from 'shared-utils';
 
 @Component({
   selector: 'app-podcast-search',
-  imports: [PodcastCard],
+  imports: [PodcastCard, Breadcrumbs, LoadingAnimation],
   templateUrl: './podcast-search.html',
   styleUrl: './podcast-search.css',
 })
@@ -16,6 +23,12 @@ export class PodcastSearchPage {
   results = signal<IPodcast[] | null>(null);
   loading = signal(false);
   error = signal('');
+
+  breadcrumbItems = computed<BreadcrumbItem[]>(() => [
+    { label: 'Home', link: ['/'] },
+    { label: 'Podcasts', link: ['/podcasts'] },
+    { label: `Search: "${this.query()}"` },
+  ]);
 
   constructor() {
     this.route.paramMap.subscribe((params) => {
