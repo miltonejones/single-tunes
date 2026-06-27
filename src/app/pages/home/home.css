@@ -272,3 +272,74 @@
 .error {
   color: var(--danger);
 }
+
+/* On mobile, render all grids as a single horizontally scrollable row. */
+@media (max-width: 576px) {
+  .dash-grid,
+  .playlist-grid,
+  .podcast-sub-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding: 0 1rem 0.5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dash-grid > *,
+  .playlist-grid > *,
+  .podcast-sub-grid > * {
+    flex: 0 0 calc(50vw - 1rem);
+    scroll-snap-align: start;
+  }
+
+  .dash-grid > lib-media-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dash-grid > lib-media-card > .media-card {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .podcast-sub-grid > * > .px-1 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .dash-grid::-webkit-scrollbar,
+  .playlist-grid::-webkit-scrollbar,
+  .podcast-sub-grid::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Landscape mobile: coverflow row */
+@media (orientation: landscape) and (max-height: 550px) {
+  .dash-grid,
+  .playlist-grid,
+  .podcast-sub-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding: 0 1rem 0.5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dash-grid > *,
+  .playlist-grid > *,
+  .podcast-sub-grid > * {
+    flex: 0 0 calc(28vw - 1rem);
+    scroll-snap-align: center;
+  }
+
+  .dash-grid::-webkit-scrollbar,
+  .playlist-grid::-webkit-scrollbar,
+  .podcast-sub-grid::-webkit-scrollbar {
+    display: none;
+  }
+}

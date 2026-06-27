@@ -5,14 +5,35 @@
 } @else if (error()) {
   <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
 } @else {
-  <lib-breadcrumbs [items]="breadcrumbItems()" />
+  <div class="grid-header">
+    <lib-breadcrumbs [items]="breadcrumbItems()" />
+    <div class="sort-bar">
+      @for (opt of sortOptions(); track opt.field) {
+        <button
+          type="button"
+          class="sort-btn"
+          [class.active]="sort().field === opt.field"
+          (click)="setSort(opt.field)"
+        >
+          {{ opt.label }}
+          @if (sort().field === opt.field) {
+            <i
+              class="fa-solid"
+              [class.fa-arrow-up]="sort().direction === 'ASC'"
+              [class.fa-arrow-down]="sort().direction === 'DESC'"
+            ></i>
+          }
+        </button>
+      }
+    </div>
+  </div>
 
-  <div class="grid-grid">
-    @for (item of sortedItems(); track item.ID) {
+  <div class="grid-grid" libCoverflow>
+    @for (item of items(); track item.ID) {
       <lib-media-card
         [thumbnail]="item.Thumbnail"
+        [eyebrow]="gridType() === 'album' ? item.artistName : null"
         [title]="item.Name"
-        [subtitle]="item.artistName ?? ''"
         [caption]="item.TrackCount + ' tracks'"
         [routerLink]="['/list', gridType(), item.ID, 1]"
       />

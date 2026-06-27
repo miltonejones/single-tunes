@@ -46,23 +46,6 @@
     </div>
   }
 
-  @if (playHistory.recentItems().length > 0) {
-    <div class="section-header">
-      <h3><i class="fa-solid fa-clock-rotate-left"></i> Recently Played</h3>
-    </div>
-    <div class="dash-grid">
-      @for (item of playHistory.recentItems(); track item.title + item.eyebrow) {
-        <lib-media-card
-          [thumbnail]="item.thumbnail"
-          [title]="item.title"
-          [eyebrow]="item.eyebrow"
-          [caption]="item.caption"
-          [routerLink]="item.routerLink"
-        />
-      }
-    </div>
-  }
-
   @if (featuredPlaylists().length > 0) {
     <div class="section-header">
       <h3><i class="fa-solid fa-list-ul"></i> Playlists</h3>
@@ -70,7 +53,7 @@
         >View all <i class="fa-solid fa-chevron-right"></i
       ></a>
     </div>
-    <div class="playlist-grid">
+    <div class="playlist-grid" libCoverflow>
       @for (playlist of featuredPlaylists(); track playlist.listKey) {
         <a class="playlist-card" [routerLink]="['/list', 'playlist', playlist.listKey, 1]">
           <img
@@ -88,6 +71,22 @@
     </div>
   }
 
+  @if (playHistory.recentItems().length > 0) {
+    <div class="section-header">
+      <h3><i class="fa-solid fa-clock-rotate-left"></i> Recently Played</h3>
+    </div>
+    <div class="dash-grid" libCoverflow>
+      @for (item of playHistory.recentItems(); track item.title + item.eyebrow) {
+        <lib-media-card
+          [thumbnail]="item.thumbnail"
+          [title]="item.title"
+          [eyebrow]="item.eyebrow"
+          [caption]="item.caption"
+          [routerLink]="item.routerLink"
+        />
+      }
+    </div>
+  }
   @if (subscriptionsService.subscriptions().length > 0) {
     <div class="section-header">
       <h3><i class="fa-solid fa-podcast"></i> Subscribed Podcasts</h3>
@@ -95,7 +94,7 @@
         >View all <i class="fa-solid fa-chevron-right"></i
       ></a>
     </div>
-    <div class="row g-2" style="padding: 0 1rem">
+    <div class="row g-2 podcast-sub-grid" style="padding: 0 1rem">
       @for (podcast of subscriptionsService.subscriptions(); track podcast.feedUrl) {
         <lib-podcast-card [podcast]="podcast" />
       }
@@ -108,7 +107,7 @@
       >View all <i class="fa-solid fa-chevron-right"></i
     ></a>
   </div>
-  <div class="dash-grid">
+  <div class="dash-grid" libCoverflow>
     @for (item of topArtists(); track item.ID + item.Type) {
       <lib-media-card
         [thumbnail]="item.Thumbnail"
@@ -126,7 +125,7 @@
       >View all <i class="fa-solid fa-chevron-right"></i
     ></a>
   </div>
-  <div class="dash-grid">
+  <div class="dash-grid" libCoverflow>
     @for (item of topAlbums(); track item.ID + item.Type) {
       <lib-media-card
         [thumbnail]="item.Thumbnail"
