@@ -12,6 +12,7 @@ import {
   ITrackItem,
   LoadingAnimation,
   MediaCard,
+  PlayHistoryService,
   TrackMenu,
 } from 'shared-utils';
 
@@ -39,6 +40,7 @@ export class ListPage implements OnInit {
   private route = inject(ActivatedRoute);
   private catalogQuery = inject(CatalogQueryService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
+  private playHistory = inject(PlayHistoryService);
 
   listType = signal<ListType>('album');
   listId = signal('');
@@ -62,22 +64,21 @@ export class ListPage implements OnInit {
     const name = this.bannerName();
     if (!name) return '';
     switch (this.listType()) {
-      case 'artist': {
-        const count = this.detail()?.related.count ?? 0;
-        return count > 0 ? `${name} — ${count} tracks` : `Tracks by ${name}`;
-      }
+      case 'artist':
+        return name;
       case 'album': {
         const albumName = this.entity()?.Name ?? name;
-        const count = this.detail()?.related.count ?? 0;
-        return count > 0 ? `${albumName} — ${count} tracks` : albumName;
+        return albumName;
       }
-      case 'genre': {
-        const count = this.detail()?.related.count ?? 0;
-        return count > 0 ? `${name} — ${count} tracks` : name;
-      }
+      case 'genre':
+        return name;
       default:
         return name;
     }
+  });
+  bannerTrackCount = computed(() => {
+    const count = this.detail()?.related.count ?? 0;
+    return count > 0 ? `${count} tracks` : '';
   });
   playlists = signal<IPlaylistSummary[]>([]);
 
@@ -190,6 +191,7 @@ export class ListPage implements OnInit {
   }
 
   playTrack(track: ITrackItem): void {
+    this.recordPlay(track);
     this.audioPlayerCommand.openTrack(track, this.tracks());
   }
 
@@ -199,6 +201,7 @@ export class ListPage implements OnInit {
     } else {
       const tracks = this.tracks();
       if (tracks.length > 0) {
+        this.recordPlay(tracks[0]);
         this.audioPlayerCommand.openTrack(tracks[0], tracks);
       }
     }
@@ -211,6 +214,7 @@ export class ListPage implements OnInit {
       [tracks[i], tracks[j]] = [tracks[j], tracks[i]];
     }
     if (tracks.length > 0) {
+      this.recordPlay(tracks[0]);
       this.audioPlayerCommand.openTrack(tracks[0], tracks);
     }
   }
@@ -226,6 +230,17 @@ export class ListPage implements OnInit {
 
   closeMenu(): void {
     this.menuTrack.set(null);
+  }
+
+  private recordPlay(track: ITrackItem): void {
+    this.playHistory.recordPlay(
+      this.listType() === 'library' ? 'library' : this.listType(),
+      this.currentLabel(),
+      this.listType() === 'library'
+        ? ['/list', this.pageNum()]
+        : ['/list', this.listType(), this.listId(), this.pageNum()],
+      track,
+    );
   }
 
   private buildPageLink(pageNum: number): unknown[] {

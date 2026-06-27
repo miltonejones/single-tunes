@@ -78,6 +78,13 @@
         <i class="fa-solid fa-chevron-down"></i>
       </button>
 
+      @if (currentSource(); as source) {
+        <div class="audio-player-fullscreen-source">
+          <div class="audio-player-fullscreen-source-header">Playing from {{ source.type }}</div>
+          <div class="audio-player-fullscreen-source-name">{{ source.name }}</div>
+        </div>
+      }
+
       <img
         class="audio-player-fullscreen-art"
         appImgFallback
@@ -117,6 +124,9 @@
       </div>
 
       <div class="audio-player-fullscreen-controls">
+        <button type="button" (click)="queuePanel.toggle()" title="Track queue">
+          <i class="fa-solid fa-list"></i>
+        </button>
         <button type="button" (click)="advanceTrack(-1)">
           <i class="fa-solid fa-backward-step"></i>
         </button>

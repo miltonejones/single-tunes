@@ -42,6 +42,12 @@
   max-width: 50vw;
 }
 
+.artist-banner-count {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-top: 0.15rem;
+}
+
 .artist-banner-actions {
   display: flex;
   align-items: center;

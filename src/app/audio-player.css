@@ -208,7 +208,30 @@ input[type='range']::-moz-range-track {
   font-size: 1.5rem;
   color: var(--text-secondary);
   cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.audio-player-fullscreen-source {
+  text-align: center;
   margin-bottom: 1rem;
+}
+
+.audio-player-fullscreen-source-header {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.audio-player-fullscreen-source-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80vw;
 }
 
 .audio-player-fullscreen-close:hover {

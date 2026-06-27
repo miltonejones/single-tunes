@@ -1,5 +1,33 @@
 <lib-breadcrumbs [items]="breadcrumbItems()" />
 
+<div class="search-box">
+  <form (ngSubmit)="submitSearch(query())" class="d-flex gap-2">
+    <div class="search-input-wrapper flex-grow-1">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input
+        type="text"
+        class="form-control search-input"
+        placeholder="Search podcasts..."
+        [(ngModel)]="query"
+        name="q"
+        list="search-history"
+        autocomplete="off"
+      />
+      <datalist id="search-history">
+        @for (term of searchHistory(); track term) {
+          <option [value]="term"></option>
+        }
+      </datalist>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+    @if (searchHistory().length > 0) {
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="clearHistory()" title="Clear search history">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+    }
+  </form>
+</div>
+
 @if (loading()) {
   <lib-loading-animation variant="visualizer" label="Searching for podcasts" />
 } @else if (results()?.length === 0) {

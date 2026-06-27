@@ -8,7 +8,7 @@
   <lib-breadcrumbs [items]="breadcrumbItems()" />
 
   <div class="grid-grid">
-    @for (item of items(); track item.ID) {
+    @for (item of sortedItems(); track item.ID) {
       <lib-media-card
         [thumbnail]="item.Thumbnail"
         [title]="item.Name"

@@ -24,3 +24,28 @@
   color: var(--accent);
   font-size: 0.85rem;
 }
+
+/* Search box */
+.search-box {
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input {
+  padding-left: 2rem;
+}

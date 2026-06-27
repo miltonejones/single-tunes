@@ -49,3 +49,5 @@ export { PodcastAudioPlayerCommandService } from './podcast-audio-player-command
 export { PodcastSubscriptionsService } from './podcast-subscriptions.service';
 export { PodcastToastService } from './podcast-toast.service';
 export { PodcastCard } from './podcast-card';
+export { PlayHistoryService } from './play-history.service';
+export type { PlayHistoryEntry, RecentPlayItem } from './play-history.service';
