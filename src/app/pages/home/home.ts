@@ -1,6 +1,15 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { CatalogQueryService, DashItem, ImgFallbackDirective, IPlaylistSummary, LoadingAnimation, MediaCard } from 'shared-utils';
+import {
+  CatalogQueryService,
+  DashItem,
+  ImgFallbackDirective,
+  IPlaylistSummary,
+  LoadingAnimation,
+  MediaCard,
+  PodcastCard,
+  PodcastSubscriptionsService,
+} from 'shared-utils';
 
 const TRACK_COUNT_PATTERN = /(\d+)\s*tracks?/i;
 const CAROUSEL_INTERVAL_MS = 5000;
@@ -20,7 +29,7 @@ function pickRandom<T>(items: T[], count: number): T[] {
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterOutlet, RouterLink, MediaCard, ImgFallbackDirective, LoadingAnimation],
+  imports: [RouterOutlet, RouterLink, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
@@ -28,6 +37,7 @@ export class HomePage implements OnInit, OnDestroy {
   protected readonly title = signal('home');
 
   private catalogQuery = inject(CatalogQueryService);
+  protected subscriptionsService = inject(PodcastSubscriptionsService);
   private carouselTimer?: ReturnType<typeof setInterval>;
 
   dashItems = signal<DashItem[]>([]);

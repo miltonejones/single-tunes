@@ -71,6 +71,20 @@
     </div>
   }
 
+  @if (subscriptionsService.subscriptions().length > 0) {
+    <div class="section-header">
+      <h3><i class="fa-solid fa-podcast"></i> Subscribed Podcasts</h3>
+      <a class="view-all-link" [routerLink]="['/podcasts/subscriptions']"
+        >View all <i class="fa-solid fa-chevron-right"></i
+      ></a>
+    </div>
+    <div class="row g-2" style="padding: 0 1rem">
+      @for (podcast of subscriptionsService.subscriptions(); track podcast.feedUrl) {
+        <lib-podcast-card [podcast]="podcast" />
+      }
+    </div>
+  }
+
   <div class="section-header">
     <h3><i class="fa-solid fa-microphone"></i> Top Artists</h3>
     <a class="view-all-link" [routerLink]="['/grid', 'artist', 1]"

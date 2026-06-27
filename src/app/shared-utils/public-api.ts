@@ -33,6 +33,7 @@ export { Breadcrumbs } from './breadcrumbs';
 export type { BreadcrumbItem } from './breadcrumbs';
 export { LoadingAnimation } from './loading-animation';
 export type { LoadingVariant } from './loading-animation';
+export { TrackMenu } from './track-menu';
 
 // ── Podcast exports ──────────────────────────────────────────────────────
 

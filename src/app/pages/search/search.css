@@ -96,6 +96,20 @@ h2 {
   font-variant-numeric: tabular-nums;
 }
 
+.track-menu-btn {
+  border: none;
+  background: none;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.track-menu-btn:hover {
+  color: var(--text);
+}
+
 .error {
   color: var(--danger);
 }

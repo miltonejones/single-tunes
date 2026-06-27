@@ -1,11 +1,58 @@
 /* Podcast home page — carousel and card grid */
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.75rem 0 0.85rem;
+  padding: 0 1rem;
+}
+
+.section-header:first-child {
+  margin-top: 0.5rem;
+}
+
+.section-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.section-header h3 i {
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.view-all-link {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.view-all-link:hover {
+  color: var(--accent-to);
+}
+
+.view-all-link i {
+  font-size: 0.7rem;
+}
+
 .podcast-carousel-container {
   position: relative;
   width: 100%;
   height: 35vh;
   margin: 1rem 0;
-  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
 }
@@ -13,7 +60,6 @@
 @media (max-width: 768px) {
   .podcast-carousel-container {
     height: 25vh;
-    border-radius: 10px;
     margin: 0.75rem 0;
   }
 }
@@ -21,7 +67,6 @@
 @media (max-width: 480px) {
   .podcast-carousel-container {
     height: 20vh;
-    border-radius: 8px;
     margin: 0.5rem 0;
   }
 }

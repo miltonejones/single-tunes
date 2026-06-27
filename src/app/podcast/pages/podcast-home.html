@@ -1,8 +1,5 @@
 @if (loading() && podcasts().length === 0) {
-  <div class="text-center py-5">
-    <div class="spinner-border"></div>
-    <p class="mt-2">Loading popular podcasts...</p>
-  </div>
+  <lib-loading-animation variant="visualizer" label="Loading popular podcasts" />
 } @else if (podcasts().length === 0) {
   <div class="text-center py-5">
     <h3>No popular podcasts found</h3>
@@ -10,7 +7,9 @@
   </div>
 } @else {
   @if (currentSlide(); as slide) {
-    <h4>Listen Now</h4>
+    <div class="section-header">
+      <h3><i class="fa-solid fa-headphones"></i> Listen Now</h3>
+    </div>
     <ng-template #slideContent let-item>
       <div class="podcast-slide-content">
         <div
@@ -68,23 +67,26 @@
   }
 
   @if (subscriptionsService.subscriptions().length > 0) {
-    <div class="row">
-      <div class="col-12 d-flex justify-content-between mb-2">
-        <h4>{{ subscriptionsService.subscriptions().length }} Subscriptions</h4>
-        <a class="btn btn-light btn-sm" routerLink="/podcasts/subscriptions"
-          >View all <i class="fa-solid fa-arrow-right"></i
-        ></a>
-      </div>
+    <div class="section-header">
+      <h3><i class="fa-solid fa-podcast"></i> Subscribed Podcasts</h3>
+      <a class="view-all-link" routerLink="/podcasts/subscriptions"
+        >View all <i class="fa-solid fa-chevron-right"></i
+      ></a>
+    </div>
+    <div class="row g-2" style="padding: 0 1rem">
       @for (podcast of subscriptionsPreview(); track podcast.feedUrl) {
         <lib-podcast-card [podcast]="podcast" />
       }
     </div>
   }
 
-  <div class="row">
-    <div class="col-12">
-      <h4 class="mb-4">Popular Podcasts</h4>
-    </div>
+  <div class="section-header">
+    <h3><i class="fa-solid fa-compact-disc"></i> Popular Podcasts</h3>
+    <a class="view-all-link" routerLink="/podcasts/search/popular"
+      >View all <i class="fa-solid fa-chevron-right"></i
+    ></a>
+  </div>
+  <div class="row g-2" style="padding: 0 1rem">
     @for (podcast of featuredPodcasts(); track podcast.feedUrl) {
       <lib-podcast-card [podcast]="podcast" />
     }

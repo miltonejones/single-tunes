@@ -12,13 +12,14 @@ import {
   MediaCard,
   PodcastCard,
   PodcastQueryService,
+  TrackMenu,
 } from 'shared-utils';
 
 type ResultTab = 'artists' | 'albums' | 'tracks' | 'podcasts';
 
 @Component({
   selector: 'app-search-page',
-  imports: [RouterOutlet, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard],
+  imports: [RouterOutlet, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard, TrackMenu],
   templateUrl: './search.html',
   styleUrl: './search.css',
 })
@@ -39,6 +40,7 @@ export class SearchPage implements OnInit {
   tracks = signal<ITrackItem[]>([]);
   podcasts = signal<IPodcast[]>([]);
   activeTab = signal<ResultTab>('artists');
+  menuTrack = signal<ITrackItem | null>(null);
 
   hasResults = computed(
     () => this.artists().length > 0 || this.albums().length > 0 || this.tracks().length > 0 || this.podcasts().length > 0,
@@ -57,6 +59,15 @@ export class SearchPage implements OnInit {
 
   playTrack(track: ITrackItem): void {
     this.audioPlayerCommand.openTrack(track, this.tracks());
+  }
+
+  openMenu(track: ITrackItem, event: Event): void {
+    event.stopPropagation();
+    this.menuTrack.set(track);
+  }
+
+  closeMenu(): void {
+    this.menuTrack.set(null);
   }
 
   private runSearch(query: string): void {

@@ -1,8 +1,6 @@
 @if (track(); as currentTrack) {
-  <button type="button" class="btn-close audio-close" aria-label="Close" (click)="close()"></button>
-
-  <button class="player-btn menu-btn mobile" title="Show playlist" (click)="queuePanel.toggle()">
-    <i class="fa-solid fa-list-check"></i>
+  <button type="button" class="player-btn audio-close" aria-label="Collapse" (click)="isExpanded.set(false)">
+    <i class="fa-solid fa-chevron-down"></i>
   </button>
 
   <div class="player-controls">
@@ -16,7 +14,11 @@
     </div>
 
     <div class="player-buttons">
-      <button class="player-btn menu-btn" title="Show playlist" (click)="queuePanel.toggle()">
+      <button class="player-btn expand-btn mobile" title="Expand player" (click)="isExpanded.set(true)">
+        <i class="fa-solid fa-chevron-up"></i>
+      </button>
+
+<button class="player-btn menu-btn" title="Show playlist" (click)="queuePanel.toggle()">
         <i class="fa-solid fa-list-check"></i>
       </button>
 
@@ -33,6 +35,10 @@
         <i class="fa-solid fa-arrow-rotate-right"></i>
         <span class="skip-btn-label">30</span>
       </button>
+
+      <button class="player-btn close-btn" title="Stop" (click)="close()">
+        <i class="fa-solid fa-stop"></i>
+      </button>
     </div>
 
     <div class="player-progress">
@@ -48,9 +54,6 @@
       <span class="player-time">{{ durationLabel() }}</span>
     </div>
 
-    <button class="player-btn" title="Close player" (click)="close()">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
   </div>
 }
 

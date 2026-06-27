@@ -1,0 +1,116 @@
+@if (track()) {
+  <div class="offcanvas-backdrop fade show" (click)="close()"></div>
+}
+
+<div
+  class="offcanvas offcanvas-end"
+  [class.show]="track()"
+  [style.visibility]="track() ? 'visible' : 'hidden'"
+  tabindex="-1"
+>
+  @if (track(); as track) {
+    <div class="offcanvas-header">
+      <img
+        class="track-menu-art"
+        [src]="track.albumImage"
+        [alt]="track.Title"
+        appImgFallback
+        [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
+      />
+      <div class="track-menu-header-text">
+        <h5 class="offcanvas-title">{{ track.Title }}</h5>
+        <span class="track-menu-subtitle">{{ track.albumName }}</span>
+        <span class="track-menu-subtitle">{{ track.artistName }}</span>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+    </div>
+    <div class="offcanvas-body">
+      @if (menuView() === 'main') {
+        <div class="track-menu-list">
+          @if (track.albumFk) {
+            <a
+              class="track-menu-item"
+              [routerLink]="['/list', 'album', track.albumFk, 1]"
+              (click)="close()"
+            >
+              <i class="fa-solid fa-compact-disc"></i>
+              <span class="track-menu-label">View Album</span>
+              <span class="track-menu-caption">{{ track.albumName }}</span>
+            </a>
+          } @else {
+            <span class="track-menu-item disabled">
+              <i class="fa-solid fa-compact-disc"></i>
+              <span class="track-menu-label">View Album</span>
+              <span class="track-menu-caption">Not available</span>
+            </span>
+          }
+          @if (track.artistFk) {
+            <a
+              class="track-menu-item"
+              [routerLink]="['/list', 'artist', track.artistFk, 1]"
+              (click)="close()"
+            >
+              <i class="fa-solid fa-microphone"></i>
+              <span class="track-menu-label">View Artist</span>
+              <span class="track-menu-caption">{{ track.artistName }}</span>
+            </a>
+          } @else {
+            <span class="track-menu-item disabled">
+              <i class="fa-solid fa-microphone"></i>
+              <span class="track-menu-label">View Artist</span>
+              <span class="track-menu-caption">Not available</span>
+            </span>
+          }
+          @if (track.Genre) {
+            <a
+              class="track-menu-item"
+              [routerLink]="['/list', 'genre', track.Genre, 1]"
+              (click)="close()"
+            >
+              <i class="fa-solid fa-tags"></i>
+              <span class="track-menu-label">View Genre</span>
+              <span class="track-menu-caption">{{ track.Genre }}</span>
+            </a>
+          } @else {
+            <span class="track-menu-item disabled">
+              <i class="fa-solid fa-tags"></i>
+              <span class="track-menu-label">View Genre</span>
+              <span class="track-menu-caption">Not available</span>
+            </span>
+          }
+          <button type="button" class="track-menu-item" (click)="menuView.set('playlists')">
+            <i class="fa-solid fa-list-ul"></i>
+            <span class="track-menu-label">Add to Playlist</span>
+            <span class="track-menu-caption">Save this track to a playlist</span>
+          </button>
+          <button
+            type="button"
+            class="track-menu-item"
+            [disabled]="!canAddToQueue()"
+            (click)="addToQueue()"
+          >
+            <i class="fa-solid fa-circle-plus"></i>
+            <span class="track-menu-label">Add to Queue</span>
+            <span class="track-menu-caption">Play this track next</span>
+          </button>
+        </div>
+      } @else {
+        <button type="button" class="track-menu-back" (click)="menuView.set('main')">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </button>
+        <div class="track-menu-list">
+          @for (playlist of playlists(); track playlist.listKey) {
+            <button type="button" class="track-menu-item" (click)="togglePlaylist(playlist)">
+              @if (isTrackInPlaylist(playlist)) {
+                <i class="fa-solid fa-check track-menu-check"></i>
+              } @else {
+                <i class="fa-solid fa-list-ul"></i>
+              }
+              {{ playlist.Title }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
