@@ -32,7 +32,7 @@
     @for (item of items(); track item.ID) {
       <lib-media-card
         [thumbnail]="item.Thumbnail"
-        [eyebrow]="gridType() === 'album' ? item.artistName : null"
+        [eyebrow]="gridType() === 'album' ? (item.artistName ?? null) : null"
         [title]="item.Name"
         [caption]="item.TrackCount + ' tracks'"
         [routerLink]="['/list', gridType(), item.ID, 1]"
