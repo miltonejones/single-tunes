@@ -2,6 +2,7 @@ import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular
 import { RouterLink, RouterOutlet } from '@angular/router';
 import {
   CatalogQueryService,
+  CoverflowDirective,
   DashItem,
   ImgFallbackDirective,
   IPlaylistSummary,
@@ -30,7 +31,7 @@ function pickRandom<T>(items: T[], count: number): T[] {
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterOutlet, RouterLink, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard],
+  imports: [RouterOutlet, RouterLink, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard, CoverflowDirective],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })

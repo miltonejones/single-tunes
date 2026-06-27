@@ -30,3 +30,71 @@
 .error {
   color: var(--danger);
 }
+
+.grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 1rem;
+}
+
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.sort-btn:not(.active):hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.sort-btn.active {
+  background: var(--accent-gradient);
+  color: #fff;
+  border-color: transparent;
+}
+
+.sort-btn i {
+  font-size: 0.65rem;
+}
+
+@media (orientation: landscape) and (max-height: 550px) {
+  .grid-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding: 0 1rem 0.5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .grid-grid > * {
+    flex: 0 0 calc(28vw - 1rem);
+    scroll-snap-align: center;
+  }
+
+  .grid-grid::-webkit-scrollbar {
+    display: none;
+  }
+}

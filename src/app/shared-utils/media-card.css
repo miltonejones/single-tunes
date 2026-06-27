@@ -1,7 +1,14 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
 .media-card {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -24,11 +31,12 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-sm);
+  aspect-ratio: 1;
 }
 
 .media-card-art img {
   width: 100%;
-  aspect-ratio: 1;
+  height: 100%;
   object-fit: cover;
   border-radius: var(--radius-sm);
   background: var(--surface-2);

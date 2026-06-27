@@ -28,6 +28,7 @@ export type { ToastMessage } from './toast.service';
 export { Toast } from './toast';
 export { faveIcon } from './favorite-icon';
 export { ImgFallbackDirective } from './img-fallback.directive';
+export { CoverflowDirective } from './coverflow.directive';
 export { MediaCard } from './media-card';
 export { Breadcrumbs } from './breadcrumbs';
 export type { BreadcrumbItem } from './breadcrumbs';
