@@ -10,7 +10,7 @@
       <div class="artist-banner-overlay">
         <div class="artist-banner-info">
           <div class="artist-banner-label">{{ bannerLabel() }}</div>
-          <div class="artist-banner-title">{{ bannerName() }}</div>
+          <div class="artist-banner-title">{{ bannerTitle() }}</div>
         </div>
         <div class="artist-banner-actions">
           <button
@@ -66,6 +66,7 @@
       <div
         class="track-row"
         [class.active]="track.ID === currentTrackId()"
+        [class.artist-view]="listType() === 'artist'"
         (click)="playTrack(track)"
       >
         <img
@@ -139,91 +140,6 @@
   }
 }
 
-@if (menuTrack()) {
-  <div class="offcanvas-backdrop fade show" (click)="closeMenu()"></div>
-}
-
-<div
-  class="offcanvas offcanvas-end"
-  [class.show]="menuTrack()"
-  [style.visibility]="menuTrack() ? 'visible' : 'hidden'"
-  tabindex="-1"
->
-  @if (menuTrack(); as track) {
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title">{{ track.Title }}</h5>
-      <button type="button" class="btn-close" aria-label="Close" (click)="closeMenu()"></button>
-    </div>
-    <div class="offcanvas-body">
-      @if (menuView() === 'main') {
-        <div class="track-menu-list">
-          @if (track.albumFk) {
-            <a
-              class="track-menu-item"
-              [routerLink]="['/list', 'album', track.albumFk, 1]"
-              (click)="closeMenu()"
-              ><i class="fa-solid fa-compact-disc"></i> View Album</a
-            >
-          } @else {
-            <span class="track-menu-item disabled"
-              ><i class="fa-solid fa-compact-disc"></i> View Album</span
-            >
-          }
-          @if (track.artistFk) {
-            <a
-              class="track-menu-item"
-              [routerLink]="['/list', 'artist', track.artistFk, 1]"
-              (click)="closeMenu()"
-              ><i class="fa-solid fa-microphone"></i> View Artist</a
-            >
-          } @else {
-            <span class="track-menu-item disabled"
-              ><i class="fa-solid fa-microphone"></i> View Artist</span
-            >
-          }
-          @if (track.Genre) {
-            <a
-              class="track-menu-item"
-              [routerLink]="['/list', 'genre', track.Genre, 1]"
-              (click)="closeMenu()"
-              ><i class="fa-solid fa-tags"></i> View Genre</a
-            >
-          } @else {
-            <span class="track-menu-item disabled"
-              ><i class="fa-solid fa-tags"></i> View Genre</span
-            >
-          }
-          <button type="button" class="track-menu-item" (click)="menuView.set('playlists')">
-            <i class="fa-solid fa-list-ul"></i> Add to Playlist
-          </button>
-          <button
-            type="button"
-            class="track-menu-item"
-            [disabled]="!canAddToQueue()"
-            (click)="addSelectedTrackToQueue()"
-          >
-            <i class="fa-solid fa-circle-plus"></i> Add to Queue
-          </button>
-        </div>
-      } @else {
-        <button type="button" class="track-menu-back" (click)="menuView.set('main')">
-          <i class="fa-solid fa-arrow-left"></i> Back
-        </button>
-        <div class="track-menu-list">
-          @for (playlist of playlists(); track playlist.listKey) {
-            <button type="button" class="track-menu-item" (click)="togglePlaylist(playlist)">
-              @if (isTrackInPlaylist(playlist)) {
-                <i class="fa-solid fa-check track-menu-check"></i>
-              } @else {
-                <i class="fa-solid fa-list-ul"></i>
-              }
-              {{ playlist.Title }}
-            </button>
-          }
-        </div>
-      }
-    </div>
-  }
-</div>
+<app-track-menu [track]="menuTrack()" (closed)="closeMenu()" />
 
 <router-outlet />

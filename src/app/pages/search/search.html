@@ -102,6 +102,9 @@
               <div class="track-artist">{{ track.artistName }}</div>
             </div>
             <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+            <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
           </div>
         }
       </div>
@@ -122,5 +125,7 @@
     }
   }
 }
+
+<app-track-menu [track]="menuTrack()" (closed)="closeMenu()" />
 
 <router-outlet />

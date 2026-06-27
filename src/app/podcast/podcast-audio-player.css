@@ -275,12 +275,8 @@
   display: none;
 }
 
-.menu-btn.mobile {
-  display: none;
-}
-
-/* Show the mobile menu button in the expanded fullscreen view */
-:host-context(body.podcast-playing) .menu-btn.mobile {
+/* Expand button: hidden on desktop, shown on mobile collapsed */
+.expand-btn {
   display: none;
 }
 
@@ -299,6 +295,10 @@
   /* In the collapsed mini-player, hide track info and show compact controls */
   .player-track-info {
     display: none;
+  }
+
+  .expand-btn {
+    display: block;
   }
 
   :host.expanded .player-track-info {
@@ -344,6 +344,10 @@
     left: 18px;
   }
 
+  :host.expanded .expand-btn {
+    display: none;
+  }
+
   :host.expanded .player-buttons {
     display: flex;
     align-items: center;
@@ -356,5 +360,9 @@
 
   :host.expanded .player-buttons .skip-btn {
     display: block;
+  }
+
+  :host.expanded .player-btn-large {
+    font-size: 2rem;
   }
 }

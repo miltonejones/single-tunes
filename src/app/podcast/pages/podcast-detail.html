@@ -1,8 +1,5 @@
 @if (loading() && episodes().length === 0) {
-  <div class="text-center py-5">
-    <div class="spinner-border"></div>
-    <p class="mt-2">Loading episodes...</p>
-  </div>
+  <lib-loading-animation variant="visualizer" label="Loading episodes" />
 }
 
 @if (podcast(); as info) {

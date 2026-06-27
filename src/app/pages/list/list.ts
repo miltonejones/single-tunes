@@ -4,7 +4,6 @@ import {
   AudioPlayerCommandService,
   Breadcrumbs,
   BreadcrumbItem,
-  CatalogCommandService,
   CatalogQueryService,
   formatDuration,
   IDetailResponse,
@@ -13,9 +12,8 @@ import {
   ITrackItem,
   LoadingAnimation,
   MediaCard,
+  TrackMenu,
 } from 'shared-utils';
-
-type MenuView = 'main' | 'playlists';
 
 const PAGE_SIZE = 100;
 
@@ -30,7 +28,7 @@ const LIST_TYPE_LABELS: Record<Exclude<ListType, 'library'>, string> = {
 
 @Component({
   selector: 'app-list-page',
-  imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, LoadingAnimation],
+  imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, LoadingAnimation, TrackMenu],
   templateUrl: './list.html',
   styleUrl: './list.css',
 })
@@ -40,7 +38,6 @@ export class ListPage implements OnInit {
 
   private route = inject(ActivatedRoute);
   private catalogQuery = inject(CatalogQueryService);
-  private catalogCommand = inject(CatalogCommandService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
 
   listType = signal<ListType>('album');
@@ -61,11 +58,30 @@ export class ListPage implements OnInit {
       default: return '';
     }
   });
+  bannerTitle = computed(() => {
+    const name = this.bannerName();
+    if (!name) return '';
+    switch (this.listType()) {
+      case 'artist': {
+        const count = this.detail()?.related.count ?? 0;
+        return count > 0 ? `${name} — ${count} tracks` : `Tracks by ${name}`;
+      }
+      case 'album': {
+        const albumName = this.entity()?.Name ?? name;
+        const count = this.detail()?.related.count ?? 0;
+        return count > 0 ? `${albumName} — ${count} tracks` : albumName;
+      }
+      case 'genre': {
+        const count = this.detail()?.related.count ?? 0;
+        return count > 0 ? `${name} — ${count} tracks` : name;
+      }
+      default:
+        return name;
+    }
+  });
   playlists = signal<IPlaylistSummary[]>([]);
-  queueLength = signal(0);
 
   menuTrack = signal<ITrackItem | null>(null);
-  menuView = signal<MenuView>('main');
 
   entity = computed(() => this.detail()?.row[0] ?? null);
   hasMultipleDiscs = computed(() => {
@@ -118,8 +134,6 @@ export class ListPage implements OnInit {
     return fileKeys;
   });
 
-  canAddToQueue = computed(() => this.queueLength() > 0);
-
   currentLabel = computed(() => {
     if (this.listType() === 'playlist') {
       const playlist = this.playlists().find((p) => p.listKey === this.listId());
@@ -145,10 +159,6 @@ export class ListPage implements OnInit {
   ngOnInit(): void {
     this.audioPlayerCommand.currentTrack$.subscribe((track) => {
       this.currentTrackId.set(track?.ID ?? null);
-    });
-
-    this.audioPlayerCommand.queue$.subscribe((queue) => {
-      this.queueLength.set(queue.length);
     });
 
     this.catalogQuery.getPlaylists().then((playlists) => this.playlists.set(playlists));
@@ -212,46 +222,10 @@ export class ListPage implements OnInit {
   openMenu(track: ITrackItem, event: Event): void {
     event.stopPropagation();
     this.menuTrack.set(track);
-    this.menuView.set('main');
   }
 
   closeMenu(): void {
     this.menuTrack.set(null);
-  }
-
-  addSelectedTrackToQueue(): void {
-    const track = this.menuTrack();
-    if (!track) {
-      return;
-    }
-    this.audioPlayerCommand.addToQueue(track);
-    this.closeMenu();
-  }
-
-  isTrackInPlaylist(playlist: IPlaylistSummary): boolean {
-    const track = this.menuTrack();
-    return !!track && playlist.related.includes(track.FileKey);
-  }
-
-  togglePlaylist(playlist: IPlaylistSummary): void {
-    const track = this.menuTrack();
-    if (!track) {
-      return;
-    }
-
-    const alreadyIn = playlist.related.includes(track.FileKey);
-    const updated: IPlaylistSummary = {
-      ...playlist,
-      related: alreadyIn
-        ? playlist.related.filter((fileKey) => fileKey !== track.FileKey)
-        : [...playlist.related, track.FileKey],
-    };
-
-    this.catalogCommand.savePlaylist(updated).then(() => {
-      this.playlists.update((list) =>
-        list.map((p) => (p.listKey === playlist.listKey ? updated : p)),
-      );
-    });
   }
 
   private buildPageLink(pageNum: number): unknown[] {

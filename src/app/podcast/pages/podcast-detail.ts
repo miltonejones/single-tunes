@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  LoadingAnimation,
   PodcastAudioPlayerCommandService,
   PodcastQueryService,
   PodcastSelectionService,
@@ -22,7 +23,7 @@ const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-podcast-detail',
-  imports: [DatePipe],
+  imports: [DatePipe, LoadingAnimation],
   templateUrl: './podcast-detail.html',
   styleUrl: './podcast-detail.css',
 })

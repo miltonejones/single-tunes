@@ -12,6 +12,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
   IPodcast,
+  LoadingAnimation,
   PodcastCard,
   PodcastQueryService,
   PodcastSelectionService,
@@ -28,7 +29,7 @@ type SlideDirection = 'forward' | 'backward';
 
 @Component({
   selector: 'app-podcast-home',
-  imports: [RouterLink, PodcastCard, NgTemplateOutlet],
+  imports: [RouterLink, PodcastCard, NgTemplateOutlet, LoadingAnimation],
   templateUrl: './podcast-home.html',
   styleUrl: './podcast-home.css',
 })
