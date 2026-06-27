@@ -33,3 +33,18 @@ export { Breadcrumbs } from './breadcrumbs';
 export type { BreadcrumbItem } from './breadcrumbs';
 export { LoadingAnimation } from './loading-animation';
 export type { LoadingVariant } from './loading-animation';
+
+// ── Podcast exports ──────────────────────────────────────────────────────
+
+export * from './podcast-models';
+export * from './domain/podcast-rss';
+export * from './domain/podcast-track';
+export { shuffleArray, sortTrackList, usePagination } from './domain/podcast-format';
+
+export { PodcastQueryService } from './podcast-query.service';
+export type { IPodcastFeed } from './podcast-query.service';
+export { PodcastSelectionService } from './podcast-selection.service';
+export { PodcastAudioPlayerCommandService } from './podcast-audio-player-command.service';
+export { PodcastSubscriptionsService } from './podcast-subscriptions.service';
+export { PodcastToastService } from './podcast-toast.service';
+export { PodcastCard } from './podcast-card';

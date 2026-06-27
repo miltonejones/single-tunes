@@ -1,0 +1,23 @@
+<div class="col-6 col-md-4 col-lg-2 px-1 mb-4">
+  <div class="card h-100 cursor-pointer podcast-item" (click)="open()">
+    <img
+      [src]="podcast().artworkUrl100"
+      [alt]="podcast().trackName"
+      class="card-img-top podcast-card-img"
+    />
+    <div class="card-body p-2">
+      <p class="card-text small fw-bold text-truncate mb-0 podcast-card-title">
+        {{ podcast().trackName }}
+      </p>
+      <div class="card-text text-muted small subscribe-btn" (click)="toggleSubscribe($event)">
+        <i class="fa-star" [class.fa-solid]="subscribed" [class.fa-regular]="!subscribed"></i>
+        {{ subscribed ? 'Unsubscribe' : 'Subscribe' }}
+      </div>
+      @if (progress) {
+        <div class="progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar bg-danger" [style.width.%]="progress"></div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

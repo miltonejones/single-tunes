@@ -1,0 +1,15 @@
+@if (subscriptionsService.subscriptions().length === 0) {
+  <div class="text-center py-5">
+    <h3>No subscriptions yet</h3>
+    <p class="text-muted">Start by searching for podcasts and subscribing to your favorites!</p>
+  </div>
+} @else {
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">My Subscriptions</h2>
+    </div>
+    @for (podcast of subscriptionsService.subscriptions(); track podcast.feedUrl) {
+      <lib-podcast-card [podcast]="podcast" />
+    }
+  </div>
+}

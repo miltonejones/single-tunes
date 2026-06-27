@@ -1,0 +1,23 @@
+.podcast-detail-header {
+  background-color: var(--surface-2);
+  color: var(--text);
+}
+
+.detail-image {
+  width: 180px;
+  height: 180px;
+}
+
+@media (max-width: 768px) {
+  .detail-image {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-image {
+    width: 100px;
+    height: 100px;
+  }
+}

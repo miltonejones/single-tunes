@@ -89,4 +89,9 @@
 
 <app-track-queue />
 
+@if (podcastPlaying()) {
+  <app-podcast-audio-player />
+  <app-episode-queue />
+}
+
 <app-settings-modal />

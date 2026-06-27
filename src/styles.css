@@ -271,3 +271,104 @@ a {
   --bs-border-radius-lg: 1rem;
   --bs-border-radius-xl: 1.25rem;
 }
+
+/* ── Podcast player ─────────────────────────────────────────────────── */
+
+body.podcast-playing {
+  padding-bottom: 8rem;
+}
+
+@media (max-width: 576px) {
+  body.podcast-playing {
+    padding-bottom: 9rem;
+  }
+}
+
+/* ── Podcast detail page ────────────────────────────────────────────── */
+
+.detail-image {
+  width: 180px;
+  height: 180px;
+}
+
+@media (max-width: 768px) {
+  .detail-image {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-image {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* ── Podcast episode list ──────────────────────────────────────────── */
+
+.list-group-item {
+  border-color: var(--border);
+  transition: background-color 0.16s ease;
+}
+
+.list-group-item:not(.bg-primary):hover {
+  background-color: var(--surface-hover);
+}
+
+.list-group-item.bg-primary {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.badge.bg-secondary {
+  background-color: var(--surface-2) !important;
+  color: var(--text-secondary);
+}
+
+/* ── Podcast progress bars ─────────────────────────────────────────── */
+
+.progress {
+  background-color: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+  height: 0.4rem;
+}
+
+.progress-bar.bg-danger {
+  background-color: #b3795f !important;
+}
+
+/* ── Podcast offcanvas (episode queue) ──────────────────────────────── */
+
+.offcanvas {
+  box-shadow: var(--shadow-lg);
+}
+
+.offcanvas-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.offcanvas-body {
+  padding: 0.5rem 1rem;
+}
+
+/* ── Podcast sort buttons ───────────────────────────────────────────── */
+
+.btn-outline-primary {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary.active {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── Podcast text-muted ────────────────────────────────────────────── */
+
+.text-muted {
+  color: var(--text-secondary) !important;
+}

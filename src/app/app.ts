@@ -2,14 +2,16 @@ import { Component, computed, ElementRef, HostListener, inject, signal, ViewChil
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { AudioPlayerCommandService, Toast } from 'shared-utils';
+import { AudioPlayerCommandService, PodcastAudioPlayerCommandService, Toast } from 'shared-utils';
 import { AudioPlayer } from './audio-player';
 import { AudioVisualizer } from './audio-visualizer';
 import { SettingsModal } from './settings-modal';
 import { SettingsPanelService } from './settings-panel.service';
 import { TrackQueue } from './track-queue';
+import { PodcastAudioPlayer } from './podcast/podcast-audio-player';
+import { EpisodeQueue } from './podcast/episode-queue';
 
-type NavSection = 'home' | 'artist' | 'album' | 'genre' | 'playlist' | 'library' | null;
+type NavSection = 'home' | 'artist' | 'album' | 'genre' | 'playlist' | 'library' | 'podcasts' | null;
 
 const GRID_TYPES = ['artist', 'album', 'genre', 'playlist'];
 
@@ -20,6 +22,7 @@ const SECTION_LABELS: Record<string, string> = {
   playlist: 'Playlists',
   library: 'Library',
   home: 'Home',
+  podcasts: 'Podcasts',
 };
 
 interface NavItem {
@@ -36,6 +39,7 @@ const NAV_ITEMS: NavItem[] = [
   { section: 'genre', icon: 'fa-tags', label: 'Genres', routerLink: ['/grid', 'genre', 1] },
   { section: 'playlist', icon: 'fa-list-ul', label: 'Playlists', routerLink: ['/grid', 'playlist', 1] },
   { section: 'library', icon: 'fa-music', label: 'Library', routerLink: ['/list', 1] },
+  { section: 'podcasts', icon: 'fa-podcast', label: 'Podcasts', routerLink: ['/podcasts'] },
 ];
 
 /** Resolves which nav button represents a URL, ignoring trailing page-number params. */
@@ -44,6 +48,9 @@ function resolveNavSection(url: string): NavSection {
 
   if (segments.length === 0) {
     return 'home';
+  }
+  if (segments[0] === 'podcasts') {
+    return 'podcasts';
   }
   if (segments[0] === 'grid' && GRID_TYPES.includes(segments[1])) {
     return segments[1] as NavSection;
@@ -65,6 +72,15 @@ function pageTitleFromUrl(url: string): string {
 
   if (segments.length === 0) {
     return 'SkyTunes | Home';
+  }
+
+  if (segments[0] === 'podcasts') {
+    if (segments.length === 1) return 'SkyTunes | Podcasts';
+    if (segments[1] === 'search') return `SkyTunes | Podcasts: Search`;
+    if (segments[1] === 'subscriptions') return 'SkyTunes | Podcasts: Subscriptions';
+    if (segments[1] === 'categories') return 'SkyTunes | Podcasts: Categories';
+    if (segments[1] === 'detail') return 'SkyTunes | Podcasts: Episode List';
+    return 'SkyTunes | Podcasts';
   }
 
   if (segments[0] === 'search') {
@@ -90,7 +106,10 @@ function pageTitleFromUrl(url: string): string {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, TrackQueue, SettingsModal, Toast],
+  imports: [
+    RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, TrackQueue, SettingsModal, Toast,
+    PodcastAudioPlayer, EpisodeQueue,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -98,12 +117,14 @@ export class App {
   private router = inject(Router);
   private titleService = inject(Title);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
+  private podcastAudioPlayerCommand = inject(PodcastAudioPlayerCommandService);
   protected settingsPanel = inject(SettingsPanelService);
   protected readonly NAV_ITEMS = NAV_ITEMS;
   activeSection = signal<NavSection>(resolveNavSection(this.router.url));
   searchOpen = signal(false);
   navDropdownOpen = signal(false);
   protected activeItem = computed(() => NAV_ITEMS.find((i) => i.section === this.activeSection()));
+  protected podcastPlaying = signal(false);
 
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
 
@@ -116,9 +137,23 @@ export class App {
       this.titleService.setTitle(pageTitleFromUrl(navEvent.urlAfterRedirects));
     });
 
-    // Add/remove body class so page padding thickens when a track is loaded
+    // Add/remove body class so page padding thickens when a music track is loaded
     this.audioPlayerCommand.currentTrack$.subscribe((track) => {
       document.body.classList.toggle('track-playing', !!track);
+      // Stop podcast player when music starts
+      if (track) {
+        this.podcastAudioPlayerCommand.clearQueue();
+      }
+    });
+
+    // Track podcast playback for dual-player visibility + body class
+    this.podcastAudioPlayerCommand.currentTrack$.subscribe((track) => {
+      this.podcastPlaying.set(!!track);
+      document.body.classList.toggle('podcast-playing', !!track);
+      // Stop music player when podcast starts
+      if (track) {
+        this.audioPlayerCommand.clearQueue();
+      }
     });
   }
 

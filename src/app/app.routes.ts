@@ -21,4 +21,30 @@ export const routes: Routes = [
     path: 'search/:query',
     loadComponent: () => import('./pages/search/search').then((m) => m.SearchPage),
   },
+  {
+    path: 'podcasts',
+    loadComponent: () => import('./podcast/podcast-shell').then((m) => m.PodcastShell),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./podcast/pages/podcast-home').then((m) => m.PodcastHomePage),
+      },
+      {
+        path: 'search/:query',
+        loadComponent: () => import('./podcast/pages/podcast-search').then((m) => m.PodcastSearchPage),
+      },
+      {
+        path: 'detail/:feedUrl',
+        loadComponent: () => import('./podcast/pages/podcast-detail').then((m) => m.PodcastDetailPage),
+      },
+      {
+        path: 'subscriptions',
+        loadComponent: () => import('./podcast/pages/podcast-subscriptions').then((m) => m.PodcastSubscriptionsPage),
+      },
+      {
+        path: 'categories',
+        loadComponent: () => import('./podcast/pages/podcast-categories').then((m) => m.PodcastCategoriesPage),
+      },
+    ],
+  },
 ];

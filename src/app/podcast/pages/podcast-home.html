@@ -1,0 +1,92 @@
+@if (loading() && podcasts().length === 0) {
+  <div class="text-center py-5">
+    <div class="spinner-border"></div>
+    <p class="mt-2">Loading popular podcasts...</p>
+  </div>
+} @else if (podcasts().length === 0) {
+  <div class="text-center py-5">
+    <h3>No popular podcasts found</h3>
+    <p class="text-muted">Try refreshing the page or check your connection.</p>
+  </div>
+} @else {
+  @if (currentSlide(); as slide) {
+    <h4>Listen Now</h4>
+    <ng-template #slideContent let-item>
+      <div class="podcast-slide-content">
+        <div
+          class="slide-background"
+          [style.background-image]="'url(' + (item.artworkUrl600 || item.artworkUrl100) + ')'"
+        ></div>
+        <div class="slide-overlay">
+          <div class="text-white podcast-info">
+            <div class="podcast-title">{{ item.collectionName }}</div>
+            <div class="podcast-meta">
+              {{ item.primaryGenreName }}
+              @if (item.trackCount) {
+                &bull; {{ item.trackCount }} episodes
+              }
+            </div>
+            <div class="podcast-actions">
+              <button class="btn btn-primary btn-sm me-2" (click)="openPodcast(item)">
+                Listen Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <div class="podcast-carousel-container">
+      <div class="carousel-wrapper">
+        @if (previousSlide(); as outgoing) {
+          <div
+            class="carousel-slide"
+            [class.slide-out-left]="exitDirection() === 'forward'"
+            [class.slide-out-right]="exitDirection() === 'backward'"
+          >
+            <ng-container *ngTemplateOutlet="slideContent; context: { $implicit: outgoing }" />
+          </div>
+        }
+        <div class="carousel-slide slide-in-right" #slideEl>
+          <ng-container *ngTemplateOutlet="slideContent; context: { $implicit: slide }" />
+        </div>
+      </div>
+      <button class="carousel-arrow carousel-arrow-prev" (click)="prevSlide()">&lsaquo;</button>
+      <button class="carousel-arrow carousel-arrow-next" (click)="nextSlide()">&rsaquo;</button>
+      <div class="carousel-indicators">
+        @for (podcast of podcasts(); track podcast.feedUrl; let i = $index) {
+          @if (i < 10) {
+            <button
+              class="indicator"
+              [class.active]="i === carouselIndex()"
+              (click)="goToSlide(i)"
+            ></button>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  @if (subscriptionsService.subscriptions().length > 0) {
+    <div class="row">
+      <div class="col-12 d-flex justify-content-between mb-2">
+        <h4>{{ subscriptionsService.subscriptions().length }} Subscriptions</h4>
+        <a class="btn btn-light btn-sm" routerLink="/podcasts/subscriptions"
+          >View all <i class="fa-solid fa-arrow-right"></i
+        ></a>
+      </div>
+      @for (podcast of subscriptionsPreview(); track podcast.feedUrl) {
+        <lib-podcast-card [podcast]="podcast" />
+      }
+    </div>
+  }
+
+  <div class="row">
+    <div class="col-12">
+      <h4 class="mb-4">Popular Podcasts</h4>
+    </div>
+    @for (podcast of featuredPodcasts(); track podcast.feedUrl) {
+      <lib-podcast-card [podcast]="podcast" />
+    }
+  </div>
+}

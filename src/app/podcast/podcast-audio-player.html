@@ -1,0 +1,64 @@
+@if (track(); as currentTrack) {
+  <button type="button" class="btn-close audio-close" aria-label="Close" (click)="close()"></button>
+
+  <button class="player-btn menu-btn mobile" title="Show playlist" (click)="queuePanel.toggle()">
+    <i class="fa-solid fa-list-check"></i>
+  </button>
+
+  <div class="player-controls">
+    <div class="player-track-info" (click)="isExpanded.set(true)">
+      @if (podcastArt()) {
+        <img class="player-track-image" [src]="podcastArt()" alt="Track artwork" />
+      }
+      <div>
+        <p class="player-track-title">{{ currentTrack.title }}</p>
+      </div>
+    </div>
+
+    <div class="player-buttons">
+      <button class="player-btn menu-btn" title="Show playlist" (click)="queuePanel.toggle()">
+        <i class="fa-solid fa-list-check"></i>
+      </button>
+
+      <button class="player-btn skip-btn" title="Rewind 30 seconds" (click)="skip(-30)">
+        <i class="fa-solid fa-arrow-rotate-left"></i>
+        <span class="skip-btn-label">30</span>
+      </button>
+
+      <button class="player-btn player-btn-large" title="Play/Pause" (click)="togglePlayPause()">
+        <i class="fa-solid" [class.fa-circle-pause]="isPlaying()" [class.fa-circle-play]="!isPlaying()"></i>
+      </button>
+
+      <button class="player-btn skip-btn" title="Forward 30 seconds" (click)="skip(30)">
+        <i class="fa-solid fa-arrow-rotate-right"></i>
+        <span class="skip-btn-label">30</span>
+      </button>
+    </div>
+
+    <div class="player-progress">
+      <span class="player-time">{{ currentTimeLabel() }}</span>
+      <input
+        type="range"
+        class="player-slider"
+        min="0"
+        max="100"
+        [value]="progress()"
+        (input)="onSeekInput($event)"
+      />
+      <span class="player-time">{{ durationLabel() }}</span>
+    </div>
+
+    <button class="player-btn" title="Close player" (click)="close()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+}
+
+<audio
+  #audioEl
+  (play)="onPlay()"
+  (pause)="onPause()"
+  (ended)="onEnded()"
+  (timeupdate)="onTimeUpdate()"
+  (loadedmetadata)="onLoadedMetadata()"
+></audio>
