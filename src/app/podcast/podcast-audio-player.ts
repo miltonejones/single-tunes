@@ -1,13 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   PodcastAudioPlayerCommandService,
@@ -30,20 +21,22 @@ const RESUME_THRESHOLD = 97;
   },
 })
 export class PodcastAudioPlayer implements OnInit, OnDestroy {
-  @ViewChild('audioEl') private audioElRef!: ElementRef<HTMLAudioElement>;
-
   private audioPlayerCommand = inject(PodcastAudioPlayerCommandService);
   private podcastSelection = inject(PodcastSelectionService);
   protected queuePanel = inject(EpisodeQueuePanelService);
   private subscription?: Subscription;
+
+  private audio = new Audio();
 
   track = signal<ITrack | null>(null);
   isPlaying = signal(false);
   isExpanded = signal(false);
   currentTime = signal(0);
   duration = signal(0);
+  private audioReadyPromise: Promise<void> | null = null;
 
   podcastArt = computed(() => this.podcastSelection.current()?.artworkUrl600 || '');
+  podcastName = computed(() => this.podcastSelection.current()?.collectionName || '');
   progress = computed(() => (this.duration() ? (this.currentTime() / this.duration()) * 100 : 0));
   currentTimeLabel = computed(() => formatDuration(this.currentTime()));
   durationLabel = computed(() => formatDuration(this.duration()));
@@ -53,6 +46,28 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.audio.addEventListener('play', () => this.isPlaying.set(true));
+    this.audio.addEventListener('pause', () => this.isPlaying.set(false));
+    this.audio.addEventListener('ended', () => {
+      this.isPlaying.set(false);
+      if (!this.audioPlayerCommand.advance(1)) {
+        this.audioPlayerCommand.clearQueue();
+      }
+    });
+    this.audio.addEventListener('timeupdate', () => {
+      const currentTime = this.audio.currentTime;
+      this.currentTime.set(currentTime);
+
+      const track = this.track();
+      if (track && this.duration()) {
+        const progress = (currentTime / this.duration()) * 100;
+        this.audioPlayerCommand.setProgress(track.guid, progress, track.podcastFeedUrl);
+      }
+    });
+    this.audio.addEventListener('loadedmetadata', () => {
+      this.duration.set(this.audio.duration);
+    });
+
     this.subscription = this.audioPlayerCommand.currentTrack$.subscribe((track) => {
       this.track.set(track);
       if (track) {
@@ -63,84 +78,88 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
-  }
-
-  private get audioEl(): HTMLAudioElement {
-    return this.audioElRef.nativeElement;
+    this.audio.pause();
+    this.audio.src = '';
   }
 
   private loadAndPlay(track: ITrack): void {
-    this.audioEl.src = track.audioUrl;
-    this.audioEl.load();
-    this.play();
+    // Set the audio source and load it
+    this.audio.src = track.audioUrl;
+    this.audio.load();
 
+    // Set up a promise that resolves when the audio is ready to play
+    this.audioReadyPromise = new Promise<void>((resolve) => {
+      this.audio.addEventListener(
+        'canplay',
+        () => resolve(),
+        { once: true },
+      );
+    });
+
+    // Handle progress restoration
     const progress = this.audioPlayerCommand.getProgress(track.guid);
     if (progress > 0 && progress < RESUME_THRESHOLD) {
       const resume = () => {
-        this.audioEl.currentTime = (progress / 100) * this.audioEl.duration;
-        this.audioEl.removeEventListener('loadedmetadata', resume);
+        if (isFinite(this.audio.duration)) {
+          this.audio.currentTime = (progress / 100) * this.audio.duration;
+        }
+        this.audio.removeEventListener('loadedmetadata', resume);
       };
-      this.audioEl.addEventListener('loadedmetadata', resume);
+
+      this.audio.addEventListener('loadedmetadata', resume, { once: true });
     }
+
+    // Actually start playback once the audio is ready
+    this.play().catch((err) => console.warn('Auto-play failed:', err));
   }
 
-  play(): void {
-    this.audioEl.play().catch((error) => console.error('Play failed:', error));
+  async play(): Promise<void> {
+    // Wait for the audio to be ready if it's still loading
+    if (this.audioReadyPromise) {
+      try {
+        await this.audioReadyPromise;
+      } catch (error) {
+        console.warn('Audio ready promise failed:', error);
+      } finally {
+        this.audioReadyPromise = null;
+      }
+    }
+
+    return this.audio.play().catch((error) => {
+      console.error('Play failed:', error);
+      throw error;
+    });
   }
 
   pause(): void {
-    this.audioEl.pause();
+    this.audio.pause();
   }
 
   togglePlayPause(): void {
-    this.isPlaying() ? this.pause() : this.play();
+    if (this.isPlaying()) {
+      this.pause();
+    } else {
+      this.play().catch((error) => {
+        console.warn('Play failed:', error);
+      });
+    }
   }
 
   skip(seconds: number): void {
-    this.audioEl.currentTime += seconds;
+    this.audio.currentTime += seconds;
   }
 
   close(): void {
-    this.audioEl.pause();
-    this.audioEl.currentTime = 0;
+    this.audio.pause();
+    this.audio.currentTime = 0;
     this.audioPlayerCommand.clearQueue();
     this.isExpanded.set(false);
   }
 
   onSeekInput(event: Event): void {
     const percent = Number((event.target as HTMLInputElement).value);
-    if (isFinite(this.audioEl.duration)) {
-      this.audioEl.currentTime = (percent / 100) * this.audioEl.duration;
+    if (isFinite(this.audio.duration)) {
+      this.audio.currentTime = (percent / 100) * this.audio.duration;
     }
-  }
-
-  onPlay(): void {
-    this.isPlaying.set(true);
-  }
-
-  onPause(): void {
-    this.isPlaying.set(false);
-  }
-
-  onEnded(): void {
-    this.isPlaying.set(false);
-    if (!this.audioPlayerCommand.advance(1)) {
-      this.audioPlayerCommand.clearQueue();
-    }
-  }
-
-  onTimeUpdate(): void {
-    const currentTime = this.audioEl.currentTime;
-    this.currentTime.set(currentTime);
-
-    const track = this.track();
-    if (track && this.duration()) {
-      const progress = (currentTime / this.duration()) * 100;
-      this.audioPlayerCommand.setProgress(track.guid, progress, track.podcastFeedUrl);
-    }
-  }
-
-  onLoadedMetadata(): void {
-    this.duration.set(this.audioEl.duration);
   }
 }

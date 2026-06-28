@@ -24,6 +24,7 @@ import {
 } from 'shared-utils';
 import { AnnouncerSettingsService } from './announcer-settings.service';
 import { AudioAnalyserService } from './audio-analyser.service';
+import { AudioVisualizer } from './audio-visualizer';
 import { AudioVisualizerPanelService } from './audio-visualizer-panel.service';
 import { CastButton } from './cast-button';
 import { TrackQueuePanelService } from './track-queue-panel.service';
@@ -32,7 +33,7 @@ const ANNOUNCING_VOLUME = 0.3;
 
 @Component({
   selector: 'app-audio-player',
-  imports: [CastButton, ImgFallbackDirective],
+  imports: [CastButton, ImgFallbackDirective, AudioVisualizer],
   templateUrl: './audio-player.html',
   styleUrl: './audio-player.css',
 })

@@ -1,7 +1,11 @@
 @if (track(); as currentTrack) {
   <button type="button" class="player-btn audio-close" aria-label="Collapse" (click)="isExpanded.set(false)">
-    <i class="fa-solid fa-chevron-down"></i>
+    <i class="fa-solid fa-arrow-left"></i>
   </button>
+
+  <div class="podcast-expanded-header">
+    <span class="podcast-expanded-title">{{ podcastName() }}</span>
+  </div>
 
   <div class="player-controls">
     <div class="player-track-info" (click)="isExpanded.set(true)">
@@ -56,12 +60,3 @@
 
   </div>
 }
-
-<audio
-  #audioEl
-  (play)="onPlay()"
-  (pause)="onPause()"
-  (ended)="onEnded()"
-  (timeupdate)="onTimeUpdate()"
-  (loadedmetadata)="onLoadedMetadata()"
-></audio>

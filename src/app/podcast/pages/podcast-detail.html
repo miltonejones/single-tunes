@@ -5,7 +5,7 @@
 }
 
 @if (podcast(); as info) {
-  <div class="mb-4 p-3 podcast-detail-header rounded" style="max-height: 240px; overflow: auto;">
+  <div class="mb-4 p-3 podcast-detail-header" style="max-height: 240px; overflow: auto;">
     <div class="d-flex gap-3">
       @if (info.artworkUrl600) {
         <img [src]="info.artworkUrl600" class="detail-image rounded object-fit-cover" />
@@ -17,13 +17,14 @@
         </div>
         <b>{{ info.collectionName }}</b>
         <p class="text-muted mb-0">{{ info.artistName }}</p>
-        <p class="text-muted mb-0">{{ description() }}</p>
+        <p class="text-muted mb-0 small">{{ description() }}</p>
         <small class="text-muted">{{ episodes().length }} episodes</small>
       </div>
     </div>
   </div>
 }
 
+<div class="podcast-detail-body">
 <div class="d-flex justify-content-between">
   @if (pages().pageCount > 1) {
     <div class="d-flex align-items-center justify-content-center mb-3 gap-1">
@@ -120,4 +121,5 @@
       </div>
     </div>
   }
+</div>
 </div>

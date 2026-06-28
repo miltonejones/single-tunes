@@ -27,3 +27,22 @@
   font-size: 0.6rem;
   color: var(--text-tertiary);
 }
+
+@media (max-width: 768px) {
+  .breadcrumbs {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .breadcrumbs a,
+  .breadcrumb-current {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .breadcrumbs a:last-of-type,
+  .breadcrumb-current:last-of-type {
+    max-width: 40vw;
+  }
+}

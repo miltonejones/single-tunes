@@ -326,3 +326,18 @@ input[type='range']::-moz-range-track {
 .audio-player-fullscreen-play-btn:hover {
   filter: brightness(1.1);
 }
+
+.audio-player-fullscreen-visualizer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 151;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.audio-player-fullscreen-visualizer app-audio-visualizer {
+  pointer-events: auto;
+}
