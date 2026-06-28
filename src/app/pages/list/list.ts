@@ -5,6 +5,7 @@ import {
   AudioPlayerCommandService,
   Breadcrumbs,
   BreadcrumbItem,
+  CatalogCommandService,
   CatalogQueryService,
   formatDuration,
   IDetailResponse,
@@ -42,6 +43,7 @@ export class ListPage implements OnInit {
 
   private route = inject(ActivatedRoute);
   private catalogQuery = inject(CatalogQueryService);
+  private catalogCommand = inject(CatalogCommandService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private playHistory = inject(PlayHistoryService);
   protected downloadService = inject(TrackDownloadService);
@@ -87,6 +89,10 @@ export class ListPage implements OnInit {
   playlists = signal<IPlaylistSummary[]>([]);
 
   menuTrack = signal<ITrackItem | null>(null);
+  editMode = signal(false);
+  orderedTracks = signal<ITrackItem[]>([]);
+  savingOrder = signal(false);
+  private dragFromIndex = -1;
 
   entity = computed(() => this.detail()?.row[0] ?? null);
   hasMultipleDiscs = computed(() => {
@@ -246,6 +252,76 @@ export class ListPage implements OnInit {
 
   closeMenu(): void {
     this.menuTrack.set(null);
+  }
+
+  enterEditMode(): void {
+    this.orderedTracks.set([...this.tracks()]);
+    this.editMode.set(true);
+  }
+
+  cancelEditMode(): void {
+    this.editMode.set(false);
+    this.orderedTracks.set([]);
+  }
+
+  onDragStart(index: number): void {
+    this.dragFromIndex = index;
+  }
+
+  onDragOver(index: number, event: DragEvent): void {
+    event.preventDefault();
+    this.moveItem(index);
+  }
+
+  onTouchStart(index: number, event: TouchEvent): void {
+    event.preventDefault();
+    this.dragFromIndex = index;
+  }
+
+  onTouchMove(event: TouchEvent): void {
+    event.preventDefault();
+    if (this.dragFromIndex === -1) return;
+    const touch = event.touches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const row = el?.closest('[data-drag-index]') as HTMLElement | null;
+    if (!row) return;
+    const toIndex = Number(row.getAttribute('data-drag-index'));
+    if (!isNaN(toIndex)) this.moveItem(toIndex);
+  }
+
+  onTouchEnd(): void {
+    this.dragFromIndex = -1;
+  }
+
+  private moveItem(toIndex: number): void {
+    if (toIndex === this.dragFromIndex) return;
+    const tracks = [...this.orderedTracks()];
+    const [moved] = tracks.splice(this.dragFromIndex, 1);
+    tracks.splice(toIndex, 0, moved);
+    this.dragFromIndex = toIndex;
+    this.orderedTracks.set(tracks);
+  }
+
+  async saveOrder(): Promise<void> {
+    const playlist = this.playlists().find((p) => p.listKey === this.listId());
+    if (!playlist) return;
+
+    this.savingOrder.set(true);
+    const updated: IPlaylistSummary = {
+      ...playlist,
+      related: this.orderedTracks().map((t) => t.FileKey),
+    };
+    try {
+      await this.catalogCommand.savePlaylist(updated);
+      this.editMode.set(false);
+      this.orderedTracks.set([]);
+      this.loadDetail('playlist', this.listId(), this.pageNum());
+      inject(ToastService).show('Playlist order saved.');
+    } catch {
+      inject(ToastService).show('Failed to save order.');
+    } finally {
+      this.savingOrder.set(false);
+    }
   }
 
   onTrackUpdated(updatedTrack: ITrackItem): void {

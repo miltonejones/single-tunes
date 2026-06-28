@@ -48,6 +48,16 @@
               <i class="fa-solid fa-download"></i>
             }
           </button>
+          @if (listType() === 'playlist') {
+            <button
+              type="button"
+              class="banner-edit-btn"
+              title="Edit playlist order"
+              (click)="enterEditMode()"
+            >
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+          }
         </div>
       </div>
     </div>
@@ -64,86 +74,117 @@
     />
   } -->
 
-  <div class="track-list">
-    <!-- <div class="track-row track-header">
-      <span></span>
-      <span>#</span>
-      <span>Title</span>
-      <span>Artist</span>
-      <span>Album</span>
-      <span>Genre</span>
-      <span>Time</span>
-      <span></span>
-      <span></span>
-    </div> -->
-    @for (track of tracks(); track track.ID) {
-      @if (hasMultipleDiscs() && track.discNumber && ($index === 0 || track.discNumber !== tracks()[$index - 1].discNumber)) {
-        <div class="disc-header">
-          <i class="fa-solid fa-compact-disc"></i> Disc {{ track.discNumber }}
+  @if (editMode()) {
+    <div class="edit-mode-bar">
+      <span class="edit-mode-label"><i class="fa-solid fa-grip-lines"></i> Drag to reorder</span>
+      <div class="edit-mode-actions">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="cancelEditMode()">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" [disabled]="savingOrder()" (click)="saveOrder()">
+          @if (savingOrder()) { <i class="fa-solid fa-spinner fa-spin"></i> } @else { <i class="fa-solid fa-floppy-disk"></i> }
+          Save
+        </button>
+      </div>
+    </div>
+    <div class="track-list track-list-edit">
+      @for (track of orderedTracks(); track track.ID; let i = $index) {
+        <div
+          class="track-row track-row-draggable"
+          [attr.data-drag-index]="i"
+          draggable="true"
+          (dragstart)="onDragStart(i)"
+          (dragover)="onDragOver(i, $event)"
+        >
+          <i
+            class="fa-solid fa-grip-lines drag-handle"
+            (touchstart)="onTouchStart(i, $event)"
+            (touchmove)="onTouchMove($event)"
+            (touchend)="onTouchEnd()"
+          ></i>
+          <img
+            class="track-icon"
+            appImgFallback
+            [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
+            [src]="track.albumImage"
+            [alt]="track.Title"
+          />
+          <span class="track-number">{{ i + 1 }}</span>
+          <span class="track-title">{{ track.Title }}</span>
+          <span class="track-artist">{{ track.artistName }}</span>
+          <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
         </div>
       }
-      <div
-        class="track-row"
-        [class.active]="track.ID === currentTrackId()"
-        [class.artist-view]="listType() === 'artist'"
-        (click)="playTrack(track)"
-      >
-        <img
-          class="track-icon"
-          appImgFallback
-          [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
-          [src]="track.albumImage"
-          [alt]="track.Title"
-        />
-        <span class="track-number">{{ track.trackNumber }}</span>
-        <span class="track-title">
-          @if (downloadService.isDownloaded(track.ID)) {
-            <i class="fa-solid fa-download track-downloaded-icon"></i>
+    </div>
+  } @else {
+    <div class="track-list">
+      @for (track of tracks(); track track.ID) {
+        @if (hasMultipleDiscs() && track.discNumber && ($index === 0 || track.discNumber !== tracks()[$index - 1].discNumber)) {
+          <div class="disc-header">
+            <i class="fa-solid fa-compact-disc"></i> Disc {{ track.discNumber }}
+          </div>
+        }
+        <div
+          class="track-row"
+          [class.active]="track.ID === currentTrackId()"
+          [class.artist-view]="listType() === 'artist'"
+          (click)="playTrack(track)"
+        >
+          <img
+            class="track-icon"
+            appImgFallback
+            [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
+            [src]="track.albumImage"
+            [alt]="track.Title"
+          />
+          <span class="track-number">{{ track.trackNumber }}</span>
+          <span class="track-title">
+            @if (downloadService.isDownloaded(track.ID)) {
+              <i class="fa-solid fa-download track-downloaded-icon"></i>
+            }
+            {{ track.Title }}
+          </span>
+          @if (track.artistFk) {
+            <a
+              class="track-artist"
+              [routerLink]="['/list', 'artist', track.artistFk, 1]"
+              (click)="$event.stopPropagation()"
+              >{{ track.artistName }}</a
+            >
+          } @else {
+            <span class="track-artist">{{ track.artistName }}</span>
           }
-          {{ track.Title }}
-        </span>
-        @if (track.artistFk) {
-          <a
-            class="track-artist"
-            [routerLink]="['/list', 'artist', track.artistFk, 1]"
-            (click)="$event.stopPropagation()"
-            >{{ track.artistName }}</a
-          >
-        } @else {
-          <span class="track-artist">{{ track.artistName }}</span>
-        }
-        @if (track.albumFk) {
-          <a
-            class="track-album"
-            [routerLink]="['/list', 'album', track.albumFk, 1]"
-            (click)="$event.stopPropagation()"
-            >{{ track.albumName }}</a
-          >
-        } @else {
-          <span class="track-album">{{ track.albumName }}</span>
-        }
-        @if (track.Genre) {
-          <a
-            class="track-genre"
-            [routerLink]="['/list', 'genre', track.Genre, 1]"
-            (click)="$event.stopPropagation()"
-            >{{ track.Genre }}</a
-          >
-        } @else {
-          <span class="track-genre">{{ track.Genre }}</span>
-        }
-        <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
-        <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
-          <i class="fa-solid fa-ellipsis-vertical"></i>
-        </button>
-        <i
-          class="fa-heart track-heart"
-          [class.fa-solid]="isInPlaylist(track)"
-          [class.fa-regular]="!isInPlaylist(track)"
-        ></i>
-      </div>
-    }
-  </div>
+          @if (track.albumFk) {
+            <a
+              class="track-album"
+              [routerLink]="['/list', 'album', track.albumFk, 1]"
+              (click)="$event.stopPropagation()"
+              >{{ track.albumName }}</a
+            >
+          } @else {
+            <span class="track-album">{{ track.albumName }}</span>
+          }
+          @if (track.Genre) {
+            <a
+              class="track-genre"
+              [routerLink]="['/list', 'genre', track.Genre, 1]"
+              (click)="$event.stopPropagation()"
+              >{{ track.Genre }}</a
+            >
+          } @else {
+            <span class="track-genre">{{ track.Genre }}</span>
+          }
+          <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+          <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+          <i
+            class="fa-heart track-heart"
+            [class.fa-solid]="isInPlaylist(track)"
+            [class.fa-regular]="!isInPlaylist(track)"
+          ></i>
+        </div>
+      }
+    </div>
+  }
 
   @if (totalPages() > 1) {
   <div class="pager">

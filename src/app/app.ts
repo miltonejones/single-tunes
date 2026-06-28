@@ -124,11 +124,11 @@ const routeAnimation = trigger('routeAnimation', [
   transition('* => *', [
     query(':leave', [
       style({ transform: 'translateX(0)', opacity: 1 }),
-      animate('200ms ease-in', style({ transform: 'translateX(-25%)', opacity: 0.4 })),
+      animate('350ms ease-in', style({ transform: 'translateX(-25%)', opacity: 0.4 })),
     ], { optional: true }),
     query(':enter', [
       style({ transform: 'translateX(100%)', opacity: 0 }),
-      animate('350ms ease-out', style({ transform: 'translateX(0)', opacity: 1 })),
+      animate('550ms ease-out', style({ transform: 'translateX(0)', opacity: 1 })),
     ], { optional: true }),
   ]),
 ]);
