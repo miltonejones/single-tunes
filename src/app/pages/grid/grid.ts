@@ -31,7 +31,7 @@ const SORT_DEFAULTS: Record<GridType, ISortProp> = {
   artist: { field: 'Name', direction: 'ASC' },
   album: { field: 'Name', direction: 'ASC' },
   genre: { field: 'Genre', direction: 'ASC' },
-  playlist: { field: 'Title', direction: 'ASC' },
+  playlist: { field: 'Title', direction: 'DESC' },
 };
 
 const SORT_OPTIONS: Record<GridType, SortOption[]> = {
