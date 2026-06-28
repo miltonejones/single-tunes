@@ -21,6 +21,7 @@ import {
   PlayHistoryService,
   shouldAnnounceForFrequency,
   SpeechPlaybackService,
+  TrackMenu,
 } from 'shared-utils';
 import { AnnouncerSettingsService } from './announcer-settings.service';
 import { AudioAnalyserService } from './audio-analyser.service';
@@ -33,7 +34,7 @@ const ANNOUNCING_VOLUME = 0.3;
 
 @Component({
   selector: 'app-audio-player',
-  imports: [CastButton, ImgFallbackDirective, AudioVisualizer],
+  imports: [CastButton, ImgFallbackDirective, AudioVisualizer, TrackMenu],
   templateUrl: './audio-player.html',
   styleUrl: './audio-player.css',
 })
@@ -58,6 +59,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   duration = signal(0);
   isExpanded = signal(false);
   protected isCasting = signal(false);
+  protected showTrackMenu = signal(false);
 
   private playRequestId = 0;
 
@@ -409,6 +411,10 @@ export class AudioPlayer implements OnInit, OnDestroy {
     if (!this.audioPlayerCommand.advance(offset)) {
       this.stop();
     }
+  }
+
+  closeTrackMenu(): void {
+    this.showTrackMenu.set(false);
   }
 
   // ── Template-bound <audio> event handlers ────────────────────────────────────

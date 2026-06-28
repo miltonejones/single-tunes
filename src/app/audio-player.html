@@ -74,16 +74,27 @@
 
   @if (isExpanded()) {
     <div class="audio-player-fullscreen">
-      <button type="button" class="audio-player-fullscreen-close" (click)="isExpanded.set(false)">
-        <i class="fa-solid fa-chevron-down"></i>
-      </button>
+      <div class="audio-player-fullscreen-topbar">
+        <button type="button" class="audio-player-fullscreen-close" (click)="isExpanded.set(false)">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
 
-      @if (currentSource(); as source) {
-        <div class="audio-player-fullscreen-source">
-          <div class="audio-player-fullscreen-source-header">Playing from {{ source.type }}</div>
-          <div class="audio-player-fullscreen-source-name">{{ source.name }}</div>
-        </div>
-      }
+        @if (currentSource(); as source) {
+          <div class="audio-player-fullscreen-topbar-source">
+            <div class="audio-player-fullscreen-source-header">Playing from {{ source.type }}</div>
+            <div class="audio-player-fullscreen-source-name">{{ source.name }}</div>
+          </div>
+        }
+
+        <button
+          type="button"
+          class="audio-player-fullscreen-menu-btn"
+          title="Track options"
+          (click)="showTrackMenu.set(true)"
+        >
+          <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+      </div>
 
       <img
         class="audio-player-fullscreen-art"
@@ -142,6 +153,10 @@
       <div class="audio-player-fullscreen-visualizer">
         <app-audio-visualizer />
       </div>
+
+      @if (showTrackMenu()) {
+        <app-track-menu [track]="track" (closed)="closeTrackMenu()" />
+      }
     </div>
   }
 }
