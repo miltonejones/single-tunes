@@ -362,7 +362,7 @@ input[type='range']::-moz-range-track {
 
 .audio-player-fullscreen-visualizer {
   position: fixed;
-  bottom: 0;
+  bottom: 1.5rem;
   left: 0;
   right: 0;
   z-index: 151;
