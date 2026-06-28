@@ -97,6 +97,37 @@
   border-color: rgba(255, 255, 255, 0.6);
 }
 
+.banner-download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.banner-download-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.banner-download-btn.all-downloaded {
+  color: limegreen;
+  border-color: limegreen;
+}
+
+.banner-download-btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
 .track-list {
   display: flex;
   flex-direction: column;
@@ -215,6 +246,15 @@
 .track-title {
   color: var(--text);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.track-downloaded-icon {
+  color: limegreen;
+  font-size: 0.7rem;
+  flex-shrink: 0;
 }
 
 .track-artist,
@@ -282,7 +322,8 @@ a.track-genre:hover {
     font-size: 1rem;
   }
 
-  .banner-shuffle-btn {
+  .banner-shuffle-btn,
+  .banner-download-btn {
     width: 2rem;
     height: 2rem;
     font-size: 0.75rem;

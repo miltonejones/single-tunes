@@ -13,7 +13,6 @@ import { Subscription } from 'rxjs';
 import {
   AnnouncementCommandService,
   AudioPlayerCommandService,
-  buildPlayerUrl,
   CastService,
   formatDuration,
   ImgFallbackDirective,
@@ -21,6 +20,7 @@ import {
   PlayHistoryService,
   shouldAnnounceForFrequency,
   SpeechPlaybackService,
+  TrackDownloadService,
   TrackMenu,
 } from 'shared-utils';
 import { AnnouncerSettingsService } from './announcer-settings.service';
@@ -48,6 +48,8 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private audioAnalyser = inject(AudioAnalyserService);
   private castService = inject(CastService);
   private playHistory = inject(PlayHistoryService);
+  private trackDownload = inject(TrackDownloadService);
+  private blobUrl: string | null = null;
   protected queuePanel = inject(TrackQueuePanelService);
   protected visualizerPanel = inject(AudioVisualizerPanelService);
   private subscriptions: Subscription[] = [];
@@ -143,6 +145,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     for (const s of this.subscriptions) s.unsubscribe();
+    this.revokeBlobUrl();
   }
 
   // ── Cast transition helpers ──────────────────────────────────────────────────
@@ -219,8 +222,11 @@ export class AudioPlayer implements OnInit, OnDestroy {
     this.corsRetryAttempted = false;
     this.audioAnalyser.setAvailable(true);
     this.audioAnalyser.initialize(this.audioEl);
-    this.audioEl.crossOrigin = 'anonymous';
-    this.audioEl.src = buildPlayerUrl(track.FileKey);
+    this.revokeBlobUrl();
+    const { src, isBlob } = await this.trackDownload.getAudioSrc(track);
+    if (isBlob) this.blobUrl = src;
+    this.audioEl.crossOrigin = isBlob ? '' : 'anonymous';
+    this.audioEl.src = src;
 
     const settings = this.announcerSettings.settings();
     if (shouldAnnounceForFrequency(settings.frequency)) {
@@ -244,12 +250,15 @@ export class AudioPlayer implements OnInit, OnDestroy {
   }
 
   /** Load a track on the native <audio> element, optionally seeking to a position. */
-  private loadAudioElement(track: ITrackItem, seekToPosition = 0): void {
+  private async loadAudioElement(track: ITrackItem, seekToPosition = 0): Promise<void> {
     this.corsRetryAttempted = false;
     this.audioAnalyser.setAvailable(true);
     this.audioAnalyser.initialize(this.audioEl);
-    this.audioEl.crossOrigin = 'anonymous';
-    this.audioEl.src = buildPlayerUrl(track.FileKey);
+    this.revokeBlobUrl();
+    const { src, isBlob } = await this.trackDownload.getAudioSrc(track);
+    if (isBlob) this.blobUrl = src;
+    this.audioEl.crossOrigin = isBlob ? '' : 'anonymous';
+    this.audioEl.src = src;
 
     if (seekToPosition > 0) {
       const onLoaded = () => {
@@ -260,6 +269,13 @@ export class AudioPlayer implements OnInit, OnDestroy {
     }
 
     this.play();
+  }
+
+  private revokeBlobUrl(): void {
+    if (this.blobUrl) {
+      URL.revokeObjectURL(this.blobUrl);
+      this.blobUrl = null;
+    }
   }
 
   // ── Wake lock (keep screen on while playing) ───────────────────────────────

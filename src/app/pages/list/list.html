@@ -32,6 +32,22 @@
           >
             <i class="fa-solid fa-shuffle"></i>
           </button>
+          <button
+            type="button"
+            class="banner-download-btn"
+            [class.all-downloaded]="allTracksDownloaded()"
+            [disabled]="anyTrackDownloading()"
+            [title]="allTracksDownloaded() ? 'All tracks downloaded' : 'Download all tracks'"
+            (click)="downloadAllTracks()"
+          >
+            @if (anyTrackDownloading()) {
+              <i class="fa-solid fa-spinner fa-spin"></i>
+            } @else if (allTracksDownloaded()) {
+              <i class="fa-solid fa-check"></i>
+            } @else {
+              <i class="fa-solid fa-download"></i>
+            }
+          </button>
         </div>
       </div>
     </div>
@@ -80,7 +96,12 @@
           [alt]="track.Title"
         />
         <span class="track-number">{{ track.trackNumber }}</span>
-        <span class="track-title">{{ track.Title }}</span>
+        <span class="track-title">
+          @if (downloadService.isDownloaded(track.ID)) {
+            <i class="fa-solid fa-download track-downloaded-icon"></i>
+          }
+          {{ track.Title }}
+        </span>
         @if (track.artistFk) {
           <a
             class="track-artist"
