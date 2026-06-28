@@ -1,29 +1,58 @@
 <div class="page downloads-page">
   <lib-breadcrumbs [items]="breadcrumbItems()" />
 
-  <div class="page-header d-flex align-items-center justify-content-between">
-    <h1 class="m-0">Downloads</h1>
-    <div class="d-flex gap-2">
-      <button
-        type="button"
-        class="btn btn-primary"
-        [disabled]="tracks().length === 0 || isPlayingThisList()"
-        (click)="togglePlayList()"
-      >
-        <i class="fa-solid fa-play"></i>
-        {{ isPlayingThisList() ? 'Stop' : 'Play All' }}
-      </button>
-      <button
-        type="button"
-        class="btn btn-outline-secondary"
-        [disabled]="tracks().length === 0"
-        (click)="shuffleAndPlay()"
-      >
-        <i class="fa-solid fa-shuffle"></i>
-        Shuffle
-      </button>
+  @if (bannerImage(); as banner) {
+    <div class="artist-banner" [style.background-image]="'url(' + banner + ')'">
+      <div class="artist-banner-overlay">
+        <div class="artist-banner-info">
+          <div class="artist-banner-label">Library</div>
+          <div class="artist-banner-title">Downloads</div>
+          @if (tracks().length > 0) {
+            <div class="artist-banner-count">{{ tracks().length }} track{{ tracks().length === 1 ? '' : 's' }}</div>
+          }
+        </div>
+        <div class="artist-banner-actions">
+          <button
+            type="button"
+            class="banner-play-btn"
+            [title]="isPlayingThisList() ? 'Stop' : 'Play all'"
+            [disabled]="tracks().length === 0"
+            (click)="togglePlayList()"
+          >
+            <i class="fa-solid" [class.fa-play]="!isPlayingThisList()" [class.fa-stop]="isPlayingThisList()"></i>
+          </button>
+          <button
+            type="button"
+            class="banner-shuffle-btn"
+            title="Shuffle play"
+            [disabled]="tracks().length === 0"
+            (click)="shuffleAndPlay()"
+          >
+            <i class="fa-solid fa-shuffle"></i>
+          </button>
+          @if (confirmingClear()) {
+            <span class="banner-confirm-label">Delete all?</span>
+            <button type="button" class="banner-confirm-yes" (click)="clearAllDownloads()">
+              <i class="fa-solid fa-check"></i>
+            </button>
+            <button type="button" class="banner-confirm-no" (click)="confirmingClear.set(false)">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="banner-trash-btn"
+              title="Delete all downloads"
+              [disabled]="tracks().length === 0"
+              (click)="confirmingClear.set(true)"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          }
+        </div>
+      </div>
     </div>
-  </div>
+  }
 
   @if (loading()) {
     <lib-loading-animation />
@@ -58,12 +87,13 @@
               </button>
 
               <img
-                [src]="track.albumImage || 'album-placeholder.png'"
+                appImgFallback
+                [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
+                [src]="track.albumImage"
                 class="track-image"
                 width="50"
                 height="50"
                 alt="{{ track.albumName }}"
-                libImgFallback
               />
 
               <div class="track-info flex-grow-1">
@@ -79,7 +109,7 @@
                 class="btn btn-sm btn-outline-secondary track-menu-button"
                 (click)="openMenu(track, $event)"
               >
-                <i class="fa-solid fa-ellipsis"></i>
+                <i class="fa-solid fa-ellipsis-vertical"></i>
               </button>
             </div>
           }

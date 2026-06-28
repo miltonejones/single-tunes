@@ -1,5 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { IGridResponse } from 'shared-utils';
+import { gridResolver } from './grid.resolver';
 import {
   Breadcrumbs,
   BreadcrumbItem,
@@ -83,15 +85,16 @@ export class GridPage implements OnInit {
   ]);
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      const gridType = this.parseGridType(params.get('gridType'));
-      const pageNum = Number(params.get('pageNum')) || 1;
+    const params = this.route.snapshot.paramMap;
+    const gridType = this.parseGridType(params.get('gridType'));
+    const pageNum = Number(params.get('pageNum')) || 1;
+    this.gridType.set(gridType);
+    this.pageNum.set(pageNum);
+    this.sort.set(SORT_DEFAULTS[gridType]);
 
-      this.gridType.set(gridType);
-      this.pageNum.set(pageNum);
-      this.sort.set(SORT_DEFAULTS[gridType]);
-      this.loadGrid(gridType, pageNum);
-    });
+    const resolved = this.route.snapshot.data['grid'] as IGridResponse;
+    this.items.set(resolved.records);
+    this.totalCount.set(resolved.count);
   }
 
   setSort(field: string): void {

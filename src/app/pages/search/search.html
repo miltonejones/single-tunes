@@ -24,11 +24,7 @@
   }
 </div>
 
-@if (loading()) {
-  <lib-loading-animation variant="visualizer" label="Searching" />
-} @else if (error()) {
-  <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
-} @else if (!hasResults()) {
+@if (!hasResults()) {
   <p>No results found.</p>
 } @else if (viewMode() === 'tabs') {
 

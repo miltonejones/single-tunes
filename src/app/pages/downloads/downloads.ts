@@ -1,5 +1,6 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DownloadsResolvedData } from './downloads.resolver';
 import {
   AudioPlayerCommandService,
   Breadcrumbs,
@@ -23,6 +24,10 @@ interface DownloadedTrack {
   discNumber?: number | null;
   trackNumber?: number | null;
   FileKey: string;
+  albumFk?: any;
+  artistFk?: number | null;
+  Genre?: string | null;
+  genreKey?: any;
 }
 
 function toITrackItem(track: DownloadedTrack): ITrackItem {
@@ -37,8 +42,10 @@ function toITrackItem(track: DownloadedTrack): ITrackItem {
     trackNumber: track.trackNumber ?? null,
     FileKey: track.FileKey,
     trackId: track.ID,
-    Genre: '',
-    genreKey: null,
+    Genre: track.Genre ?? '',
+    genreKey: track.genreKey ?? null,
+    albumFk: track.albumFk ?? null,
+    artistFk: track.artistFk ?? null,
     explicit: false,
   };
 }
@@ -54,6 +61,7 @@ export class DownloadsPage implements OnInit {
   protected readonly formatDuration = formatDuration;
   protected readonly toITrackItem = toITrackItem;
 
+  private route = inject(ActivatedRoute);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private playHistory = inject(PlayHistoryService);
   protected downloadService = inject(TrackDownloadService);
@@ -62,11 +70,21 @@ export class DownloadsPage implements OnInit {
   loading = signal(true);
   currentTrackId = signal<number | null>(null);
   menuTrack = signal<DownloadedTrack | null>(null);
+  confirmingClear = signal(false);
+
+  constructor() {
+    effect(() => {
+      const downloaded = this.downloadService.downloadedIds();
+      this.tracks.update((list) => list.filter((t) => downloaded.has(t.ID)));
+    });
+  }
 
   isPlayingThisList = computed(() => {
     const id = this.currentTrackId();
     return !!id && this.tracks().some((t) => t.ID === id);
   });
+
+  bannerImage = computed(() => this.tracks().find((t) => t.albumImage)?.albumImage ?? null);
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
     { label: 'Home', link: ['/'] },
@@ -78,32 +96,24 @@ export class DownloadsPage implements OnInit {
       this.currentTrackId.set(track?.ID ?? null);
     });
 
-    this.loadDownloadedTracks();
-  }
-
-  private async loadDownloadedTracks(): Promise<void> {
-    this.loading.set(true);
-    try {
-      const downloadedItems = await this.downloadService.getAllDownloadedTracks();
-      // Convert the stored items to DownloadedTrack format
-      const trackItems: DownloadedTrack[] = downloadedItems.map(item => ({
-        ID: item.trackId,
-        Title: item.title,
-        artistName: item.artistName ?? '',
-        albumName: item.albumName ?? '',
-        albumImage: item.albumImage ?? '',
-        trackTime: item.trackTime ?? 0,
-        discNumber: item.discNumber,
-        trackNumber: item.trackNumber,
-        FileKey: item.FileKey,
-      }));
-      this.tracks.set(trackItems);
-    } catch (error) {
-      console.error('Failed to load downloaded tracks:', error);
-      this.tracks.set([]);
-    } finally {
-      this.loading.set(false);
-    }
+    const resolved = this.route.snapshot.data['downloads'] as DownloadsResolvedData;
+    const trackItems: DownloadedTrack[] = resolved.map(item => ({
+      ID: item.trackId,
+      Title: item.title,
+      artistName: item.artistName ?? '',
+      albumName: item.albumName ?? '',
+      albumImage: item.albumImage ?? '',
+      trackTime: item.trackTime ?? 0,
+      discNumber: item.discNumber,
+      trackNumber: item.trackNumber,
+      FileKey: item.FileKey,
+      albumFk: item.albumFk ?? null,
+      artistFk: item.artistFk ?? null,
+      Genre: item.Genre ?? null,
+      genreKey: item.genreKey ?? null,
+    }));
+    this.tracks.set(trackItems);
+    this.loading.set(false);
   }
 
   playTrack(track: DownloadedTrack): void {
@@ -158,6 +168,17 @@ export class DownloadsPage implements OnInit {
 
   closeMenu(): void {
     this.menuTrack.set(null);
+  }
+
+  async clearAllDownloads(): Promise<void> {
+    const tracks = this.tracks();
+    if (tracks.length === 0) return;
+    for (const track of tracks) {
+      await this.downloadService.remove(toITrackItem(track));
+    }
+    this.tracks.set([]);
+    this.confirmingClear.set(false);
+    this.audioPlayerCommand.clearQueue();
   }
 
   private recordPlay(track: ITrackItem): void {

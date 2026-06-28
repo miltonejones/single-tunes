@@ -49,6 +49,10 @@ export class TrackDownloadService {
         discNumber: track.discNumber ?? null,
         trackNumber: track.trackNumber ?? null,
         FileKey: track.FileKey,
+        albumFk: track.albumFk ?? null,
+        artistFk: track.artistFk ?? null,
+        Genre: track.Genre ?? null,
+        genreKey: track.genreKey ?? null,
       });
       this.downloadedIds.update((s) => new Set([...s, trackId]));
     } catch (err: any) {
@@ -146,6 +150,10 @@ export class TrackDownloadService {
     discNumber?: number | null;
     trackNumber?: number | null;
     FileKey: string;
+    albumFk?: any;
+    artistFk?: number | null;
+    Genre?: string | null;
+    genreKey?: any;
   }>> {
     if (!this.db) return [];
 
@@ -190,6 +198,10 @@ export class TrackDownloadService {
     discNumber?: number | null;
     trackNumber?: number | null;
     FileKey: string;
+    albumFk?: any;
+    artistFk?: number | null;
+    Genre?: string | null;
+    genreKey?: any;
   }): Promise<void> {
     return new Promise((resolve, reject) => {
       const req = this.db!.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(value);

@@ -1,11 +1,6 @@
 <!-- <h2>Home remote</h2> -->
 
-@if (loading()) {
-  <lib-loading-animation variant="visualizer" label="Loading dashboard" />
-} @else if (error()) {
-  <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
-} @else {
-  @if (carouselItems().length > 0) {
+@if (carouselItems().length > 0) {
     <div class="carousel">
       <div class="carousel-track" [style.transform]="'translateX(-' + carouselIndex() * 100 + '%)'">
         @for (item of carouselItems(); track item.ID + item.Type) {
@@ -44,9 +39,9 @@
         </div>
       }
     </div>
-  }
+}
 
-  @if (featuredPlaylists().length > 0) {
+@if (featuredPlaylists().length > 0) {
     <div class="section-header">
       <h3><i class="fa-solid fa-list-ul"></i> Playlists</h3>
       <a class="view-all-link" [routerLink]="['/grid', 'playlist', 1]"
@@ -136,6 +131,5 @@
       />
     }
   </div>
-}
 
 <router-outlet />

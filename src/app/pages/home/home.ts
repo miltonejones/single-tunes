@@ -1,12 +1,11 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { HomeResolvedData } from './home.resolver';
 import {
-  CatalogQueryService,
   CoverflowDirective,
   DashItem,
   ImgFallbackDirective,
   IPlaylistSummary,
-  LoadingAnimation,
   MediaCard,
   PlayHistoryService,
   PodcastCard,
@@ -31,22 +30,20 @@ function pickRandom<T>(items: T[], count: number): T[] {
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterOutlet, RouterLink, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard, CoverflowDirective],
+  imports: [RouterOutlet, RouterLink, MediaCard, ImgFallbackDirective, PodcastCard, CoverflowDirective],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
 export class HomePage implements OnInit, OnDestroy {
   protected readonly title = signal('home');
 
-  private catalogQuery = inject(CatalogQueryService);
+  private route = inject(ActivatedRoute);
   protected subscriptionsService = inject(PodcastSubscriptionsService);
   protected playHistory = inject(PlayHistoryService);
   private carouselTimer?: ReturnType<typeof setInterval>;
 
   dashItems = signal<DashItem[]>([]);
   featuredPlaylists = signal<IPlaylistSummary[]>([]);
-  loading = signal(false);
-  error = signal('');
   carouselIndex = signal(0);
 
   topArtists = computed(() => this.topByTrackCount('artist'));
@@ -60,21 +57,10 @@ export class HomePage implements OnInit, OnDestroy {
   );
 
   ngOnInit(): void {
-    this.loading.set(true);
-    this.error.set('');
-
-    this.catalogQuery
-      .getDashboard()
-      .then((items) => {
-        this.dashItems.set(items);
-        this.startCarousel();
-      })
-      .catch((err) => this.error.set(err?.message || 'Failed to load dashboard'))
-      .finally(() => this.loading.set(false));
-
-    this.catalogQuery
-      .getPlaylists()
-      .then((playlists) => this.featuredPlaylists.set(pickRandom(playlists, FEATURED_PLAYLIST_COUNT)));
+    const data = this.route.snapshot.data['home'] as HomeResolvedData;
+    this.dashItems.set(data.dashItems);
+    this.featuredPlaylists.set(pickRandom(data.playlists, FEATURED_PLAYLIST_COUNT));
+    this.startCarousel();
   }
 
   ngOnDestroy(): void {

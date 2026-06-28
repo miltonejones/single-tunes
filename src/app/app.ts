@@ -1,7 +1,7 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { animate, group, query, style, transition, trigger } from '@angular/animations';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { AudioPlayerCommandService, PodcastAudioPlayerCommandService, Toast } from 'shared-utils';
@@ -153,6 +153,7 @@ export class App {
   activeSection = signal<NavSection>(resolveNavSection(this.router.url));
   searchOpen = signal(false);
   navDropdownOpen = signal(false);
+  navigating = signal(false);
   protected activeItem = computed(() => NAV_ITEMS.find((i) => i.section === this.activeSection()));
   protected podcastPlaying = signal(false);
   protected searchHistory = signal<string[]>(this.loadSearchHistory());
@@ -160,12 +161,18 @@ export class App {
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
 
   constructor() {
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
-      const navEvent = event as NavigationEnd;
-      this.activeSection.set(resolveNavSection(navEvent.urlAfterRedirects));
-      this.searchOpen.set(false);
-      this.navDropdownOpen.set(false);
-      this.titleService.setTitle(pageTitleFromUrl(navEvent.urlAfterRedirects));
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.navigating.set(true);
+      } else if (event instanceof NavigationEnd) {
+        this.navigating.set(false);
+        this.activeSection.set(resolveNavSection(event.urlAfterRedirects));
+        this.searchOpen.set(false);
+        this.navDropdownOpen.set(false);
+        this.titleService.setTitle(pageTitleFromUrl(event.urlAfterRedirects));
+      } else if (event instanceof NavigationCancel || event instanceof NavigationError) {
+        this.navigating.set(false);
+      }
     });
 
     // Add/remove body class so page padding thickens when a music track is loaded
@@ -204,6 +211,9 @@ export class App {
       this.saveSearchHistory(trimmed);
       this.router.navigate(['/search', trimmed]);
       this.searchOpen.set(false);
+      if (this.searchInputRef?.nativeElement) {
+        this.searchInputRef.nativeElement.value = '';
+      }
     }
   }
 

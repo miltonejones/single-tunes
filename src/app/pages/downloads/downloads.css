@@ -1,5 +1,172 @@
 .downloads-page {
-  padding: 1rem;
+  padding: 0 1rem;
+}
+
+.downloads-page lib-breadcrumbs {
+  margin-top: 0;
+}
+
+.artist-banner {
+  position: relative;
+  height: 40vh;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface);
+  overflow: hidden;
+  margin: 0 -1rem 1rem;
+}
+
+.artist-banner-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1rem 1.5rem 1rem 1rem;
+  background: linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.1) 55%, transparent 80%);
+  color: #fff;
+}
+
+.artist-banner-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.artist-banner-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+}
+
+.artist-banner-title {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.artist-banner-count {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-top: 0.15rem;
+}
+
+.artist-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.banner-play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent-gradient, linear-gradient(135deg, #4f46e5, #ec4899));
+  color: #fff;
+  font-size: 1.15rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(99,102,241,.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.banner-play-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(99,102,241,.55);
+}
+
+.banner-shuffle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  background: rgba(0,0,0,.35);
+  color: rgba(255,255,255,.85);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.banner-shuffle-btn:hover {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border-color: rgba(255,255,255,.6);
+}
+
+.banner-trash-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  background: rgba(0,0,0,.35);
+  color: rgba(255,255,255,.85);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.banner-trash-btn:hover:not(:disabled) {
+  background: rgba(220,38,38,.5);
+  color: #fff;
+  border-color: rgba(220,38,38,.8);
+}
+
+.banner-trash-btn:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.banner-confirm-label {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,.9);
+  white-space: nowrap;
+}
+
+.banner-confirm-yes,
+.banner-confirm-no {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.banner-confirm-yes {
+  border: 1px solid rgba(220,38,38,.7);
+  background: rgba(220,38,38,.4);
+  color: #fff;
+}
+
+.banner-confirm-yes:hover {
+  background: rgba(220,38,38,.75);
+  border-color: rgba(220,38,38,1);
+}
+
+.banner-confirm-no {
+  border: 1px solid rgba(255,255,255,.3);
+  background: rgba(0,0,0,.35);
+  color: rgba(255,255,255,.85);
+}
+
+.banner-confirm-no:hover {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border-color: rgba(255,255,255,.6);
 }
 
 .downloads-content {
