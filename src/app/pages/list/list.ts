@@ -177,23 +177,25 @@ export class ListPage implements OnInit {
 
     this.catalogQuery.getPlaylists().then((playlists) => this.playlists.set(playlists));
 
-    const params = this.route.snapshot.paramMap;
-    const pageNum = Number(params.get('pageNum')) || 1;
-    const rawListType = params.get('listType');
+    this.route.data.subscribe((data) => {
+      const params = this.route.snapshot.paramMap;
+      const pageNum = Number(params.get('pageNum')) || 1;
+      const rawListType = params.get('listType');
 
-    if (rawListType === null) {
-      this.listType.set('library');
-      this.listId.set('');
-    } else {
-      this.listType.set(this.parseListType(rawListType));
-      this.listId.set(params.get('listId') ?? '');
-    }
-    this.pageNum.set(pageNum);
+      if (rawListType === null) {
+        this.listType.set('library');
+        this.listId.set('');
+      } else {
+        this.listType.set(this.parseListType(rawListType));
+        this.listId.set(params.get('listId') ?? '');
+      }
+      this.pageNum.set(pageNum);
 
-    const resolved = this.route.snapshot.data['list'] as ListResolvedData;
-    this.detail.set(resolved.detail);
-    this.bannerImage.set(resolved.bannerImage);
-    this.bannerName.set(resolved.bannerName);
+      const resolved = data['list'] as ListResolvedData;
+      this.detail.set(resolved.detail);
+      this.bannerImage.set(resolved.bannerImage);
+      this.bannerName.set(resolved.bannerName);
+    });
   }
 
   private parseListType(value: string | null): ListType {
