@@ -201,14 +201,50 @@ input[type='range']::-moz-range-track {
     var(--bg);
 }
 
+.audio-player-fullscreen-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
 .audio-player-fullscreen-close {
-  align-self: flex-start;
   border: none;
   background: none;
   font-size: 1.5rem;
   color: var(--text-secondary);
   cursor: pointer;
-  margin-bottom: 0.5rem;
+}
+
+.audio-player-fullscreen-close:hover {
+  color: var(--text);
+}
+
+.audio-player-fullscreen-menu-btn {
+  border: none;
+  background: none;
+  font-size: 1.3rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.audio-player-fullscreen-menu-btn:hover {
+  background-color: var(--surface-hover);
+  color: var(--text);
+}
+
+.audio-player-fullscreen-topbar-source {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
 }
 
 .audio-player-fullscreen-source {
@@ -234,19 +270,6 @@ input[type='range']::-moz-range-track {
   max-width: 80vw;
 }
 
-.audio-player-fullscreen-close:hover {
-  color: var(--text);
-}
-
-.audio-player-fullscreen-art {
-  width: min(80vw, 320px);
-  height: min(80vw, 320px);
-  border-radius: var(--radius-lg);
-  object-fit: cover;
-  background: var(--surface-2);
-  box-shadow: var(--shadow-lg);
-}
-
 .audio-player-fullscreen-info {
   text-align: center;
   margin-top: 1.5rem;
@@ -269,6 +292,16 @@ input[type='range']::-moz-range-track {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.audio-player-fullscreen-art {
+  width: min(80vw, 320px);
+  height: min(80vw, 320px);
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  background: var(--surface-2);
+  box-shadow: var(--shadow-lg);
+  margin-top: 1.5rem;
 }
 
 .audio-player-fullscreen-progress {
@@ -339,5 +372,11 @@ input[type='range']::-moz-range-track {
 }
 
 .audio-player-fullscreen-visualizer app-audio-visualizer {
+  display: block;
+  width: 100%;
   pointer-events: auto;
+}
+
+.audio-player-fullscreen-visualizer app-audio-visualizer .audio-visualizer {
+  margin: 0.5rem auto;
 }
