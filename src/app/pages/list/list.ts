@@ -14,6 +14,7 @@ import {
   MediaCard,
   PlayHistoryService,
   ToastService,
+  TrackDownloadService,
   TrackMenu,
 } from 'shared-utils';
 
@@ -42,6 +43,7 @@ export class ListPage implements OnInit {
   private catalogQuery = inject(CatalogQueryService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private playHistory = inject(PlayHistoryService);
+  protected downloadService = inject(TrackDownloadService);
 
   listType = signal<ListType>('album');
   listId = signal('');
@@ -122,6 +124,15 @@ export class ListPage implements OnInit {
     const id = this.currentTrackId();
     return !!id && this.tracks().some((t) => t.ID === id);
   });
+
+  allTracksDownloaded = computed(() => {
+    const tracks = this.tracks();
+    return tracks.length > 0 && tracks.every((t) => this.downloadService.isDownloaded(t.ID));
+  });
+
+  anyTrackDownloading = computed(() =>
+    this.tracks().some((t) => this.downloadService.isDownloading(t.ID)),
+  );
 
   prevLink = computed(() => this.buildPageLink(this.pageNum() - 1));
   nextLink = computed(() => this.buildPageLink(this.pageNum() + 1));
@@ -218,6 +229,10 @@ export class ListPage implements OnInit {
       this.recordPlay(tracks[0]);
       this.audioPlayerCommand.openTrack(tracks[0], tracks);
     }
+  }
+
+  downloadAllTracks(): void {
+    this.downloadService.downloadAll(this.tracks());
   }
 
   isInPlaylist(track: ITrackItem): boolean {

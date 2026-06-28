@@ -1,6 +1,9 @@
 <div class="toast-stack">
   @for (toast of toasts(); track toast.id) {
-    <div class="toast-item" role="status" (click)="dismiss(toast.id)">
+    <div class="toast-item" [class.persistent]="toast.persistent" role="status" (click)="!toast.persistent && dismiss(toast.id)">
+      @if (toast.persistent) {
+        <i class="fa-solid fa-spinner fa-spin toast-spinner"></i>
+      }
       {{ toast.text }}
     </div>
   }

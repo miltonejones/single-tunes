@@ -24,6 +24,7 @@ export { WikipediaQueryService } from './wikipedia-query.service';
 export { CastService } from './cast.service';
 export { ServiceWorkerUpdateService } from './service-worker-update.service';
 export { ToastService } from './toast.service';
+export { TrackDownloadService } from './track-download.service';
 export type { ToastMessage } from './toast.service';
 export { Toast } from './toast';
 export { faveIcon } from './favorite-icon';

@@ -8,6 +8,7 @@ import { IPlaylistSummary, ITrackItem } from './models';
 import { TrackQueryService } from './track-query.service';
 import { TrackCommandService } from './track-command.service';
 import { ItunesSearchModal } from './itunes-search-modal';
+import { TrackDownloadService } from './track-download.service';
 
 type MenuView = 'main' | 'playlists';
 
@@ -27,6 +28,7 @@ export class TrackMenu implements OnInit {
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private trackQuery = inject(TrackQueryService);
   private trackCommand = inject(TrackCommandService);
+  protected downloadService = inject(TrackDownloadService);
 
   menuView = signal<MenuView>('main');
   playlists = signal<IPlaylistSummary[]>([]);
@@ -103,5 +105,19 @@ export class TrackMenu implements OnInit {
 
   onTrackUpdated(updatedTrack: ITrackItem): void {
     this.trackUpdated.emit(updatedTrack);
+  }
+
+  downloadTrack(): void {
+    const track = this.track();
+    if (!track) return;
+    this.downloadService.download(track);
+    this.close();
+  }
+
+  removeDownload(): void {
+    const track = this.track();
+    if (!track) return;
+    this.downloadService.remove(track);
+    this.close();
   }
 }

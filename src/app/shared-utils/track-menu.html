@@ -32,6 +32,25 @@
             <span class="track-menu-label">Edit Track</span>
             <span class="track-menu-caption">Update metadata from iTunes</span>
           </button>
+          @if (downloadService.isDownloaded(track.ID)) {
+            <button type="button" class="track-menu-item" (click)="removeDownload()">
+              <i class="fa-solid fa-trash"></i>
+              <span class="track-menu-label">Remove Download</span>
+              <span class="track-menu-caption">Delete offline copy from device</span>
+            </button>
+          } @else if (downloadService.isDownloading(track.ID)) {
+            <span class="track-menu-item disabled">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              <span class="track-menu-label">Downloading…</span>
+              <span class="track-menu-caption">Saving to device</span>
+            </span>
+          } @else {
+            <button type="button" class="track-menu-item" (click)="downloadTrack()">
+              <i class="fa-solid fa-download"></i>
+              <span class="track-menu-label">Download</span>
+              <span class="track-menu-caption">Save for offline listening</span>
+            </button>
+          }
           @if (track.albumFk) {
             <a
               class="track-menu-item"
