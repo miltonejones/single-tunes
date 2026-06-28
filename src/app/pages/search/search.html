@@ -1,4 +1,28 @@
-<h2>Search results for &ldquo;{{ query() }}&rdquo;</h2>
+<div class="search-header">
+  <lib-breadcrumbs [items]="breadcrumbItems()" />
+  @if (hasResults()) {
+    <div class="view-toggle">
+      <button
+        type="button"
+        class="view-btn"
+        [class.active]="viewMode() === 'tabs'"
+        (click)="viewMode.set('tabs')"
+        title="Tabbed view"
+      >
+        <i class="fa-solid fa-table-cells"></i>
+      </button>
+      <button
+        type="button"
+        class="view-btn"
+        [class.active]="viewMode() === 'list'"
+        (click)="viewMode.set('list')"
+        title="List view"
+      >
+        <i class="fa-solid fa-list"></i>
+      </button>
+    </div>
+  }
+</div>
 
 @if (loading()) {
   <lib-loading-animation variant="visualizer" label="Searching" />
@@ -6,7 +30,9 @@
   <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
 } @else if (!hasResults()) {
   <p>No results found.</p>
-} @else {
+} @else if (viewMode() === 'tabs') {
+
+  <!-- ── Tabbed view ─────────────────────────────────────────────── -->
   <ul class="nav nav-tabs mb-3">
     @for (tab of tabsWithResults(); track tab) {
       <li class="nav-item">
@@ -17,18 +43,10 @@
           (click)="activeTab.set(tab)"
         >
           @switch (tab) {
-            @case ('artists') {
-              <i class="fa-solid fa-microphone"></i> Artists ({{ artists().length }})
-            }
-            @case ('albums') {
-              <i class="fa-solid fa-compact-disc"></i> Albums ({{ albums().length }})
-            }
-            @case ('tracks') {
-              <i class="fa-solid fa-music"></i> Tracks ({{ tracks().length }})
-            }
-            @case ('podcasts') {
-              <i class="fa-solid fa-podcast"></i> Podcasts ({{ podcasts().length }})
-            }
+            @case ('artists') { <i class="fa-solid fa-microphone"></i> Artists ({{ artists().length }}) }
+            @case ('albums')  { <i class="fa-solid fa-compact-disc"></i> Albums ({{ albums().length }}) }
+            @case ('tracks')  { <i class="fa-solid fa-music"></i> Tracks ({{ tracks().length }}) }
+            @case ('podcasts'){ <i class="fa-solid fa-podcast"></i> Podcasts ({{ podcasts().length }}) }
           }
         </button>
       </li>
@@ -74,14 +92,8 @@
     @if (tracks().length > 0) {
       <div class="track-list">
         @for (track of tracks(); track track.ID) {
-          <div class="track-row" (click)="playTrack(track)">
-            <img
-              class="track-icon"
-              appImgFallback
-              [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
-              [src]="track.albumImage"
-              [alt]="track.Title"
-            />
+          <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+            <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
             <div class="track-info">
               <div class="track-title">{{ track.Title }}</div>
               <div class="track-artist">{{ track.artistName }}</div>
@@ -109,6 +121,80 @@
       <p class="text-muted">No matching podcasts.</p>
     }
   }
+
+} @else {
+
+  <!-- ── List view ───────────────────────────────────────────────── -->
+  <div class="list-view">
+
+    @if (artists().length > 0) {
+      <div class="list-section">
+        <h3 class="list-section-heading"><i class="fa-solid fa-microphone"></i> Artists</h3>
+        @for (item of artists(); track item.ID) {
+          <a class="list-row" [routerLink]="['/list', 'artist', item.ID, 1]">
+            <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="item.Thumbnail" [alt]="item.Name" />
+            <div class="list-info">
+              <div class="list-title">{{ item.Name }}</div>
+              <div class="list-meta">{{ item.TrackCount }} tracks</div>
+            </div>
+            <i class="fa-solid fa-chevron-right list-chevron"></i>
+          </a>
+        }
+      </div>
+    }
+
+    @if (albums().length > 0) {
+      <div class="list-section">
+        <h3 class="list-section-heading"><i class="fa-solid fa-compact-disc"></i> Albums</h3>
+        @for (item of albums(); track item.ID) {
+          <a class="list-row" [routerLink]="['/list', 'album', item.ID, 1]">
+            <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="item.Thumbnail" [alt]="item.Name" />
+            <div class="list-info">
+              <div class="list-title">{{ item.Name }}</div>
+              <div class="list-meta">{{ item.artistName }}</div>
+            </div>
+            <i class="fa-solid fa-chevron-right list-chevron"></i>
+          </a>
+        }
+      </div>
+    }
+
+    @if (tracks().length > 0) {
+      <div class="list-section">
+        <h3 class="list-section-heading"><i class="fa-solid fa-music"></i> Tracks</h3>
+        @for (track of tracks(); track track.ID) {
+          <div class="list-row track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+            <img class="list-thumb track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
+            <div class="list-info">
+              <div class="list-title">{{ track.Title }}</div>
+              <div class="list-meta">{{ track.artistName }} · {{ track.albumName }}</div>
+            </div>
+            <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+            <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (podcasts().length > 0) {
+      <div class="list-section">
+        <h3 class="list-section-heading"><i class="fa-solid fa-podcast"></i> Podcasts</h3>
+        @for (podcast of podcasts(); track podcast.feedUrl) {
+          <a class="list-row" [routerLink]="['/podcasts/detail', podcast.feedUrl]">
+            <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="podcast.artworkUrl60" [alt]="podcast.collectionName" />
+            <div class="list-info">
+              <div class="list-title">{{ podcast.collectionName }}</div>
+              <div class="list-meta">{{ podcast.artistName }}</div>
+            </div>
+            <i class="fa-solid fa-chevron-right list-chevron"></i>
+          </a>
+        }
+      </div>
+    }
+
+  </div>
 }
 
 <app-track-menu [track]="menuTrack()" (closed)="closeMenu()" />

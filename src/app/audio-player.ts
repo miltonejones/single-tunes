@@ -95,6 +95,20 @@ export class AudioPlayer implements OnInit, OnDestroy {
       }),
     );
 
+    // Listen for seek relative requests
+    this.subscriptions.push(
+      this.audioPlayerCommand.seekRelative$.subscribe((seconds) => {
+        this.seekRelative(seconds);
+      }),
+    );
+
+    // Listen for toggle play/pause requests
+    this.subscriptions.push(
+      this.audioPlayerCommand.togglePlayPause$.subscribe(() => {
+        this.togglePlayPause();
+      }),
+    );
+
     // Watch Cast connection state — hand off / reclaim playback.
     this.subscriptions.push(
       this.castService.isConnected$.subscribe((connected) => {
@@ -427,6 +441,13 @@ export class AudioPlayer implements OnInit, OnDestroy {
     if (!this.audioPlayerCommand.advance(offset)) {
       this.stop();
     }
+  }
+
+  /** Seek relative to the current position. */
+  seekRelative(seconds: number): void {
+    const currentTime = this.isCasting() ? this.currentTime() : this.audioEl.currentTime;
+    const newTime = currentTime + seconds;
+    this.seekTo(newTime);
   }
 
   closeTrackMenu(): void {

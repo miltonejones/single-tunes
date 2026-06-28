@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ITrackItem } from './models';
 
 @Injectable({
@@ -14,6 +14,8 @@ export class AudioPlayerCommandService {
 
   readonly currentTrack$ = new BehaviorSubject<ITrackItem | null>(null);
   readonly queue$ = new BehaviorSubject<ITrackItem[]>([]);
+  readonly seekRelative$ = new Subject<number>();
+  readonly togglePlayPause$ = new Subject<void>();
 
   /** Broadcasts a request to open and play a track, optionally alongside sibling tracks for next/prev. */
   openTrack(track: ITrackItem, queue: ITrackItem[] = [track]): void {
@@ -62,6 +64,16 @@ export class AudioPlayerCommandService {
     this.queue = [];
     this.queue$.next([]);
     this.setCurrentTrack(null);
+  }
+
+  /** Broadcasts a request to seek relative to the current position. */
+  seekRelative(seconds: number): void {
+    this.seekRelative$.next(seconds);
+  }
+
+  /** Broadcasts a request to toggle play/pause. */
+  togglePlayPause(): void {
+    this.togglePlayPause$.next();
   }
 
   private setCurrentTrack(track: ITrackItem | null): void {

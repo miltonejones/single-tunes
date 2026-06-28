@@ -22,6 +22,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/search/search').then((m) => m.SearchPage),
   },
   {
+    path: 'downloads',
+    loadComponent: () => import('./pages/downloads/downloads').then((m) => m.DownloadsPage),
+  },
+  {
     path: 'podcasts',
     loadComponent: () => import('./podcast/podcast-shell').then((m) => m.PodcastShell),
     children: [

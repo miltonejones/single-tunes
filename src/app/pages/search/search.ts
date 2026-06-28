@@ -1,7 +1,9 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterOutlet } from '@angular/router';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
 import {
   AudioPlayerCommandService,
+  Breadcrumbs,
+  BreadcrumbItem,
   CatalogQueryService,
   formatDuration,
   IGridItem,
@@ -20,7 +22,7 @@ type ResultTab = 'artists' | 'albums' | 'tracks' | 'podcasts';
 
 @Component({
   selector: 'app-search-page',
-  imports: [RouterOutlet, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard, TrackMenu],
+  imports: [RouterOutlet, RouterLink, Breadcrumbs, MediaCard, ImgFallbackDirective, LoadingAnimation, PodcastCard, TrackMenu],
   templateUrl: './search.html',
   styleUrl: './search.css',
 })
@@ -43,6 +45,15 @@ export class SearchPage implements OnInit {
   podcasts = signal<IPodcast[]>([]);
   activeTab = signal<ResultTab>('artists');
   menuTrack = signal<ITrackItem | null>(null);
+  currentTrackId = signal<number | null>(null);
+  viewMode = signal<'tabs' | 'list'>(
+    (localStorage.getItem('sky-tunes-search-view') as 'tabs' | 'list') ?? 'tabs',
+  );
+
+  breadcrumbItems = computed<BreadcrumbItem[]>(() => [
+    { label: 'Home', link: ['/'] },
+    { label: `Search: "${this.query()}"` },
+  ]);
 
   hasResults = computed(
     () => this.artists().length > 0 || this.albums().length > 0 || this.tracks().length > 0 || this.podcasts().length > 0,
@@ -57,7 +68,15 @@ export class SearchPage implements OnInit {
     return tabs;
   });
 
+  constructor() {
+    effect(() => localStorage.setItem('sky-tunes-search-view', this.viewMode()));
+  }
+
   ngOnInit(): void {
+    this.audioPlayerCommand.currentTrack$.subscribe((track) => {
+      this.currentTrackId.set(track?.ID ?? null);
+    });
+
     this.route.paramMap.subscribe((params) => {
       const query = params.get('query') ?? '';
       this.query.set(query);

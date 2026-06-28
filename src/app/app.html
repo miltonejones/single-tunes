@@ -30,6 +30,12 @@
       @if (activeItem(); as active) {
         <i class="fa-solid" [class]="active.icon"></i>
         <span>{{ active.label }}</span>
+      } @else if (activeSection() === 'search') {
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span>Search Results</span>
+      } @else {
+        <i class="fa-solid fa-bars"></i>
+        <span>Browse</span>
       }
       <i class="fa-solid fa-chevron-down"></i>
     </button>

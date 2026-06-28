@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ITrack, ITrackMemory } from './podcast-models';
 
 const TRACK_MEMORY_KEY = 'skytunes.podcast.trackMemory';
@@ -13,6 +13,8 @@ export class PodcastAudioPlayerCommandService {
 
   readonly currentTrack$ = new BehaviorSubject<ITrack | null>(null);
   readonly queue$ = new BehaviorSubject<ITrack[]>([]);
+  readonly seekRelative$ = new Subject<number>();
+  readonly togglePlayPause$ = new Subject<void>();
 
   readonly trackMemory = signal<Record<string, ITrackMemory>>(this.loadTrackMemory());
 
@@ -56,6 +58,16 @@ export class PodcastAudioPlayerCommandService {
     this.queue = [];
     this.queue$.next([]);
     this.currentTrack$.next(null);
+  }
+
+  /** Broadcasts a request to seek relative to the current position. */
+  seekRelative(seconds: number): void {
+    this.seekRelative$.next(seconds);
+  }
+
+  /** Broadcasts a request to toggle play/pause. */
+  togglePlayPause(): void {
+    this.togglePlayPause$.next();
   }
 
   getProgress(guid: string): number {

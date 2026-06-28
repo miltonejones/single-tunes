@@ -74,6 +74,16 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
         this.loadAndPlay(track);
       }
     });
+
+    // Listen for seek relative requests
+    this.audioPlayerCommand.seekRelative$.subscribe((seconds) => {
+      this.skip(seconds);
+    });
+
+    // Listen for toggle play/pause requests
+    this.audioPlayerCommand.togglePlayPause$.subscribe(() => {
+      this.togglePlayPause();
+    });
   }
 
   ngOnDestroy(): void {
@@ -147,6 +157,11 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
 
   skip(seconds: number): void {
     this.audio.currentTime += seconds;
+  }
+
+  /** Seek relative to the current position. */
+  seekRelative(seconds: number): void {
+    this.skip(seconds);
   }
 
   close(): void {
