@@ -3,6 +3,10 @@
   color: var(--text);
 }
 
+.podcast-detail-body {
+  padding: 0 1rem;
+}
+
 .detail-image {
   width: 180px;
   height: 180px;

@@ -112,7 +112,7 @@
 .player-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   cursor: pointer;
   color: var(--text-secondary);
   transition:
@@ -125,13 +125,13 @@
 
 @media (max-width: 768px) {
   .player-btn {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
   .player-btn {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
 }
 
@@ -141,7 +141,7 @@
 }
 
 .player-btn-large {
-  font-size: 2rem;
+  font-size: 2.4rem;
   color: var(--accent);
 }
 
@@ -152,13 +152,13 @@
 
 @media (max-width: 768px) {
   .player-btn-large {
-    font-size: 1.75rem;
+    font-size: 2.1rem;
   }
 }
 
 @media (max-width: 480px) {
   .player-btn-large {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
 }
 
@@ -275,6 +275,10 @@
   display: none;
 }
 
+.podcast-expanded-header {
+  display: none;
+}
+
 /* Expand button: hidden on desktop, shown on mobile collapsed */
 .expand-btn {
   display: none;
@@ -330,18 +334,39 @@
     top: 420px;
   }
 
+  :host.expanded .podcast-expanded-header {
+    display: block;
+    position: absolute;
+    top: 12px;
+    left: 60px;
+    right: 60px;
+    text-align: center;
+  }
+
+  .podcast-expanded-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60vw;
+    display: inline-block;
+  }
+
   :host.expanded .audio-close {
     display: block;
     position: absolute;
-    top: 70px;
-    right: 18px;
+    top: 12px;
+    left: 12px;
   }
 
   :host.expanded .menu-btn.mobile {
     display: block;
     position: absolute;
-    top: 70px;
-    left: 18px;
+    top: 12px;
+    right: 12px;
   }
 
   :host.expanded .expand-btn {
@@ -363,6 +388,6 @@
   }
 
   :host.expanded .player-btn-large {
-    font-size: 2rem;
+    font-size: 2.4rem;
   }
 }
