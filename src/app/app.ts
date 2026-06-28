@@ -16,7 +16,7 @@ import { TrackQueue } from './track-queue';
 import { PodcastAudioPlayer } from './podcast/podcast-audio-player';
 import { EpisodeQueue } from './podcast/episode-queue';
 
-type NavSection = 'home' | 'artist' | 'album' | 'genre' | 'playlist' | 'library' | 'podcasts' | null;
+type NavSection = 'home' | 'artist' | 'album' | 'genre' | 'playlist' | 'library' | 'downloads' | 'podcasts' | 'search' | null;
 
 const GRID_TYPES = ['artist', 'album', 'genre', 'playlist'];
 
@@ -44,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { section: 'genre', icon: 'fa-tags', label: 'Genres', routerLink: ['/grid', 'genre', 1] },
   { section: 'playlist', icon: 'fa-list-ul', label: 'Playlists', routerLink: ['/grid', 'playlist', 1] },
   { section: 'library', icon: 'fa-music', label: 'Library', routerLink: ['/list', 1] },
+  { section: 'downloads', icon: 'fa-download', label: 'Downloads', routerLink: ['/downloads'] },
   { section: 'podcasts', icon: 'fa-podcast', label: 'Podcasts', routerLink: ['/podcasts'] },
 ];
 
@@ -56,6 +57,12 @@ function resolveNavSection(url: string): NavSection {
   }
   if (segments[0] === 'podcasts') {
     return 'podcasts';
+  }
+  if (segments[0] === 'downloads') {
+    return 'downloads';
+  }
+  if (segments[0] === 'search') {
+    return 'search';
   }
   if (segments[0] === 'grid' && GRID_TYPES.includes(segments[1])) {
     return segments[1] as NavSection;
@@ -86,6 +93,10 @@ function pageTitleFromUrl(url: string): string {
     if (segments[1] === 'categories') return 'SkyTunes | Podcasts: Categories';
     if (segments[1] === 'detail') return 'SkyTunes | Podcasts: Episode List';
     return 'SkyTunes | Podcasts';
+  }
+
+  if (segments[0] === 'downloads') {
+    return 'SkyTunes | Downloads';
   }
 
   if (segments[0] === 'search') {
@@ -222,6 +233,44 @@ export class App {
       const target = event.target as HTMLElement;
       if (!target.closest('.mobile-nav-dropdown')) {
         this.navDropdownOpen.set(false);
+      }
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    // Only handle global shortcuts when not in an input field
+    const target = event.target as HTMLElement;
+    const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+    if (!isInput) {
+      // Spacebar to play/pause
+      if (event.code === 'Space') {
+        event.preventDefault();
+        // Check if we have a music track playing first, then podcast
+        if (this.audioPlayerCommand.currentTrack$.value) {
+          this.audioPlayerCommand.togglePlayPause();
+        } else if (this.podcastAudioPlayerCommand.currentTrack$.value) {
+          this.podcastAudioPlayerCommand.togglePlayPause();
+        }
+      }
+      // Left arrow to seek backward 10 seconds
+      else if (event.code === 'ArrowLeft') {
+        event.preventDefault();
+        if (this.audioPlayerCommand.currentTrack$.value) {
+          this.audioPlayerCommand.seekRelative(-10);
+        } else if (this.podcastAudioPlayerCommand.currentTrack$.value) {
+          this.podcastAudioPlayerCommand.seekRelative(-10);
+        }
+      }
+      // Right arrow to seek forward 10 seconds
+      else if (event.code === 'ArrowRight') {
+        event.preventDefault();
+        if (this.audioPlayerCommand.currentTrack$.value) {
+          this.audioPlayerCommand.seekRelative(10);
+        } else if (this.podcastAudioPlayerCommand.currentTrack$.value) {
+          this.podcastAudioPlayerCommand.seekRelative(10);
+        }
       }
     }
   }

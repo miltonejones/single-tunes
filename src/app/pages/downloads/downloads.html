@@ -1,0 +1,98 @@
+<div class="page downloads-page">
+  <lib-breadcrumbs [items]="breadcrumbItems()" />
+
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <h1 class="m-0">Downloads</h1>
+    <div class="d-flex gap-2">
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="tracks().length === 0 || isPlayingThisList()"
+        (click)="togglePlayList()"
+      >
+        <i class="fa-solid fa-play"></i>
+        {{ isPlayingThisList() ? 'Stop' : 'Play All' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        [disabled]="tracks().length === 0"
+        (click)="shuffleAndPlay()"
+      >
+        <i class="fa-solid fa-shuffle"></i>
+        Shuffle
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <lib-loading-animation />
+  }
+
+  @if (!loading()) {
+    <div class="downloads-content">
+      @if (tracks().length === 0) {
+        <div class="empty-state">
+          <i class="fa-solid fa-download fa-3x mb-3"></i>
+          <h3>No Downloads</h3>
+          <p>You haven't downloaded any tracks yet.</p>
+          <a routerLink="/" class="btn btn-primary">Browse Music</a>
+        </div>
+      } @else {
+        <div class="track-grid">
+          @for (track of tracks(); track track.ID) {
+            <div
+              class="track-item d-flex align-items-center gap-3 p-3"
+              [class.playing]="currentTrackId() === track.ID"
+            >
+              <button
+                type="button"
+                class="btn btn-sm play-button"
+                (click)="playTrack(track)"
+              >
+                @if (currentTrackId() === track.ID && isPlayingThisList()) {
+                  <i class="fa-solid fa-pause"></i>
+                } @else {
+                  <i class="fa-solid fa-play"></i>
+                }
+              </button>
+
+              <img
+                [src]="track.albumImage || 'album-placeholder.png'"
+                class="track-image"
+                width="50"
+                height="50"
+                alt="{{ track.albumName }}"
+                libImgFallback
+              />
+
+              <div class="track-info flex-grow-1">
+                <div class="track-title">{{ track.Title }}</div>
+                <div class="track-artist">{{ track.artistName }}</div>
+                <div class="track-meta text-muted">
+                  {{ track.albumName }} • {{ formatDuration(track.trackTime) }}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary track-menu-button"
+                (click)="openMenu(track, $event)"
+              >
+                <i class="fa-solid fa-ellipsis"></i>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (menuTrack(); as track) {
+    <app-track-menu
+      [track]="toITrackItem(track)"
+      (closed)="closeMenu()"
+      (trackUpdated)="closeMenu()"
+    />
+  }
+</div>

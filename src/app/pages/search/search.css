@@ -3,12 +3,45 @@
   padding: 0 1rem;
 }
 
-h2 {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin: 1rem 0 1.25rem;
+.search-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+}
+
+.search-header lib-breadcrumbs {
+  margin-left: -1rem;
+}
+
+
+.view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem;
+}
+
+.view-btn {
+  border: none;
+  background: none;
+  padding: 0.3rem 0.55rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.view-btn:hover {
+  color: var(--text);
+}
+
+.view-btn.active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
 }
 
 .nav-tabs .nav-link {
@@ -57,10 +90,32 @@ h2 {
   background-color: var(--surface-hover);
 }
 
+.track-row.active {
+  background-color: var(--accent-soft);
+  color: var(--accent);
+}
+
+.track-row.active .track-icon {
+  animation: spin-record 4s linear infinite;
+}
+
+@keyframes spin-record {
+  to { transform: rotate(360deg); }
+}
+
+.track-row.active .track-title {
+  color: var(--accent);
+}
+
+.track-row.active .track-artist,
+.track-row.active .track-time {
+  color: var(--accent);
+}
+
 .track-icon {
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   object-fit: cover;
   background: var(--surface-2);
   flex-shrink: 0;
@@ -112,4 +167,75 @@ h2 {
 
 .error {
   color: var(--danger);
+}
+
+/* ── List view ─────────────────────────────────────────────────── */
+
+.list-section {
+  margin-bottom: 1.5rem;
+}
+
+.list-section-heading {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 0 0 0.5rem;
+  padding: 0 0.25rem;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.list-row:hover {
+  background-color: var(--surface-hover);
+}
+
+.list-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+
+.list-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.list-title {
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-chevron {
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  flex-shrink: 0;
 }
