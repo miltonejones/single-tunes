@@ -105,7 +105,7 @@ cmd_on() {
   echo "  ✔ Config applied."
   echo ""
   echo "  Step 3/3 — Opening VS Code and launching Claude..."
-  code .
+  # code .
   claude
 }
 
@@ -126,7 +126,7 @@ cmd_off() {
   echo "  ✔ Config applied."
   echo ""
   echo "  Step 3/3 — Opening VS Code and launching Claude..."
-  code .
+  # code .
   claude
 }
 

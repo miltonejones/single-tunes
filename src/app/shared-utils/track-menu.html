@@ -27,6 +27,11 @@
     <div class="offcanvas-body">
       @if (menuView() === 'main') {
         <div class="track-menu-list">
+          <button type="button" class="track-menu-item" (click)="editTrack()">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span class="track-menu-label">Edit Track</span>
+            <span class="track-menu-caption">Update metadata from iTunes</span>
+          </button>
           @if (track.albumFk) {
             <a
               class="track-menu-item"
@@ -114,3 +119,11 @@
     </div>
   }
 </div>
+
+@if (showEditModal()) {
+  <app-itunes-search-modal
+    [track]="editTrackItem()"
+    (closed)="closeEditModal()"
+    (trackUpdated)="onTrackUpdated($event)"
+  />
+}

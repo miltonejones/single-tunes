@@ -8,46 +8,31 @@
   <p>No results found.</p>
 } @else {
   <ul class="nav nav-tabs mb-3">
-    <li class="nav-item">
-      <button
-        type="button"
-        class="nav-link"
-        [class.active]="activeTab() === 'artists'"
-        (click)="activeTab.set('artists')"
-      >
-        <i class="fa-solid fa-microphone"></i> Artists ({{ artists().length }})
-      </button>
-    </li>
-    <li class="nav-item">
-      <button
-        type="button"
-        class="nav-link"
-        [class.active]="activeTab() === 'albums'"
-        (click)="activeTab.set('albums')"
-      >
-        <i class="fa-solid fa-compact-disc"></i> Albums ({{ albums().length }})
-      </button>
-    </li>
-    <li class="nav-item">
-      <button
-        type="button"
-        class="nav-link"
-        [class.active]="activeTab() === 'tracks'"
-        (click)="activeTab.set('tracks')"
-      >
-        <i class="fa-solid fa-music"></i> Tracks ({{ tracks().length }})
-      </button>
-    </li>
-    <li class="nav-item">
-      <button
-        type="button"
-        class="nav-link"
-        [class.active]="activeTab() === 'podcasts'"
-        (click)="activeTab.set('podcasts')"
-      >
-        <i class="fa-solid fa-podcast"></i> Podcasts ({{ podcasts().length }})
-      </button>
-    </li>
+    @for (tab of tabsWithResults(); track tab) {
+      <li class="nav-item">
+        <button
+          type="button"
+          class="nav-link"
+          [class.active]="activeTab() === tab"
+          (click)="activeTab.set(tab)"
+        >
+          @switch (tab) {
+            @case ('artists') {
+              <i class="fa-solid fa-microphone"></i> Artists ({{ artists().length }})
+            }
+            @case ('albums') {
+              <i class="fa-solid fa-compact-disc"></i> Albums ({{ albums().length }})
+            }
+            @case ('tracks') {
+              <i class="fa-solid fa-music"></i> Tracks ({{ tracks().length }})
+            }
+            @case ('podcasts') {
+              <i class="fa-solid fa-podcast"></i> Podcasts ({{ podcasts().length }})
+            }
+          }
+        </button>
+      </li>
+    }
   </ul>
 
   @if (activeTab() === 'artists') {

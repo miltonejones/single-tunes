@@ -1,0 +1,115 @@
+<div class="modal-backdrop fade show" (click)="close()"></div>
+
+<div class="modal fade show" style="display: block;" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Track Metadata</h5>
+        <button type="button" class="btn-close" (click)="close()"></button>
+      </div>
+      <div class="modal-body">
+        @if (track(); as track) {
+          <div class="track-info mb-4">
+            <div class="d-flex align-items-center">
+              <img
+                class="track-art me-3"
+                [src]="track.albumImage"
+                [alt]="track.Title"
+                appImgFallback
+                [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
+                width="60"
+                height="60"
+              />
+              <div>
+                <h6 class="mb-1">{{ track.Title }}</h6>
+                <small class="text-muted">{{ track.artistName }} • {{ track.albumName }}</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="search-section mb-4">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Search iTunes for track..."
+                [value]="searchTerm()"
+                (input)="searchTerm.set($any($event).target.value)"
+                (keyup.enter)="search()"
+              />
+              <button class="btn btn-primary" type="button" (click)="search()" [disabled]="isSearching()">
+                @if (isSearching()) {
+                  <span class="spinner-border spinner-border-sm" role="status"></span>
+                } @else {
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                }
+                Search
+              </button>
+            </div>
+            <small class="form-text text-muted">Enter track name and artist to search iTunes catalog</small>
+          </div>
+
+          @if (error()) {
+            <div class="alert alert-danger">
+              {{ error() }}
+            </div>
+          }
+
+          @if (results().length > 0) {
+            <div class="results-section">
+              <h6>Search Results</h6>
+              <div class="row">
+                @for (result of results(); track result.trackId) {
+                  <div class="col-md-6 mb-3">
+                    <div class="itunes-result-card" (click)="selectResult(result)">
+                      <div class="d-flex">
+                        <img
+                          [src]="result.artworkUrl100"
+                          [alt]="result.trackName"
+                          class="result-art me-3"
+                          width="60"
+                          height="60"
+                        />
+                        <div class="flex-grow-1">
+                          <h6 class="mb-1">{{ result.trackName }}</h6>
+                          <small class="d-block text-muted">{{ result.artistName }}</small>
+                          <small class="d-block text-muted">{{ result.collectionName }}</small>
+                          <small class="d-block text-muted">
+                            {{ result.primaryGenreName }} • {{ formatDuration(result.trackTimeMillis / 1000) }}
+                          </small>
+                        </div>
+                        <div class="result-actions">
+                          <button class="btn btn-sm btn-outline-primary" type="button">
+                            <i class="fa-solid fa-check"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else if (searchTerm() && !isSearching() && results().length === 0) {
+            <div class="text-center py-4">
+              <i class="fa-solid fa-music fa-2x text-muted mb-2"></i>
+              <p class="text-muted">No results found. Try a different search term.</p>
+            </div>
+          } @else if (!searchTerm()) {
+            <div class="text-center py-4">
+              <i class="fa-brands fa-apple fa-2x text-muted mb-2"></i>
+              <p class="text-muted">Enter a search term to find track metadata on iTunes</p>
+            </div>
+          }
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+        @if (selectedResult()) {
+          <button type="button" class="btn btn-success" (click)="applyChanges()">
+            <i class="fa-solid fa-floppy-disk"></i> Apply Changes
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -15,98 +15,104 @@
         <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-4">
-          <label for="themeSelect" class="form-label">Theme</label>
-          <select
-            class="form-select"
-            id="themeSelect"
-            [value]="themeService.currentTheme().key"
-            (change)="setTheme($event)"
-          >
-            @for (theme of themes; track theme.key) {
-              <option [value]="theme.key">{{ theme.name }} — {{ theme.description }}</option>
-            }
-          </select>
-        </div>
+        <div class="settings-grid">
+          <div class="settings-column">
+            <div class="mb-3">
+              <label for="themeSelect" class="form-label">Theme</label>
+              <select
+                class="form-select"
+                id="themeSelect"
+                [value]="themeService.currentTheme().key"
+                (change)="setTheme($event)"
+              >
+                @for (theme of themes; track theme.key) {
+                  <option [value]="theme.key">{{ theme.name }} — {{ theme.description }}</option>
+                }
+              </select>
+            </div>
 
-        <hr />
+            <hr class="my-2" />
 
-        <h6 class="section-label"><i class="fa-solid fa-microphone"></i> DJ Announcer</h6>
+            <h6 class="section-label"><i class="fa-solid fa-microphone"></i> DJ Announcer</h6>
 
-        <div class="mb-3">
-          <label for="announcerFrequency" class="form-label">Announcer Frequency</label>
-          <select
-            class="form-select"
-            id="announcerFrequency"
-            [value]="form().frequency"
-            (change)="setField('frequency', $event)"
-          >
-            <option value="always">Always — every song</option>
-            <option value="often">Often</option>
-            <option value="sometimes">Sometimes — about half the songs</option>
-            <option value="seldom">Seldom</option>
-            <option value="never">Never</option>
-          </select>
-        </div>
+            <div class="mb-3">
+              <label for="announcerFrequency" class="form-label">Announcer Frequency</label>
+              <select
+                class="form-select"
+                id="announcerFrequency"
+                [value]="form().frequency"
+                (change)="setField('frequency', $event)"
+              >
+                <option value="always">Always — every song</option>
+                <option value="often">Often</option>
+                <option value="sometimes">Sometimes — about half the songs</option>
+                <option value="seldom">Seldom</option>
+                <option value="never">Never</option>
+              </select>
+            </div>
 
-        <div class="mb-3">
-          <label for="announcerName" class="form-label">Your Name</label>
-          <input
-            type="text"
-            class="form-control"
-            id="announcerName"
-            [disabled]="form().frequency === 'never'"
-            [value]="form().name"
-            (input)="setField('name', $event)"
-            placeholder="Enter your name"
-          />
-          <div class="form-text">The DJ will use this to shout you out.</div>
-        </div>
+            <div class="mb-3">
+              <label for="announcerChatType" class="form-label">AI Chat Provider</label>
+              <select
+                class="form-select"
+                id="announcerChatType"
+                [disabled]="form().frequency === 'never'"
+                [value]="form().chatType"
+                (change)="setField('chatType', $event)"
+              >
+                <option value="deep">Deepseek</option>
+                <option value="announce">ChatGPT</option>
+                <option value="claude">Claude</option>
+              </select>
+            </div>
 
-        <div class="mb-3">
-          <label for="announcerZip" class="form-label">Postal Code</label>
-          <input
-            type="text"
-            class="form-control"
-            id="announcerZip"
-            [disabled]="form().frequency === 'never'"
-            [value]="form().zip"
-            (input)="setField('zip', $event)"
-            placeholder="Enter your zip/postal code"
-          />
-          <div class="form-text">Used for local weather mentions.</div>
-        </div>
+            <div class="mb-3">
+              <label for="announcerVoice" class="form-label">Announcer Voice</label>
+              <select
+                class="form-select"
+                id="announcerVoice"
+                [disabled]="form().frequency === 'never'"
+                [value]="form().voiceURI"
+                (change)="setField('voiceURI', $event)"
+              >
+                <option value="">System default</option>
+                @for (voice of voices(); track voice.voiceURI) {
+                  <option [value]="voice.voiceURI">{{ voice.name }} ({{ voice.lang }})</option>
+                }
+              </select>
+              <div class="form-text">English voices available on this device.</div>
+            </div>
+          </div>
 
-        <div class="mb-3">
-          <label for="announcerChatType" class="form-label">AI Chat Provider</label>
-          <select
-            class="form-select"
-            id="announcerChatType"
-            [disabled]="form().frequency === 'never'"
-            [value]="form().chatType"
-            (change)="setField('chatType', $event)"
-          >
-            <option value="deep">Deepseek</option>
-            <option value="announce">ChatGPT</option>
-            <option value="claude">Claude</option>
-          </select>
-        </div>
+          <div class="settings-column">
+            <div class="mb-3">
+              <label for="announcerName" class="form-label">Your Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="announcerName"
+                [disabled]="form().frequency === 'never'"
+                [value]="form().name"
+                (input)="setField('name', $event)"
+                placeholder="Enter your name"
+              />
+              <div class="form-text">The DJ will use this to shout you out.</div>
+            </div>
 
-        <div class="mb-3">
-          <label for="announcerVoice" class="form-label">Announcer Voice</label>
-          <select
-            class="form-select"
-            id="announcerVoice"
-            [disabled]="form().frequency === 'never'"
-            [value]="form().voiceURI"
-            (change)="setField('voiceURI', $event)"
-          >
-            <option value="">System default</option>
-            @for (voice of voices(); track voice.voiceURI) {
-              <option [value]="voice.voiceURI">{{ voice.name }} ({{ voice.lang }})</option>
-            }
-          </select>
-          <div class="form-text">English voices available on this device.</div>
+            <div class="mb-3">
+              <label for="announcerZip" class="form-label">Postal Code</label>
+              <input
+                type="text"
+                class="form-control"
+                id="announcerZip"
+                [disabled]="form().frequency === 'never'"
+                [value]="form().zip"
+                (input)="setField('zip', $event)"
+                placeholder="Enter your zip/postal code"
+              />
+              <div class="form-text">Used for local weather mentions.</div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">

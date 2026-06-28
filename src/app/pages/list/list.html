@@ -143,6 +143,6 @@
   }
 }
 
-<app-track-menu [track]="menuTrack()" (closed)="closeMenu()" />
+<app-track-menu [track]="menuTrack()" (closed)="closeMenu()" (trackUpdated)="onTrackUpdated($event)" />
 
 <router-outlet />

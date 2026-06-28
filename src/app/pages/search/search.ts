@@ -48,6 +48,15 @@ export class SearchPage implements OnInit {
     () => this.artists().length > 0 || this.albums().length > 0 || this.tracks().length > 0 || this.podcasts().length > 0,
   );
 
+  tabsWithResults = computed<ResultTab[]>(() => {
+    const tabs: ResultTab[] = [];
+    if (this.artists().length > 0) tabs.push('artists');
+    if (this.albums().length > 0) tabs.push('albums');
+    if (this.tracks().length > 0) tabs.push('tracks');
+    if (this.podcasts().length > 0) tabs.push('podcasts');
+    return tabs;
+  });
+
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
       const query = params.get('query') ?? '';
@@ -88,9 +97,16 @@ export class SearchPage implements OnInit {
         this.albums.set(albumRes.records);
         this.tracks.set(musicRes.records);
         this.podcasts.set(podcastRes.results || []);
-        this.activeTab.set(
-          artistRes.records.length > 0 ? 'artists' : albumRes.records.length > 0 ? 'albums' : 'tracks',
-        );
+
+        // Set the active tab to the first tab with results, or default to 'artists'
+        const tabsWithResults = [
+          artistRes.records.length > 0 ? 'artists' : null,
+          albumRes.records.length > 0 ? 'albums' : null,
+          musicRes.records.length > 0 ? 'tracks' : null,
+          (podcastRes.results?.length || 0) > 0 ? 'podcasts' : null
+        ].filter(Boolean) as ResultTab[];
+
+        this.activeTab.set(tabsWithResults.length > 0 ? tabsWithResults[0] : 'artists');
       })
       .catch((err) => this.error.set(err?.message || 'Search failed'))
       .finally(() => this.loading.set(false));

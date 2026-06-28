@@ -5,26 +5,34 @@ import { CatalogCommandService } from './catalog-command.service';
 import { CatalogQueryService } from './catalog-query.service';
 import { ImgFallbackDirective } from './img-fallback.directive';
 import { IPlaylistSummary, ITrackItem } from './models';
+import { TrackQueryService } from './track-query.service';
+import { TrackCommandService } from './track-command.service';
+import { ItunesSearchModal } from './itunes-search-modal';
 
 type MenuView = 'main' | 'playlists';
 
 @Component({
   selector: 'app-track-menu',
-  imports: [RouterLink, ImgFallbackDirective],
+  imports: [RouterLink, ImgFallbackDirective, ItunesSearchModal],
   templateUrl: './track-menu.html',
   styleUrl: './track-menu.css',
 })
 export class TrackMenu implements OnInit {
   track = input<ITrackItem | null>(null);
   closed = output<void>();
+  trackUpdated = output<ITrackItem>();
 
   private catalogQuery = inject(CatalogQueryService);
   private catalogCommand = inject(CatalogCommandService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
+  private trackQuery = inject(TrackQueryService);
+  private trackCommand = inject(TrackCommandService);
 
   menuView = signal<MenuView>('main');
   playlists = signal<IPlaylistSummary[]>([]);
   private queueLength = signal(0);
+  showEditModal = signal(false);
+  editTrackItem = signal<ITrackItem | null>(null);
 
   canAddToQueue = computed(() => this.queueLength() > 0);
 
@@ -43,6 +51,8 @@ export class TrackMenu implements OnInit {
 
   close(): void {
     this.closed.emit();
+    this.showEditModal.set(false);
+    this.editTrackItem.set(null);
   }
 
   addToQueue(): void {
@@ -74,5 +84,24 @@ export class TrackMenu implements OnInit {
         list.map((p) => (p.listKey === playlist.listKey ? updated : p)),
       );
     });
+  }
+
+  editTrack(): void {
+    const track = this.track();
+    if (!track) return;
+
+    // Close the main menu and open the edit modal
+    this.close();
+    this.editTrackItem.set(track);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+    this.editTrackItem.set(null);
+  }
+
+  onTrackUpdated(updatedTrack: ITrackItem): void {
+    this.trackUpdated.emit(updatedTrack);
   }
 }

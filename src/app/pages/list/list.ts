@@ -13,6 +13,7 @@ import {
   LoadingAnimation,
   MediaCard,
   PlayHistoryService,
+  ToastService,
   TrackMenu,
 } from 'shared-utils';
 
@@ -230,6 +231,33 @@ export class ListPage implements OnInit {
 
   closeMenu(): void {
     this.menuTrack.set(null);
+  }
+
+  onTrackUpdated(updatedTrack: ITrackItem): void {
+    // Update the track in the current list
+    this.detail.update((currentDetail) => {
+      if (!currentDetail) return currentDetail;
+
+      const updatedRecords = currentDetail.related.records.map((track) =>
+        track.ID === updatedTrack.ID ? updatedTrack : track
+      );
+
+      return {
+        ...currentDetail,
+        related: {
+          ...currentDetail.related,
+          records: updatedRecords,
+        },
+      };
+    });
+
+    // Also update the menu track if it's the same track
+    if (this.menuTrack()?.ID === updatedTrack.ID) {
+      this.menuTrack.set(updatedTrack);
+    }
+
+    // Show a success message
+    inject(ToastService).show(`Track "${updatedTrack.Title}" updated successfully!`);
   }
 
   private recordPlay(track: ITrackItem): void {
