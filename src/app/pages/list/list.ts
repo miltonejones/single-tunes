@@ -13,6 +13,7 @@ import {
   IPlaylistSummary,
   ITrackItem,
   MediaCard,
+  OfflineService,
   PlayHistoryService,
   SkeletonLoader,
   ToastService,
@@ -46,6 +47,7 @@ export class ListPage implements OnInit {
   private catalogCommand = inject(CatalogCommandService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private playHistory = inject(PlayHistoryService);
+  protected offline = inject(OfflineService);
   protected downloadService = inject(TrackDownloadService);
 
   listType = signal<ListType>('album');
@@ -388,7 +390,13 @@ export class ListPage implements OnInit {
         this.detail.set(res);
         this.loadArtistBanner(res.related.records);
       })
-      .catch((err) => this.error.set(err?.message || 'Failed to load list'))
+      .catch(() => {
+        if (!this.offline.isOnline()) {
+          this.error.set('This content isn\'t available offline. Download tracks to listen offline.');
+        } else {
+          this.error.set('Failed to load. Check your connection and try again.');
+        }
+      })
       .finally(() => this.loading.set(false));
   }
 

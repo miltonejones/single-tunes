@@ -397,6 +397,18 @@ a.track-genre:hover {
   color: var(--danger);
 }
 
+.error-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.error-state i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--danger);
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;

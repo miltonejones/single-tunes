@@ -2,6 +2,13 @@
   <div class="nav-progress-bar"></div>
 }
 
+@if (!offlineService.isOnline()) {
+  <div class="offline-banner">
+    <i class="fa-solid fa-wifi"></i>
+    <span>You're offline — showing cached content</span>
+  </div>
+}
+
 <div
   class="toolbar d-flex align-items-center justify-content-between flex-nowrap gap-2"
   [class.search-active]="searchOpen()"

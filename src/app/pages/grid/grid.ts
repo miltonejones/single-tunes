@@ -11,6 +11,7 @@ import {
   IGridItem,
   ISortProp,
   MediaCard,
+  OfflineService,
   SkeletonLoader,
 } from 'shared-utils';
 
@@ -68,6 +69,7 @@ export class GridPage implements OnInit, OnDestroy {
 
   private route = inject(ActivatedRoute);
   private catalogQuery = inject(CatalogQueryService);
+  protected offline = inject(OfflineService);
   private routeSub?: Subscription;
 
   gridType = signal<GridType>('artist');
@@ -150,7 +152,13 @@ export class GridPage implements OnInit, OnDestroy {
         this.items.set(res.records);
         this.totalCount.set(res.count);
       })
-      .catch((err) => this.error.set(err?.message || 'Failed to load grid'))
+      .catch(() => {
+        if (!this.offline.isOnline()) {
+          this.error.set('This content isn\'t available offline. Download tracks to listen offline.');
+        } else {
+          this.error.set('Failed to load. Check your connection and try again.');
+        }
+      })
       .finally(() => this.loading.set(false));
   }
 }

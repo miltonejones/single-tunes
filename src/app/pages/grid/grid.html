@@ -3,7 +3,15 @@
 @if (loading()) {
   <lib-skeleton-loader variant="grid" [count]="12" />
 } @else if (error()) {
-  <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
+  <div class="error-state">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <p>{{ error() }}</p>
+    @if (!offline.isOnline()) {
+      <a routerLink="/downloads" class="btn btn-primary mt-2">
+        <i class="fa-solid fa-download"></i> Go to Downloads
+      </a>
+    }
+  </div>
 } @else if (items().length === 0) {
   <div class="empty-state">
     <i class="fa-solid fa-table-cells fa-3x mb-3"></i>

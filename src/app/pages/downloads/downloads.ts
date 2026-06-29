@@ -71,6 +71,39 @@ export class DownloadsPage implements OnInit {
   currentTrackId = signal<number | null>(null);
   menuTrack = signal<DownloadedTrack | null>(null);
   confirmingClear = signal(false);
+  searchQuery = signal('');
+  viewMode = signal<'all' | 'by-artist' | 'by-album'>('all');
+
+  filteredTracks = computed(() => {
+    const q = this.searchQuery().toLowerCase();
+    if (!q) return this.tracks();
+    return this.tracks().filter(
+      (t) =>
+        t.Title.toLowerCase().includes(q) ||
+        t.artistName.toLowerCase().includes(q) ||
+        t.albumName.toLowerCase().includes(q),
+    );
+  });
+
+  groupedByArtist = computed(() => {
+    const map = new Map<string, DownloadedTrack[]>();
+    for (const t of this.filteredTracks()) {
+      const key = t.artistName || 'Unknown Artist';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(t);
+    }
+    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+  });
+
+  groupedByAlbum = computed(() => {
+    const map = new Map<string, DownloadedTrack[]>();
+    for (const t of this.filteredTracks()) {
+      const key = t.albumName || 'Unknown Album';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(t);
+    }
+    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+  });
 
   constructor() {
     effect(() => {

@@ -22,6 +22,7 @@ export { CatalogCommandService } from './catalog-command.service';
 export { WikipediaQueryService } from './wikipedia-query.service';
 
 export { CastService } from './cast.service';
+export { OfflineService } from './offline.service';
 export { ServiceWorkerUpdateService } from './service-worker-update.service';
 export { ToastService } from './toast.service';
 export { TrackDownloadService } from './track-download.service';

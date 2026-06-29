@@ -246,6 +246,111 @@
   margin-bottom: 0.5rem;
 }
 
+.downloads-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.downloads-search {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.downloads-search i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.downloads-search input {
+  padding-left: 2rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+}
+
+.downloads-search input:focus {
+  background-color: var(--surface-2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.downloads-search input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem;
+  flex-shrink: 0;
+}
+
+.view-btn {
+  border: none;
+  background: none;
+  padding: 0.3rem 0.55rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  font-size: 0.85rem;
+}
+
+.view-btn:hover {
+  color: var(--text);
+}
+
+.view-btn.active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+
+.downloads-section {
+  margin-bottom: 1.5rem;
+}
+
+.downloads-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.downloads-section-heading i {
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.downloads-section-count {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 @media (min-width: 768px) {
   .downloads-page {
     padding: 1.5rem;

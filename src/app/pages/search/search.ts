@@ -11,8 +11,10 @@ import {
   IPodcast,
   ITrackItem,
   MediaCard,
+  OfflineService,
   PlayHistoryService,
   PodcastCard,
+  TrackDownloadService,
   TrackMenu,
 } from 'shared-utils';
 
@@ -31,6 +33,8 @@ export class SearchPage implements OnInit {
   private route = inject(ActivatedRoute);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private playHistory = inject(PlayHistoryService);
+  protected offline = inject(OfflineService);
+  private trackDownload = inject(TrackDownloadService);
 
   query = signal('');
   artists = signal<IGridItem[]>([]);
@@ -74,14 +78,48 @@ export class SearchPage implements OnInit {
     const query = this.route.snapshot.paramMap.get('query') ?? '';
     this.query.set(query);
 
-    const resolved = this.route.snapshot.data['search'] as SearchResolvedData;
-    this.artists.set(resolved.artists.records);
-    this.albums.set(resolved.albums.records);
-    this.tracks.set(resolved.tracks.records);
-    this.podcasts.set(resolved.podcasts);
+    if (!this.offline.isOnline()) {
+      this.searchOffline(query);
+    } else {
+      const resolved = this.route.snapshot.data['search'] as SearchResolvedData;
+      this.artists.set(resolved.artists.records);
+      this.albums.set(resolved.albums.records);
+      this.tracks.set(resolved.tracks.records);
+      this.podcasts.set(resolved.podcasts);
+    }
 
     const firstTab = this.tabsWithResults()[0];
     if (firstTab) this.activeTab.set(firstTab);
+  }
+
+  private async searchOffline(query: string): Promise<void> {
+    const q = query.toLowerCase();
+    const all = await this.trackDownload.getAllDownloadedTracks();
+    const tracks = all.filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        (t.artistName ?? '').toLowerCase().includes(q) ||
+        (t.albumName ?? '').toLowerCase().includes(q),
+    );
+    this.tracks.set(
+      tracks.map((t) => ({
+        ID: t.trackId,
+        Title: t.title,
+        FileKey: t.FileKey,
+        albumImage: t.albumImage ?? null,
+        trackId: t.trackId,
+        Genre: '',
+        genreKey: null,
+        albumFk: t.albumFk ?? null,
+        artistFk: t.artistFk ?? null,
+        discNumber: t.discNumber ?? null,
+        trackTime: t.trackTime ?? 0,
+        trackNumber: t.trackNumber ?? null,
+        explicit: false,
+        artistName: t.artistName ?? '',
+        albumName: t.albumName ?? '',
+      })),
+    );
   }
 
   playTrack(track: ITrackItem): void {
