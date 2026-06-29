@@ -128,7 +128,8 @@
     </div>
   }
 
-  @if (editMode()) {
+  @if (viewMode() === 'tracks') {
+    @if (editMode()) {
     <div class="edit-mode-bar">
       <span class="edit-mode-label"><i class="fa-solid fa-grip-lines"></i> Drag to reorder</span>
       <div class="edit-mode-actions">
@@ -238,6 +239,7 @@
         </div>
       }
     </div>
+  }
   }
 
   @if (totalPages() > 1) {
