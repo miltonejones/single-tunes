@@ -92,7 +92,7 @@
   </button>
 </div>
 
-<div class="route-container" [@routeAnimation]="getRouteAnimationState()" (@routeAnimation.start)="navigating.set(true)" (@routeAnimation.done)="navigating.set(false)">
+<div class="route-container" [@routeAnimation]="routeAnimationState()">
   <router-outlet />
 </div>
 

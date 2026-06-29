@@ -305,12 +305,12 @@ export class App {
     }
   }
 
-  /** Returns animation state with direction-aware params for bidirectional slide. */
-  protected getRouteAnimationState(): { value: string; params: { enterX: string } } {
+  /** Computes animation state with direction-aware params for bidirectional slide. */
+  protected routeAnimationState = computed(() => {
     const isBack = this.navDirection() === 'back';
     return {
       value: this.router.url.split('?')[0],
       params: { enterX: isBack ? 'translateX(-100%)' : 'translateX(100%)' },
     };
-  }
+  });
 }
