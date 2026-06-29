@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { SearchResolvedData } from './search.resolver';
 import {
   AudioPlayerCommandService,
@@ -14,6 +14,7 @@ import {
   OfflineService,
   PlayHistoryService,
   PodcastCard,
+  PodcastSelectionService,
   TrackDownloadService,
   TrackMenu,
 } from 'shared-utils';
@@ -31,9 +32,11 @@ export class SearchPage implements OnInit {
   protected readonly formatDuration = formatDuration;
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private playHistory = inject(PlayHistoryService);
   protected offline = inject(OfflineService);
+  private podcastSelection = inject(PodcastSelectionService);
   private trackDownload = inject(TrackDownloadService);
 
   query = signal('');
@@ -134,6 +137,11 @@ export class SearchPage implements OnInit {
 
   closeMenu(): void {
     this.menuTrack.set(null);
+  }
+
+  protected openPodcast(podcast: IPodcast): void {
+    this.podcastSelection.select(podcast);
+    this.router.navigate(['/podcasts/detail', encodeURIComponent(podcast.feedUrl || '')]);
   }
 
 }

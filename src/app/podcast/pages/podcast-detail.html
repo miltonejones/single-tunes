@@ -27,17 +27,18 @@
 <div class="podcast-detail-body">
 <div class="d-flex justify-content-between">
   @if (pages().pageCount > 1) {
-    <div class="d-flex align-items-center justify-content-center mb-3 gap-1">
-      <button class="btn btn-outline-primary btn-sm" [disabled]="page() <= 1" (click)="setPage(page() - 1)">
-        <i class="fa-solid fa-chevron-left"></i> Previous
+    <div class="d-flex align-items-center justify-content-center mb-3 gap-2">
+      <button class="page-btn" [class.page-btn--disabled]="page() <= 1" [disabled]="page() <= 1" (click)="setPage(page() - 1)">
+        <i class="fa-solid fa-chevron-left"></i>
       </button>
-      <span class="text-muted">Page {{ page() }} of {{ pages().pageCount }}</span>
+      <span class="page-label">{{ page() }} / {{ pages().pageCount }}</span>
       <button
-        class="btn btn-outline-primary btn-sm"
+        class="page-btn"
+        [class.page-btn--disabled]="page() >= pages().pageCount"
         [disabled]="page() >= pages().pageCount"
         (click)="setPage(page() + 1)"
       >
-        Next <i class="fa-solid fa-chevron-right"></i>
+        <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>
   }

@@ -181,7 +181,7 @@
       <div class="list-section">
         <h3 class="list-section-heading"><i class="fa-solid fa-podcast"></i> Podcasts</h3>
         @for (podcast of podcasts(); track podcast.feedUrl) {
-          <a class="list-row" [routerLink]="['/podcasts/detail', podcast.feedUrl]">
+          <a class="list-row" href="#" (click)="$event.preventDefault(); openPodcast(podcast)">
             <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="podcast.artworkUrl60" [alt]="podcast.collectionName" />
             <div class="list-info">
               <div class="list-title">{{ podcast.collectionName }}</div>
