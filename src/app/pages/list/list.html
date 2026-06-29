@@ -108,7 +108,7 @@
     <div class="album-grid">
       @for (album of albumGrid(); track album.name) {
         @if (album.routerLink) {
-          <a class="album-card" [routerLink]="album.routerLink">
+          <a class="album-card" [routerLink]="album.routerLink" (click)="viewMode.set('tracks')">
             <img class="album-card-img" appImgFallback [src]="album.image" [alt]="album.name" />
             <div class="album-card-info">
               <div class="album-card-title">{{ album.name }}</div>

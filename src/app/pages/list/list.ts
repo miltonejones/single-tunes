@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ListResolvedData } from './list.resolver';
 import {
   AudioPlayerCommandService,
@@ -43,6 +43,7 @@ export class ListPage implements OnInit {
   protected readonly formatDuration = formatDuration;
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private catalogQuery = inject(CatalogQueryService);
   private catalogCommand = inject(CatalogCommandService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
@@ -222,6 +223,9 @@ export class ListPage implements OnInit {
       this.detail.set(resolved.detail);
       this.bannerImage.set(resolved.bannerImage);
       this.bannerName.set(resolved.bannerName);
+
+      // Reset view mode to tracks when navigating to a new list
+      this.viewMode.set('tracks');
     });
   }
 
@@ -444,6 +448,8 @@ export class ListPage implements OnInit {
       .then((res) => {
         this.detail.set(res);
         this.loadArtistBanner(res.related.records);
+        // Reset view mode to tracks when loading new detail
+        this.viewMode.set('tracks');
       })
       .catch((err) => this.error.set(err?.message || 'Failed to load list'))
       .finally(() => this.loading.set(false));
@@ -467,5 +473,13 @@ export class ListPage implements OnInit {
         this.bannerImage.set(null);
         this.bannerName.set(null);
       });
+  }
+
+  // Method to handle album card clicks and ensure view mode is reset
+  protected navigateToAlbum(routerLink: any[]): void {
+    // Reset view mode to tracks before navigating
+    this.viewMode.set('tracks');
+    // Navigate to the album
+    this.router.navigate(routerLink);
   }
 }
