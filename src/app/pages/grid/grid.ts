@@ -1,5 +1,6 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { IGridResponse } from 'shared-utils';
 import { gridResolver } from './grid.resolver';
 import {
@@ -62,11 +63,12 @@ const SORT_OPTIONS: Record<GridType, SortOption[]> = {
   templateUrl: './grid.html',
   styleUrl: './grid.css',
 })
-export class GridPage implements OnInit {
+export class GridPage implements OnInit, OnDestroy {
   protected readonly title = signal('grid');
 
   private route = inject(ActivatedRoute);
   private catalogQuery = inject(CatalogQueryService);
+  private routeSub?: Subscription;
 
   gridType = signal<GridType>('artist');
   pageNum = signal(1);
@@ -85,16 +87,22 @@ export class GridPage implements OnInit {
   ]);
 
   ngOnInit(): void {
-    const params = this.route.snapshot.paramMap;
-    const gridType = this.parseGridType(params.get('gridType'));
-    const pageNum = Number(params.get('pageNum')) || 1;
-    this.gridType.set(gridType);
-    this.pageNum.set(pageNum);
-    this.sort.set(SORT_DEFAULTS[gridType]);
+    this.routeSub = this.route.data.subscribe((data) => {
+      const params = this.route.snapshot.paramMap;
+      const gridType = this.parseGridType(params.get('gridType'));
+      const pageNum = Number(params.get('pageNum')) || 1;
+      this.gridType.set(gridType);
+      this.pageNum.set(pageNum);
+      this.sort.set(SORT_DEFAULTS[gridType]);
 
-    const resolved = this.route.snapshot.data['grid'] as IGridResponse;
-    this.items.set(resolved.records);
-    this.totalCount.set(resolved.count);
+      const resolved = data['grid'] as IGridResponse;
+      this.items.set(resolved.records);
+      this.totalCount.set(resolved.count);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
   }
 
   setSort(field: string): void {
