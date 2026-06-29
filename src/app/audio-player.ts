@@ -29,6 +29,7 @@ import { AudioVisualizer } from './audio-visualizer';
 import { AudioVisualizerPanelService } from './audio-visualizer-panel.service';
 import { CastButton } from './cast-button';
 import { TrackQueuePanelService } from './track-queue-panel.service';
+import { TrackDedicationService } from './track-dedication.service';
 
 const ANNOUNCING_VOLUME = 0.3;
 
@@ -49,6 +50,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private castService = inject(CastService);
   private playHistory = inject(PlayHistoryService);
   private trackDownload = inject(TrackDownloadService);
+  private trackDedication = inject(TrackDedicationService);
   private blobUrl: string | null = null;
   protected queuePanel = inject(TrackQueuePanelService);
   protected visualizerPanel = inject(AudioVisualizerPanelService);
@@ -254,11 +256,21 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
       // Announcement — TTS plays locally while volume ducks on Cast.
       const settings = this.announcerSettings.settings();
+
+      // Check if this track has a dedication
+      let announcerName = settings.name;
+      if (track.ID !== undefined) {
+        const dedicationName = this.trackDedication.getDedication(track.ID);
+        if (dedicationName) {
+          announcerName = dedicationName;
+        }
+      }
+
       if (shouldAnnounceForFrequency(settings.frequency)) {
         this.announcing.set(true);
         await this.announcementCommand.announceTrackChange(
           track.artistName, track.Title, track.trackTime,
-          settings.name, settings.zip, settings.chatType, settings.voiceURI,
+          announcerName, settings.zip, settings.chatType, settings.voiceURI,
           () => {
             this.originalVolume = this.castService.getVolume();
             this.setVolume(ANNOUNCING_VOLUME);
@@ -290,11 +302,21 @@ export class AudioPlayer implements OnInit, OnDestroy {
     this.audioEl.src = src;
 
     const settings = this.announcerSettings.settings();
+
+    // Check if this track has a dedication
+    let announcerName = settings.name;
+    if (track.ID !== undefined) {
+      const dedicationName = this.trackDedication.getDedication(track.ID);
+      if (dedicationName) {
+        announcerName = dedicationName;
+      }
+    }
+
     if (shouldAnnounceForFrequency(settings.frequency)) {
       this.announcing.set(true);
       await this.announcementCommand.announceTrackChange(
         track.artistName, track.Title, track.trackTime,
-        settings.name, settings.zip, settings.chatType, settings.voiceURI,
+        announcerName, settings.zip, settings.chatType, settings.voiceURI,
         () => {
           this.originalVolume = this.audioEl.volume;
           this.setVolume(ANNOUNCING_VOLUME);

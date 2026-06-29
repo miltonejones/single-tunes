@@ -19,6 +19,7 @@ export interface ITrackItem {
   albumArtistName?: string;
   favorite?: boolean;
   queued?: boolean;
+  dedicationName?: string; // Added for song dedication feature
 }
 
 export interface UpdateTrackRequest {

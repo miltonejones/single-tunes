@@ -54,6 +54,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex-grow: 1;
 }
 
 .queue-title,
@@ -74,6 +75,47 @@
 
 .queue-row.active .queue-artist {
   color: var(--accent);
+}
+
+.queue-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.dedication-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 0.25rem;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.dedication-btn:hover {
+  color: var(--accent);
+}
+
+.dedication-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dedication-input {
+  width: 120px;
+  font-size: 0.85rem;
+  padding: 0.25rem;
+}
+
+.dedication-badge {
+  font-size: 0.75rem;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.1rem;
 }
 
 .queue-playing-icon {
