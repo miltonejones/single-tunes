@@ -10,6 +10,7 @@
   transition: all 0.3s ease;
   z-index: 105;
   padding: 0.6rem 1.25rem;
+  box-sizing: border-box;
 }
 
 :host-context(body.podcast-playing) {
@@ -26,11 +27,15 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  width: 100%;
 }
 
 .audio-player-row-bottom {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .audio-player-expand-trigger {
@@ -55,6 +60,7 @@
   object-fit: cover;
   background: var(--surface-2);
   box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
 }
 
 .audio-player-info {
@@ -85,6 +91,7 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  flex-shrink: 0;
 }
 
 .audio-player-controls button,
@@ -102,6 +109,7 @@
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
   position: relative;
+  flex-shrink: 0;
 }
 
 .audio-player-controls button:hover,
@@ -135,6 +143,7 @@
 
 .audio-player-progress {
   flex: 1;
+  min-width: 0;
 }
 
 .audio-player-time {
@@ -143,6 +152,7 @@
   min-width: 2.5rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
 }
 
 input[type='range'] {
@@ -153,6 +163,7 @@ input[type='range'] {
   background: var(--surface-2);
   outline: none;
   cursor: pointer;
+  width: 100%;
 }
 
 input[type='range']::-webkit-slider-thumb {
@@ -198,9 +209,54 @@ input[type='range']::-moz-range-track {
     gap: 0.5rem;
   }
 
+  .audio-player-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .audio-player-row-top {
+    flex-direction: row;
+    align-items: center;
+  }
+
   .audio-player-info {
     max-width: none;
     flex: 1;
+  }
+
+  .audio-player-row-bottom {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 0.35rem;
+  }
+
+  .audio-player-progress {
+    flex: 1;
+    min-width: 40px;
+  }
+
+  .audio-player-time {
+    font-size: 0.7rem;
+    min-width: 2rem;
+  }
+
+  .audio-player-controls {
+    gap: 0.25rem;
+  }
+
+  .audio-player-controls button,
+  .audio-player-queue-btn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.9rem;
+  }
+
+  .audio-player-play-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.9rem;
   }
 
   /* Show title and artist in mobile collapsed view */
@@ -231,6 +287,7 @@ input[type='range']::-moz-range-track {
       radial-gradient(circle at 90% 100%, rgba(236, 72, 153, 0.16), transparent 55%),
       var(--bg);
     transition: background 0.6s ease;
+    box-sizing: border-box;
   }
 
   .audio-player-fullscreen-topbar {
@@ -341,5 +398,37 @@ input[type='range']::-moz-range-track {
 
   .audio-player-fullscreen-play-btn:hover {
     filter: brightness(1.1);
+  }
+}
+
+/* Extra small devices (phones, 480px and down) */
+@media (max-width: 480px) {
+  :host {
+    padding: 0.5rem 0.5rem;
+  }
+
+  .audio-player-row-bottom {
+    gap: 0.25rem;
+  }
+
+  .audio-player-time {
+    font-size: 0.65rem;
+    min-width: 1.75rem;
+  }
+
+  .audio-player-controls button,
+  .audio-player-queue-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.8rem;
+  }
+
+  .audio-player-play-btn {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .skip-btn-label {
+    font-size: 0.4rem;
   }
 }
