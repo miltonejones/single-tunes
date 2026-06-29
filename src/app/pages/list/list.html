@@ -78,16 +78,55 @@
     </div>
   }
 
-  <lib-breadcrumbs [items]="breadcrumbItems()" />
+  <div class="list-toolbar">
+    <lib-breadcrumbs [items]="breadcrumbItems()" />
+    @if (listType() === 'artist') {
+      <div class="view-toggle">
+        <button
+          type="button"
+          class="view-btn"
+          [class.active]="viewMode() === 'tracks'"
+          (click)="viewMode.set('tracks')"
+          title="Track list"
+        >
+          <i class="fa-solid fa-list"></i>
+        </button>
+        <button
+          type="button"
+          class="view-btn"
+          [class.active]="viewMode() === 'albums'"
+          (click)="viewMode.set('albums')"
+          title="Album grid"
+        >
+          <i class="fa-solid fa-compact-disc"></i>
+        </button>
+      </div>
+    }
+  </div>
 
-  <!-- @if (entity(); as entity) {
-    <lib-media-card
-      [thumbnail]="entity.Thumbnail ?? entity.albumImage ?? null"
-      [title]="entity.Name ?? entity.Genre ?? null"
-      [eyebrow]="listType()"
-      [caption]="entity.TrackCount + ' tracks'"
-    />
-  } -->
+  @if (viewMode() === 'albums' && listType() === 'artist') {
+    <div class="album-grid">
+      @for (album of albumGrid(); track album.name) {
+        @if (album.routerLink) {
+          <a class="album-card" [routerLink]="album.routerLink">
+            <img class="album-card-img" appImgFallback [src]="album.image" [alt]="album.name" />
+            <div class="album-card-info">
+              <div class="album-card-title">{{ album.name }}</div>
+              <div class="album-card-count">{{ album.trackCount }} track{{ album.trackCount === 1 ? '' : 's' }}</div>
+            </div>
+          </a>
+        } @else {
+          <div class="album-card">
+            <img class="album-card-img" appImgFallback [src]="album.image" [alt]="album.name" />
+            <div class="album-card-info">
+              <div class="album-card-title">{{ album.name }}</div>
+              <div class="album-card-count">{{ album.trackCount }} track{{ album.trackCount === 1 ? '' : 's' }}</div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
 
   @if (editMode()) {
     <div class="edit-mode-bar">

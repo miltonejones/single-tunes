@@ -95,6 +95,25 @@ export class ListPage implements OnInit {
   orderedTracks = signal<ITrackItem[]>([]);
   savingOrder = signal(false);
   private dragFromIndex = -1;
+  protected viewMode = signal<'tracks' | 'albums'>('tracks');
+
+  /** Groups tracks by album for the album grid view. */
+  protected albumGrid = computed(() => {
+    const seen = new Map<string, { name: string; image: string; trackCount: number; routerLink: any[] | null }>();
+    for (const t of this.tracks()) {
+      const key = t.albumName || 'Unknown';
+      if (!seen.has(key)) {
+        seen.set(key, {
+          name: t.albumName || 'Unknown',
+          image: t.albumImage || '',
+          trackCount: 0,
+          routerLink: t.albumFk ? ['/list', 'album', t.albumFk, 1] : null,
+        });
+      }
+      seen.get(key)!.trackCount++;
+    }
+    return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+  });
 
   entity = computed(() => this.detail()?.row[0] ?? null);
   hasMultipleDiscs = computed(() => {

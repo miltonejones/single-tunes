@@ -397,6 +397,119 @@ a.track-genre:hover {
   color: var(--danger);
 }
 
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.list-toolbar lib-breadcrumbs {
+  flex: 1;
+  min-width: 0;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem;
+  flex-shrink: 0;
+}
+
+.view-btn {
+  border: none;
+  background: none;
+  padding: 0.3rem 0.55rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  font-size: 0.85rem;
+}
+
+.view-btn:hover {
+  color: var(--text);
+}
+
+.view-btn.active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  padding: 0 1rem;
+  margin-top: 1rem;
+}
+
+.album-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.album-card:hover {
+  transform: translateY(-3px);
+}
+
+.album-card-img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.album-card-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.album-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.album-card-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 576px) {
+  .album-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding: 0 1rem 0.5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .album-card {
+    flex: 0 0 calc(50vw - 1rem);
+    scroll-snap-align: start;
+  }
+
+  .album-grid::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .error-state {
   text-align: center;
   padding: 3rem 1rem;
