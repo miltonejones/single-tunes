@@ -1,7 +1,7 @@
 <!-- <h2>Home remote</h2> -->
 
 @if (carouselItems().length > 0) {
-    <div class="carousel">
+    <div class="carousel" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
       <div class="carousel-track" [style.transform]="'translateX(-' + carouselIndex() * 100 + '%)'">
         @for (item of carouselItems(); track item.ID + item.Type) {
           <div class="carousel-slide">

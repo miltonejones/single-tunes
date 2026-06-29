@@ -9,8 +9,8 @@ import {
   CoverflowDirective,
   IGridItem,
   ISortProp,
-  LoadingAnimation,
   MediaCard,
+  SkeletonLoader,
 } from 'shared-utils';
 
 const PAGE_SIZE = 100;
@@ -58,7 +58,7 @@ const SORT_OPTIONS: Record<GridType, SortOption[]> = {
 
 @Component({
   selector: 'app-grid-page',
-  imports: [RouterOutlet, RouterLink, MediaCard, Breadcrumbs, LoadingAnimation, CoverflowDirective],
+  imports: [RouterOutlet, RouterLink, MediaCard, Breadcrumbs, CoverflowDirective, SkeletonLoader],
   templateUrl: './grid.html',
   styleUrl: './grid.css',
 })
@@ -107,6 +107,14 @@ export class GridPage implements OnInit {
 
   private parseGridType(value: string | null): GridType {
     return value === 'album' || value === 'genre' || value === 'playlist' ? value : 'artist';
+  }
+
+  protected goToPage(page: number): void {
+    const clamped = Math.max(1, Math.min(page, this.totalPages()));
+    if (clamped !== this.pageNum()) {
+      this.pageNum.set(clamped);
+      this.loadGrid(this.gridType(), clamped);
+    }
   }
 
   private loadGrid(gridType: GridType, pageNum: number): void {

@@ -35,6 +35,8 @@ export { Breadcrumbs } from './breadcrumbs';
 export type { BreadcrumbItem } from './breadcrumbs';
 export { LoadingAnimation } from './loading-animation';
 export type { LoadingVariant } from './loading-animation';
+export { SkeletonLoader } from './skeleton-loader';
+export type { SkeletonVariant } from './skeleton-loader';
 export { TrackMenu } from './track-menu';
 export { ItunesSearchModal } from './itunes-search-modal';
 

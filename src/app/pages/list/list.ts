@@ -12,9 +12,9 @@ import {
   ImgFallbackDirective,
   IPlaylistSummary,
   ITrackItem,
-  LoadingAnimation,
   MediaCard,
   PlayHistoryService,
+  SkeletonLoader,
   ToastService,
   TrackDownloadService,
   TrackMenu,
@@ -33,7 +33,7 @@ const LIST_TYPE_LABELS: Record<Exclude<ListType, 'library'>, string> = {
 
 @Component({
   selector: 'app-list-page',
-  imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, LoadingAnimation, TrackMenu],
+  imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, SkeletonLoader, TrackMenu],
   templateUrl: './list.html',
   styleUrl: './list.css',
 })
@@ -360,6 +360,14 @@ export class ListPage implements OnInit {
         : ['/list', this.listType(), this.listId(), this.pageNum()],
       track,
     );
+  }
+
+  protected goToPage(page: number): void {
+    const clamped = Math.max(1, Math.min(page, this.totalPages()));
+    if (clamped !== this.pageNum()) {
+      this.pageNum.set(clamped);
+      this.loadDetail(this.listType(), this.listId(), clamped);
+    }
   }
 
   private buildPageLink(pageNum: number): unknown[] {

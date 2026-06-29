@@ -124,13 +124,13 @@ const routeAnimation = trigger('routeAnimation', [
   transition('* => *', [
     query(':leave', [
       style({ transform: 'translateX(0)', opacity: 1 }),
-      animate('350ms ease-in', style({ transform: 'translateX(-25%)', opacity: 0.4 })),
+      animate('300ms ease-in', style({ transform: 'translateX(-20%)', opacity: 0.3 })),
     ], { optional: true }),
     query(':enter', [
-      style({ transform: 'translateX(100%)', opacity: 0 }),
-      animate('550ms ease-out', style({ transform: 'translateX(0)', opacity: 1 })),
+      style({ transform: '{{enterX}}', opacity: 0 }),
+      animate('450ms ease-out', style({ transform: 'translateX(0)', opacity: 1 })),
     ], { optional: true }),
-  ]),
+  ], { params: { enterX: 'translateX(100%)' } }),
 ]);
 
 @Component({
@@ -157,6 +157,10 @@ export class App {
   protected activeItem = computed(() => NAV_ITEMS.find((i) => i.section === this.activeSection()));
   protected podcastPlaying = signal(false);
   protected searchHistory = signal<string[]>(this.loadSearchHistory());
+  private navDirection = signal<'forward' | 'back'>('forward');
+  private previousUrl = this.router.url;
+  private searchDebounceTimer?: ReturnType<typeof setTimeout>;
+  private readonly SEARCH_DEBOUNCE_MS = 400;
 
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
 
@@ -164,12 +168,17 @@ export class App {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.navigating.set(true);
+        // Determine navigation direction by comparing URL depth
+        const prevDepth = this.previousUrl.split('?')[0].split('/').filter(Boolean).length;
+        const nextDepth = event.url.split('?')[0].split('/').filter(Boolean).length;
+        this.navDirection.set(nextDepth > prevDepth ? 'forward' : 'back');
       } else if (event instanceof NavigationEnd) {
         this.navigating.set(false);
         this.activeSection.set(resolveNavSection(event.urlAfterRedirects));
         this.searchOpen.set(false);
         this.navDropdownOpen.set(false);
         this.titleService.setTitle(pageTitleFromUrl(event.urlAfterRedirects));
+        this.previousUrl = event.urlAfterRedirects;
       } else if (event instanceof NavigationCancel || event instanceof NavigationError) {
         this.navigating.set(false);
       }
@@ -202,6 +211,17 @@ export class App {
 
   closeSearch(): void {
     this.searchOpen.set(false);
+  }
+
+  protected onSearchInput(query: string): void {
+    clearTimeout(this.searchDebounceTimer);
+    const trimmed = query.trim();
+    if (trimmed.length >= 2) {
+      this.searchDebounceTimer = setTimeout(() => {
+        this.saveSearchHistory(trimmed);
+        this.router.navigate(['/search', trimmed]);
+      }, this.SEARCH_DEBOUNCE_MS);
+    }
   }
 
   onSearch(event: Event, query: string): void {
@@ -285,8 +305,12 @@ export class App {
     }
   }
 
-  /** Returns a unique key per route so the slide animation fires on every navigation. */
-  protected getRouteAnimationState(): string {
-    return this.router.url.split('?')[0];
+  /** Returns animation state with direction-aware params for bidirectional slide. */
+  protected getRouteAnimationState(): { value: string; params: { enterX: string } } {
+    const isBack = this.navDirection() === 'back';
+    return {
+      value: this.router.url.split('?')[0],
+      params: { enterX: isBack ? 'translateX(-100%)' : 'translateX(100%)' },
+    };
   }
 }

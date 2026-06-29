@@ -41,6 +41,8 @@ export class HomePage implements OnInit, OnDestroy {
   protected subscriptionsService = inject(PodcastSubscriptionsService);
   protected playHistory = inject(PlayHistoryService);
   private carouselTimer?: ReturnType<typeof setInterval>;
+  private touchStartX = 0;
+  private touchStartY = 0;
 
   dashItems = signal<DashItem[]>([]);
   featuredPlaylists = signal<IPlaylistSummary[]>([]);
@@ -83,6 +85,24 @@ export class HomePage implements OnInit, OnDestroy {
 
   goToSlide(index: number): void {
     this.carouselIndex.set(index);
+  }
+
+  protected onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.touches[0].clientX;
+    this.touchStartY = event.touches[0].clientY;
+  }
+
+  protected onTouchEnd(event: TouchEvent): void {
+    const deltaX = event.changedTouches[0].clientX - this.touchStartX;
+    const deltaY = event.changedTouches[0].clientY - this.touchStartY;
+    // Only trigger swipe if horizontal movement exceeds vertical (avoids conflict with page scroll)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+      if (deltaX > 0) {
+        this.prevSlide();
+      } else {
+        this.nextSlide();
+      }
+    }
   }
 
   private startCarousel(): void {

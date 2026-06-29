@@ -33,10 +33,9 @@
   flex-direction: column;
   justify-content: flex-end;
   padding: 1.5rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.1) 55%, transparent 80%);
-  color: #fff !important;
-  mix-blend-mode: difference;
-  bottom: 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.4) 40%, rgba(0, 0, 0, 0.08) 65%, transparent 80%);
+  color: #fff;
+  bottom: 0;
 }
 
 .carousel-title {

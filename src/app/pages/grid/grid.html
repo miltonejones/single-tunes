@@ -1,9 +1,16 @@
 <!-- <h2>Grid remote</h2> -->
 
 @if (loading()) {
-  <lib-loading-animation variant="visualizer" [label]="'Loading ' + gridType() + 's'" />
+  <lib-skeleton-loader variant="grid" [count]="12" />
 } @else if (error()) {
   <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
+} @else if (items().length === 0) {
+  <div class="empty-state">
+    <i class="fa-solid fa-table-cells fa-3x mb-3"></i>
+    <h3>No {{ gridType() }}s found</h3>
+    <p>There's nothing here yet. Check back later!</p>
+    <a routerLink="/" class="btn btn-primary">Go Home</a>
+  </div>
 } @else {
   <div class="grid-header">
     <lib-breadcrumbs [items]="breadcrumbItems()" />
@@ -30,6 +37,7 @@
 
   <div class="grid-grid" libCoverflow>
     @for (item of items(); track item.ID) {
+      @if (item.TrackCount > 0) {
       <lib-media-card
         [thumbnail]="item.Thumbnail"
         [eyebrow]="gridType() === 'album' ? (item.artistName ?? null) : null"
@@ -37,6 +45,7 @@
         [caption]="item.TrackCount + ' tracks'"
         [routerLink]="['/list', gridType(), item.ID, 1]"
       />
+      }
     }
   </div>
 
@@ -49,7 +58,19 @@
       <span class="pager-disabled"><i class="fa-solid fa-chevron-left"></i> Prev</span>
     }
 
-    <span>Page {{ pageNum() }} of {{ totalPages() }}</span>
+    <span class="pager-info">
+      Page
+      <input
+        type="number"
+        class="pager-input"
+        [value]="pageNum()"
+        min="1"
+        [max]="totalPages()"
+        (keydown.enter)="goToPage($any($event.target).valueAsNumber)"
+        (blur)="goToPage($any($event.target).valueAsNumber)"
+      />
+      of {{ totalPages() }}
+    </span>
 
     @if (pageNum() < totalPages()) {
       <a [routerLink]="['/grid', gridType(), pageNum() + 1]"

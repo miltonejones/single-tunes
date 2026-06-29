@@ -1,11 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ITrackItem } from './models';
+import { ToastService } from './toast.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AudioPlayerCommandService {
+  private toast = inject(ToastService);
   private queue: ITrackItem[] = [];
 
   // Where the next manually-queued track should be inserted. Reset whenever the
@@ -43,6 +45,7 @@ export class AudioPlayerCommandService {
     ];
     this.nextInsertIndex += 1;
     this.queue$.next(this.queue);
+    this.toast.show(`"${track.Title}" added to queue`);
   }
 
   /** Moves to the next (1) or previous (-1) track in the current queue. Returns false if there isn't one. */

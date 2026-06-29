@@ -62,6 +62,10 @@ export class AudioPlayer implements OnInit, OnDestroy {
   isExpanded = signal(false);
   protected isCasting = signal(false);
   protected showTrackMenu = signal(false);
+  protected volume = signal(1);
+  protected dominantColor = signal<string | null>(null);
+  protected isMuted = signal(false);
+  protected showVolumeSlider = signal(false);
 
   private playRequestId = 0;
 
@@ -202,6 +206,42 @@ export class AudioPlayer implements OnInit, OnDestroy {
     return this.audioElRef.nativeElement;
   }
 
+  /** Extracts a dominant color from the album art image for dynamic background tinting. */
+  private extractDominantColor(imageUrl: string): void {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const size = 10;
+        canvas.width = size;
+        canvas.height = size;
+        ctx.drawImage(img, 0, 0, size, size);
+        const data = ctx.getImageData(0, 0, size, size).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          // Skip very dark or very bright pixels
+          const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+          if (brightness > 30 && brightness < 225) {
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+            count++;
+          }
+        }
+        if (count > 0) {
+          this.dominantColor.set(`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`);
+        }
+      } catch {
+        // Silently fail — color extraction is non-critical
+      }
+    };
+    img.onerror = () => this.dominantColor.set(null);
+    img.src = imageUrl;
+  }
+
   private async loadAndPlay(track: ITrackItem): Promise<void> {
     const requestId = ++this.playRequestId;
 
@@ -230,6 +270,13 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
       this.announcing.set(false);
       return;
+    }
+
+    // Extract dominant color from album art for dynamic background
+    if (track.albumImage) {
+      this.extractDominantColor(track.albumImage);
+    } else {
+      this.dominantColor.set(null);
     }
 
     // Local playback
@@ -448,6 +495,26 @@ export class AudioPlayer implements OnInit, OnDestroy {
     const currentTime = this.isCasting() ? this.currentTime() : this.audioEl.currentTime;
     const newTime = currentTime + seconds;
     this.seekTo(newTime);
+  }
+
+  protected toggleMute(): void {
+    if (this.isMuted()) {
+      this.setVolume(this.volume());
+      this.isMuted.set(false);
+    } else {
+      this.volume.set(this.audioEl.volume);
+      this.setVolume(0);
+      this.isMuted.set(true);
+    }
+  }
+
+  protected onVolumeInput(event: Event): void {
+    const val = Number((event.target as HTMLInputElement).value);
+    this.volume.set(val);
+    this.setVolume(val);
+    if (val > 0 && this.isMuted()) {
+      this.isMuted.set(false);
+    }
   }
 
   closeTrackMenu(): void {

@@ -1,9 +1,16 @@
 <!-- <h2>List remote</h2> -->
 
 @if (loading()) {
-  <lib-loading-animation variant="visualizer" [label]="'Loading ' + listType()" />
+  <lib-skeleton-loader variant="track-list" [count]="10" />
 } @else if (error()) {
   <p class="error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
+} @else if (tracks().length === 0 && !bannerImage()) {
+  <div class="empty-state">
+    <i class="fa-solid fa-music fa-3x mb-3"></i>
+    <h3>No tracks found</h3>
+    <p>This {{ listType() }} doesn't have any tracks yet.</p>
+    <a routerLink="/" class="btn btn-primary">Browse Music</a>
+  </div>
 } @else {
   @if (bannerImage(); as bannerImage) {
     <div class="artist-banner" [style.background-image]="'url(' + bannerImage + ')'">
@@ -194,7 +201,19 @@
       <span class="pager-disabled"><i class="fa-solid fa-chevron-left"></i> Prev</span>
     }
 
-    <span>Page {{ pageNum() }} of {{ totalPages() }}</span>
+    <span class="pager-info">
+      Page
+      <input
+        type="number"
+        class="pager-input"
+        [value]="pageNum()"
+        min="1"
+        [max]="totalPages()"
+        (keydown.enter)="goToPage($any($event.target).valueAsNumber)"
+        (blur)="goToPage($any($event.target).valueAsNumber)"
+      />
+      of {{ totalPages() }}
+    </span>
 
     @if (pageNum() < totalPages()) {
       <a [routerLink]="nextLink()">Next <i class="fa-solid fa-chevron-right"></i></a>

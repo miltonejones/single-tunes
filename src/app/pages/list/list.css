@@ -347,6 +347,38 @@ a.track-genre:hover {
   font-size: 0.9rem;
 }
 
+.pager-info {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+}
+
+.pager-input {
+  width: 3.5rem;
+  text-align: center;
+  padding: 0.2rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+
+.pager-input::-webkit-inner-spin-button,
+.pager-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pager-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
 .pager a {
   color: var(--accent);
   text-decoration: none;
@@ -363,6 +395,17 @@ a.track-genre:hover {
 
 .error {
   color: var(--danger);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.empty-state h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text);
 }
 
 @media (max-width: 576px) {
