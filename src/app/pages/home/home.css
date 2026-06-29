@@ -33,22 +33,41 @@
   flex-direction: column;
   justify-content: flex-end;
   padding: 1.5rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.4) 40%, rgba(0, 0, 0, 0.08) 65%, transparent 80%);
-  color: #fff;
   bottom: 0;
 }
 
+.carousel-caption::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.5) 35%, transparent 65%);
+  pointer-events: none;
+}
+
 .carousel-title {
+  position: relative;
   font-family: var(--font-display);
   font-size: 1.85rem;
   font-weight: 800;
   letter-spacing: -0.01em;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
 }
 
 .carousel-subtitle {
+  position: relative;
   font-size: 1rem;
-  opacity: 0.85;
+  color: #fff;
   margin-top: 0.15rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+
+.carousel-subtitle {
+  position: relative;
+  font-size: 1rem;
+  opacity: 0.9;
+  margin-top: 0.15rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
 }
 
 .carousel-artist-link {
