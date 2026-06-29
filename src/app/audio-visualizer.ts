@@ -73,6 +73,7 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
   });
 
   private readonly onWindowScroll = (): void => this.updateScrollHide();
+  private readonly onWindowResize = (): void => this.updateScrollHide();
 
   ngOnInit(): void {
     this.subs.push(
@@ -85,7 +86,7 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     window.addEventListener('scroll', this.onWindowScroll, { passive: true });
-    window.addEventListener('resize', this.onWindowScroll);
+    window.addEventListener('resize', this.onWindowResize);
     this.updateScrollHide();
 
     const draw = () => {
@@ -100,7 +101,7 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
       cancelAnimationFrame(this.animationFrameId);
     }
     window.removeEventListener('scroll', this.onWindowScroll);
-    window.removeEventListener('resize', this.onWindowScroll);
+    window.removeEventListener('resize', this.onWindowResize);
     for (const s of this.subs) s.unsubscribe();
   }
 
@@ -124,6 +125,18 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
     const ctx = canvas?.getContext('2d');
     if (!analyser || !ctx) {
       return;
+    }
+
+    // Ensure canvas has the correct dimensions
+    if (canvas) {
+      const computedStyle = getComputedStyle(canvas);
+      const width = parseInt(computedStyle.width, 10);
+      const height = parseInt(computedStyle.height, 10);
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
     }
 
     if (!this.frequencyData || this.frequencyData.length !== analyser.frequencyBinCount) {
@@ -159,7 +172,7 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
 
   private drawBars(ctx: CanvasRenderingContext2D, width: number, height: number): void {
     const data = this.frequencyData!;
-    const barWidth = (width / data.length) * 2.5;
+    const barWidth = Math.max(1, (width / data.length) * 2.5);
     let x = 0;
 
     for (let i = 0; i < data.length; i++) {
@@ -175,7 +188,7 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
 
   private drawMirroredBars(ctx: CanvasRenderingContext2D, width: number, height: number): void {
     const data = this.frequencyData!;
-    const barWidth = (width / data.length) * 2.5;
+    const barWidth = Math.max(1, (width / data.length) * 2.5);
     const center = height / 2;
     let x = 0;
 
