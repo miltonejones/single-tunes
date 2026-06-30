@@ -177,7 +177,6 @@ input[type='range'] {
   background: var(--surface-2);
   outline: none;
   cursor: pointer;
-  width: 100%;
 }
 
 input[type='range']::-webkit-slider-thumb {
