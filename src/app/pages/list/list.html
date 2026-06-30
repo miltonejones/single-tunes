@@ -228,14 +228,14 @@
             <span class="track-genre">{{ track.Genre }}</span>
           }
           <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
-          <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-          </button>
           <i
             class="fa-heart track-heart"
             [class.fa-solid]="isInPlaylist(track)"
             [class.fa-regular]="!isInPlaylist(track)"
           ></i>
+          <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
         </div>
       }
     </div>
