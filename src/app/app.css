@@ -46,9 +46,9 @@
   right: 0;
   z-index: 100;
   padding: 0.55rem 1.25rem;
-  background: rgba(10, 10, 15, 0.72);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid var(--border);
 }
 
