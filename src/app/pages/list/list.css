@@ -67,13 +67,14 @@
   color: #fff;
   font-size: 1.15rem;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--shadow-glow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .banner-play-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+  transform: scale(1.1);
+  filter: brightness(1.12);
+  box-shadow: var(--shadow-glow), 0 0 32px rgba(var(--glow-rgb-1), 0.3);
 }
 
 .banner-shuffle-btn {
@@ -119,8 +120,8 @@
 }
 
 .banner-download-btn.all-downloaded {
-  color: limegreen;
-  border-color: limegreen;
+  color: var(--success);
+  border-color: var(--success);
 }
 
 .banner-download-btn:disabled {
@@ -224,11 +225,12 @@
   border-radius: var(--radius-sm);
   border-bottom: 1px solid var(--border);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .track-row:hover {
   background-color: var(--surface-hover);
+  box-shadow: inset 3px 0 0 var(--accent-soft);
 }
 
 .track-menu-btn {
@@ -291,6 +293,7 @@
 .track-row.active {
   background-color: var(--accent-soft);
   color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .track-row.active .track-number,
@@ -314,7 +317,7 @@
 }
 
 .track-downloaded-icon {
-  color: limegreen;
+  color: var(--success);
   font-size: 0.7rem;
   flex-shrink: 0;
 }
@@ -454,12 +457,12 @@ a.track-genre:hover {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.22s ease;
   max-width: 100%;
 }
 
 .album-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
 }
 
 .album-card-img {
@@ -470,6 +473,11 @@ a.track-genre:hover {
   background: var(--surface-2);
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
+  transition: box-shadow 0.22s ease;
+}
+
+.album-card:hover .album-card-img {
+  box-shadow: var(--shadow-md), 0 0 24px rgba(var(--glow-rgb-1), 0.18);
 }
 
 .album-card-info {
