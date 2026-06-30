@@ -94,7 +94,7 @@ export class SpeechPlaybackService {
   }
 
   getAvailableVoices(): SpeechSynthesisVoice[] {
-    return window.speechSynthesis.getVoices();
+    return window.speechSynthesis?.getVoices() ?? [];
   }
 
   getEnglishVoices(): SpeechSynthesisVoice[] {

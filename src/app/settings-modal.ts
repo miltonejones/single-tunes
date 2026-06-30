@@ -30,11 +30,11 @@ export class SettingsModal implements OnDestroy {
       }
     });
 
-    window.speechSynthesis.addEventListener('voiceschanged', this.onVoicesChanged);
+    window.speechSynthesis?.addEventListener('voiceschanged', this.onVoicesChanged);
   }
 
   ngOnDestroy(): void {
-    window.speechSynthesis.removeEventListener('voiceschanged', this.onVoicesChanged);
+    window.speechSynthesis?.removeEventListener('voiceschanged', this.onVoicesChanged);
   }
 
   setField<K extends keyof AnnouncerSettings>(key: K, event: Event): void {

@@ -165,6 +165,7 @@ export class TrackDownloadService {
   }
 
   private openDb(): Promise<void> {
+    if (typeof indexedDB === 'undefined') return Promise.resolve();
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(DB_NAME, DB_VERSION);
       req.onupgradeneeded = (e) => {
