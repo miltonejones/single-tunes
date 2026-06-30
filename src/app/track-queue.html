@@ -35,7 +35,7 @@
               <div class="queue-artist">{{ track.artistName }}</div>
               @if (getDedicationName(track); as dedicationName) {
                 <div class="dedication-badge">
-                  <i class="fa-solid fa-heart"></i> Dedicated to {{ dedicationName }}
+                  <i class="fa-solid fa-ribbon"></i> Dedicated to {{ dedicationName }}
                 </div>
               }
             </div>
@@ -66,7 +66,7 @@
                   (click)="toggleDedicationEdit(track); $event.stopPropagation()"
                   title="Dedicate this song"
                 >
-                  <i class="fa-solid fa-heart"></i>
+                  <i class="fa-solid fa-ribbon"></i>
                 </button>
               }
               @if (track.ID === currentTrackId()) {
