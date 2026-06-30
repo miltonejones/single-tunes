@@ -4,7 +4,7 @@
     <div class="carousel" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
       <div class="carousel-track" [style.transform]="'translateX(-' + carouselIndex() * 100 + '%)'">
         @for (item of carouselItems(); track item.ID + item.Type) {
-          <div class="carousel-slide">
+          <a class="carousel-slide" [routerLink]="['/list', item.Type, item.ID, 1]">
             <img [src]="item.imageLg" [alt]="item.Name" loading="lazy" />
             <div class="carousel-caption">
               <div class="carousel-title">{{ item.Name }}</div>
@@ -12,10 +12,7 @@
                 <div class="carousel-subtitle">{{ item.Caption }}</div>
               }
             </div>
-            <a class="carousel-artist-link" [routerLink]="['/list', item.Type, item.ID, 1]">
-              Open artist <i class="fa-solid fa-chevron-right"></i>
-            </a>
-          </div>
+          </a>
         }
       </div>
 
