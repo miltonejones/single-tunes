@@ -78,21 +78,26 @@ export class SearchPage implements OnInit {
       this.currentTrackId.set(track?.ID ?? null);
     });
 
-    const query = this.route.snapshot.paramMap.get('query') ?? '';
-    this.query.set(query);
+    // paramMap fires on every navigation to this route (including re-searches)
+    this.route.paramMap.subscribe((params) => {
+      const query = params.get('query') ?? '';
+      this.query.set(query);
+      if (!this.offline.isOnline()) {
+        this.searchOffline(query);
+      }
+    });
 
-    if (!this.offline.isOnline()) {
-      this.searchOffline(query);
-    } else {
-      const resolved = this.route.snapshot.data['search'] as SearchResolvedData;
+    // data fires with fresh resolver output on every navigation
+    this.route.data.subscribe((data) => {
+      if (!this.offline.isOnline()) return;
+      const resolved = data['search'] as SearchResolvedData;
       this.artists.set(resolved.artists.records);
       this.albums.set(resolved.albums.records);
       this.tracks.set(resolved.tracks.records);
       this.podcasts.set(resolved.podcasts);
-    }
-
-    const firstTab = this.tabsWithResults()[0];
-    if (firstTab) this.activeTab.set(firstTab);
+      const firstTab = this.tabsWithResults()[0];
+      if (firstTab) this.activeTab.set(firstTab);
+    });
   }
 
   private async searchOffline(query: string): Promise<void> {
@@ -123,6 +128,8 @@ export class SearchPage implements OnInit {
         albumName: t.albumName ?? '',
       })),
     );
+    const firstTab = this.tabsWithResults()[0];
+    if (firstTab) this.activeTab.set(firstTab);
   }
 
   playTrack(track: ITrackItem): void {
