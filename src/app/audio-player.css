@@ -156,10 +156,6 @@
   color: var(--text);
 }
 
-.audio-player-volume-slider {
-  width: 80px;
-}
-
 .audio-player-time {
   font-size: 0.75rem;
   color: var(--text-secondary);
@@ -238,10 +234,6 @@ input[type='range']::-moz-range-track {
     width: 1.75rem;
     height: 1.75rem;
     font-size: 0.8rem;
-  }
-
-  .audio-player-volume-slider {
-    width: 50px;
   }
 
   .audio-player-time {

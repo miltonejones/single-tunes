@@ -67,7 +67,6 @@ export class AudioPlayer implements OnInit, OnDestroy {
   protected volume = signal(1);
   protected dominantColor = signal<string | null>(null);
   protected isMuted = signal(false);
-  protected showVolumeSlider = signal(false);
 
   private playRequestId = 0;
 
@@ -527,15 +526,6 @@ export class AudioPlayer implements OnInit, OnDestroy {
       this.volume.set(this.audioEl.volume);
       this.setVolume(0);
       this.isMuted.set(true);
-    }
-  }
-
-  protected onVolumeInput(event: Event): void {
-    const val = Number((event.target as HTMLInputElement).value);
-    this.volume.set(val);
-    this.setVolume(val);
-    if (val > 0 && this.isMuted()) {
-      this.isMuted.set(false);
     }
   }
 
