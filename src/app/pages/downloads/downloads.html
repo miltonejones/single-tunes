@@ -150,7 +150,7 @@
                   <div class="track-title">{{ track.Title }}</div>
                   <div class="track-artist">{{ track.artistName }}</div>
                   <div class="track-meta text-muted">
-                    {{ track.albumName }} • {{ formatDuration(track.trackTime) }}
+                    {{ track.albumName }} • {{ formatDuration(track.trackTime / 1000) }}
                   </div>
                 </div>
 
@@ -199,7 +199,7 @@
                     />
                     <div class="track-info flex-grow-1">
                       <div class="track-title">{{ track.Title }}</div>
-                      <div class="track-meta text-muted">{{ track.albumName }} • {{ formatDuration(track.trackTime) }}</div>
+                      <div class="track-meta text-muted">{{ track.albumName }} • {{ formatDuration(track.trackTime / 1000) }}</div>
                     </div>
                     <button
                       type="button"
@@ -249,7 +249,7 @@
                     <div class="track-info flex-grow-1">
                       <div class="track-title">{{ track.Title }}</div>
                       <div class="track-artist">{{ track.artistName }}</div>
-                      <div class="track-meta text-muted">{{ formatDuration(track.trackTime) }}</div>
+                      <div class="track-meta text-muted">{{ formatDuration(track.trackTime / 1000) }}</div>
                     </div>
                     <button
                       type="button"
