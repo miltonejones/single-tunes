@@ -63,6 +63,94 @@
     </div>
   }
 
+  <!-- ── AI Search ─────────────────────────────────────────────────── -->
+  <div class="ai-search-widget">
+    <div class="ai-search-input-row">
+      <i class="fa-solid fa-wand-magic-sparkles ai-search-icon"></i>
+      <input
+        #aiInput
+        type="text"
+        class="ai-search-input"
+        placeholder="Describe what you want to hear — a mood, an era, a genre, or a vibe…"
+        (keyup.enter)="runAiSearch(aiInput.value)"
+      />
+      <button
+        type="button"
+        class="ai-search-btn"
+        [disabled]="aiStatus() === 'loading'"
+        (click)="runAiSearch(aiInput.value)"
+      >
+        @if (aiStatus() === 'loading') {
+          <span class="spinner-border spinner-border-sm" role="status"></span>
+        } @else {
+          <i class="fa-solid fa-arrow-right"></i>
+        }
+      </button>
+    </div>
+
+    @if (aiStatus() === 'error') {
+      <p class="ai-search-error">
+        <i class="fa-solid fa-circle-exclamation"></i> AI search unavailable right now.
+      </p>
+    }
+
+    @if (aiStatus() === 'success') {
+      <div class="ai-results">
+        @if (aiArtists().length > 0) {
+          <div class="section-header">
+            <h3><i class="fa-solid fa-microphone"></i> Artists</h3>
+          </div>
+          <div class="dash-grid">
+            @for (item of aiArtists(); track item.ID) {
+              <lib-media-card
+                [thumbnail]="item.Thumbnail"
+                [title]="item.Name"
+                [caption]="item.TrackCount + ' tracks'"
+                [routerLink]="['/list', 'artist', item.ID, 1]"
+              />
+            }
+          </div>
+        }
+        @if (aiAlbums().length > 0) {
+          <div class="section-header">
+            <h3><i class="fa-solid fa-compact-disc"></i> Albums</h3>
+          </div>
+          <div class="dash-grid">
+            @for (item of aiAlbums(); track item.ID) {
+              <lib-media-card
+                [thumbnail]="item.Thumbnail"
+                [title]="item.Name"
+                [subtitle]="item.artistName ?? null"
+                [caption]="item.TrackCount + ' tracks'"
+                [routerLink]="['/list', 'album', item.ID, 1]"
+              />
+            }
+          </div>
+        }
+        @if (aiTracks().length > 0) {
+          <div class="section-header">
+            <h3><i class="fa-solid fa-music"></i> Tracks</h3>
+          </div>
+          <div class="ai-track-list">
+            @for (track of aiTracks(); track track.ID) {
+              <div class="ai-track-row" [class.active]="track.ID === currentTrackId()" (click)="playAiTrack(track)">
+                <img class="ai-track-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
+                <div class="ai-track-info">
+                  <div class="ai-track-title">{{ track.Title }}</div>
+                  <div class="ai-track-artist">{{ track.artistName }} · {{ track.albumName }}</div>
+                </div>
+                <span class="ai-track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+              </div>
+            }
+          </div>
+        }
+        @if (!aiArtists().length && !aiAlbums().length && !aiTracks().length) {
+          <p class="ai-no-results">No matches found. Try a different description.</p>
+        }
+      </div>
+    }
+  </div>
+
   @if (playHistory.recentItems().length > 0) {
     <div class="section-header">
       <h3><i class="fa-solid fa-clock-rotate-left"></i> Recently Played</h3>

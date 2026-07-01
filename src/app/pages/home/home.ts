@@ -2,10 +2,16 @@ import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular
 import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
 import { HomeResolvedData } from './home.resolver';
 import {
+  AiSearchQueryService,
+  AiSearchStatus,
+  AudioPlayerCommandService,
   CoverflowDirective,
   DashItem,
+  formatDuration,
+  IGridItem,
   ImgFallbackDirective,
   IPlaylistSummary,
+  ITrackItem,
   MediaCard,
   PlayHistoryService,
   PodcastCard,
@@ -36,10 +42,13 @@ function pickRandom<T>(items: T[], count: number): T[] {
 })
 export class HomePage implements OnInit, OnDestroy {
   protected readonly title = signal('home');
+  protected readonly formatDuration = formatDuration;
 
   private route = inject(ActivatedRoute);
   protected subscriptionsService = inject(PodcastSubscriptionsService);
   protected playHistory = inject(PlayHistoryService);
+  private aiSearch = inject(AiSearchQueryService);
+  private audioPlayerCommand = inject(AudioPlayerCommandService);
   private carouselTimer?: ReturnType<typeof setInterval>;
   private touchStartX = 0;
   private touchStartY = 0;
@@ -47,6 +56,12 @@ export class HomePage implements OnInit, OnDestroy {
   dashItems = signal<DashItem[]>([]);
   featuredPlaylists = signal<IPlaylistSummary[]>([]);
   carouselIndex = signal(0);
+
+  aiStatus = signal<AiSearchStatus>('idle');
+  aiTracks = signal<ITrackItem[]>([]);
+  aiAlbums = signal<IGridItem[]>([]);
+  aiArtists = signal<IGridItem[]>([]);
+  currentTrackId = signal<number | null>(null);
 
   topArtists = computed(() => this.topByTrackCount('artist'));
   topAlbums = computed(() => this.topByTrackCount('album'));
@@ -63,10 +78,35 @@ export class HomePage implements OnInit, OnDestroy {
     this.dashItems.set(data.dashItems);
     this.featuredPlaylists.set(pickRandom(data.playlists, FEATURED_PLAYLIST_COUNT));
     this.startCarousel();
+    this.audioPlayerCommand.currentTrack$.subscribe((track) => {
+      this.currentTrackId.set(track?.ID ?? null);
+    });
   }
 
   ngOnDestroy(): void {
     clearInterval(this.carouselTimer);
+  }
+
+  async runAiSearch(query: string): Promise<void> {
+    if (!query.trim()) return;
+    this.aiStatus.set('loading');
+    this.aiTracks.set([]);
+    this.aiAlbums.set([]);
+    this.aiArtists.set([]);
+    try {
+      const result = await this.aiSearch.search(query);
+      this.aiTracks.set(result.tracks);
+      this.aiAlbums.set(result.albums);
+      this.aiArtists.set(result.artists);
+      this.aiStatus.set('success');
+    } catch {
+      this.aiStatus.set('error');
+    }
+  }
+
+  playAiTrack(track: ITrackItem): void {
+    this.playHistory.recordPlay('home-ai', 'AI Search', ['/'], track);
+    this.audioPlayerCommand.openTrack(track, this.aiTracks());
   }
 
   nextSlide(): void {

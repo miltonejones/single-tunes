@@ -263,6 +263,166 @@
   color: var(--danger);
 }
 
+/* ── AI Search widget ──────────────────────────────────────────────── */
+
+.ai-search-widget {
+  margin: 1.5rem 1rem 0.5rem;
+}
+
+.ai-search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 0.6rem 0.45rem 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-search-input-row:focus-within {
+  border-color: rgba(var(--glow-rgb-1), 0.5);
+  box-shadow: var(--shadow-sm), 0 0 0 3px rgba(var(--glow-rgb-1), 0.12);
+}
+
+.ai-search-icon {
+  color: var(--accent);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.ai-search-input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 0.9rem;
+  color: var(--text);
+  min-width: 0;
+}
+
+.ai-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.ai-search-btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  transition: opacity 0.15s ease;
+}
+
+.ai-search-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ai-search-error {
+  margin-top: 0.75rem;
+  padding: 0 0.25rem;
+  font-size: 0.85rem;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ai-results {
+  margin-top: 0.25rem;
+}
+
+.ai-no-results {
+  padding: 1rem 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.ai-track-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+.ai-track-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ai-track-row:hover {
+  background-color: var(--surface-hover);
+}
+
+.ai-track-row.active {
+  background-color: var(--accent-soft);
+}
+
+.ai-track-row.active .ai-track-title {
+  color: var(--accent);
+}
+
+.ai-track-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+
+.ai-track-row.active .ai-track-thumb {
+  animation: spin-record 4s linear infinite;
+}
+
+@keyframes spin-record {
+  to { transform: rotate(360deg); }
+}
+
+.ai-track-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.ai-track-title {
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-track-artist {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-track-time {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
 /* On mobile, render all grids as a single horizontally scrollable row. */
 @media (max-width: 576px) {
   .dash-grid,
