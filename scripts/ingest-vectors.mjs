@@ -240,3 +240,10 @@ if (results.artists) { log(`Artists : ${results.artists.ingested} ingested, ${re
 if (totalFailed > 0) {
   process.exitCode = 1;
 }
+
+// Rebuild the S3 object-store cache so the search Lambda picks up the new vectors.
+// We invoke the Lambda directly (not via API Gateway) to bypass the 29s APIGW timeout —
+// the DynamoDB scan takes ~30-60 s on a cold Lambda container.
+log('\nRebuilding S3 vector cache (direct Lambda invoke)…');
+log('  Run:  AWS_PROFILE=@Access2025 aws lambda invoke --function-name single-tunes-cache-rebuild --payload \'{"source":"ingest"}\' /tmp/rebuild.json && cat /tmp/rebuild.json');
+log('  (Skipping automatic rebuild — run the command above after ingestion completes.)');

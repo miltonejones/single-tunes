@@ -214,6 +214,19 @@ resource "aws_iam_role_policy_attachment" "ai_lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+resource "aws_s3_bucket" "vector_cache" {
+  bucket = "${var.project_name}-vector-cache-${random_string.suffix.result}"
+  tags   = local.tags
+}
+
+resource "aws_s3_bucket_public_access_block" "vector_cache" {
+  bucket                  = aws_s3_bucket.vector_cache.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_iam_role_policy" "ai_lambda_perms" {
   name = "${var.project_name}-ai-lambda-perms"
   role = aws_iam_role.ai_lambda.id
@@ -229,6 +242,11 @@ resource "aws_iam_role_policy" "ai_lambda_perms" {
         Effect   = "Allow"
         Action   = "bedrock:InvokeModel"
         Resource = "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.titan-embed-text-v2:0"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject"]
+        Resource = "${aws_s3_bucket.vector_cache.arn}/*"
       }
     ]
   })
@@ -273,15 +291,63 @@ resource "aws_lambda_function" "ai_search" {
   filename         = data.archive_file.ai_search.output_path
   source_code_hash = data.archive_file.ai_search.output_base64sha256
   timeout          = 30
-  memory_size      = 512
+  memory_size      = 1024
 
   environment {
     variables = {
-      TABLE_NAME = aws_dynamodb_table.vectors.name
+      TABLE_NAME   = aws_dynamodb_table.vectors.name
+      CACHE_BUCKET = aws_s3_bucket.vector_cache.bucket
     }
   }
 
   tags = local.tags
+}
+
+data "archive_file" "cache_rebuild" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/cache-rebuild/index.mjs"
+  output_path = "${path.module}/.lambda-zips/cache-rebuild.zip"
+}
+
+resource "aws_lambda_function" "cache_rebuild" {
+  function_name    = "${var.project_name}-cache-rebuild"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.cache_rebuild.output_path
+  source_code_hash = data.archive_file.cache_rebuild.output_base64sha256
+  timeout          = 120
+  memory_size      = 512
+
+  environment {
+    variables = {
+      TABLE_NAME   = aws_dynamodb_table.vectors.name
+      CACHE_BUCKET = aws_s3_bucket.vector_cache.bucket
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "aws_apigatewayv2_integration" "cache_rebuild" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.cache_rebuild.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "cache_rebuild" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /rebuild-cache"
+  target    = "integrations/${aws_apigatewayv2_integration.cache_rebuild.id}"
+}
+
+resource "aws_lambda_permission" "cache_rebuild" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cache_rebuild.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
 }
 
 resource "aws_apigatewayv2_api" "ai" {
