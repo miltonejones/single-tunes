@@ -18,6 +18,7 @@ export { TrackCommandService } from './track-command.service';
 export { AudioPlayerCommandService } from './audio-player-command.service';
 
 export { CatalogQueryService } from './catalog-query.service';
+export { AiSearchQueryService } from './ai-search-query.service';
 export { CatalogCommandService } from './catalog-command.service';
 export { WikipediaQueryService } from './wikipedia-query.service';
 

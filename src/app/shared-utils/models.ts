@@ -126,3 +126,21 @@ export interface IPlaylistSummary {
   image?: string | null;
   [key: string]: unknown;
 }
+
+// ── AI vector search ──────────────────────────────────────────────────────────
+
+export type AiEntityType = 'track' | 'album' | 'artist';
+
+export interface AiSearchRequest {
+  query: string;
+  types?: AiEntityType[];
+  limit?: number;
+}
+
+export interface AiSearchResponse {
+  tracks: ITrackItem[];
+  albums: IGridItem[];
+  artists: IGridItem[];
+}
+
+export type AiSearchStatus = 'idle' | 'loading' | 'success' | 'error';
