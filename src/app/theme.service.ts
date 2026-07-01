@@ -22,6 +22,16 @@ export const THEMES: Theme[] = [
     name: 'Minty Fresh',
     description: 'Cool as the other side of the pillow',
   },
+  {
+    key: 'clean-slate',
+    name: 'Clean Slate',
+    description: 'Flat and focused. No gradients, no fuss',
+  },
+  {
+    key: 'desert-wind',
+    name: 'Desert Wind',
+    description: 'Turquoise and adobe under a wide open sky',
+  },
 ];
 
 const STORAGE_KEY = 'sky-tunes-theme';

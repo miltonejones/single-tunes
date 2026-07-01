@@ -159,6 +159,78 @@
   --bg-glass: rgba(8, 15, 12, 0.82);
 }
 
+/* ── Clean Slate ──────────────────────────────────────────────────────── */
+[data-theme='clean-slate'] {
+  --bg: #111827;
+  --surface: #1f2937;
+  --surface-2: #374151;
+  --surface-hover: #4b5563;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.58);
+  --text-tertiary: rgba(255, 255, 255, 0.36);
+  --accent-from: #3b82f6;
+  --accent-to: #3b82f6;
+  --accent: #60a5fa;
+  --accent-strong: #3b82f6;
+  --accent-soft: rgba(59, 130, 246, 0.14);
+  --glow-rgb-1: 17, 24, 39;
+  --glow-rgb-2: 17, 24, 39;
+  --glow-pos-1: 0% 0%;
+  --glow-pos-2: 100% 100%;
+  --btn-hover-bg: #2563eb;
+  --btn-active-bg: #1d4ed8;
+  --switch-bg-url: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2360a5fa'/%3e%3c/svg%3e");
+  --danger: #f87171;
+  --success: #4ade80;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 4px 14px rgba(0, 0, 0, 0.24);
+  --shadow-glow: 0 2px 8px rgba(59, 130, 246, 0.18);
+  --bg-glass: rgba(17, 24, 39, 0.9);
+}
+
+[data-theme='clean-slate'] body {
+  background: var(--bg);
+}
+
+/* ── Desert Wind ──────────────────────────────────────────────────────── */
+[data-theme='desert-wind'] {
+  --bg: #130c08;
+  --surface: #1e1108;
+  --surface-2: #2c1a0c;
+  --surface-hover: #3d2510;
+  --border: rgba(200, 120, 60, 0.10);
+  --border-strong: rgba(200, 120, 60, 0.20);
+  --text: rgba(255, 240, 220, 0.94);
+  --text-secondary: rgba(220, 190, 160, 0.62);
+  --text-tertiary: rgba(200, 170, 140, 0.4);
+  --accent-from: #0d9488;
+  --accent-to: #0d9488;
+  --accent: #2dd4bf;
+  --accent-strong: #0d9488;
+  --accent-soft: rgba(13, 148, 136, 0.16);
+  --glow-rgb-1: 19, 12, 8;
+  --glow-rgb-2: 19, 12, 8;
+  --glow-pos-1: 0% 0%;
+  --glow-pos-2: 100% 100%;
+  --btn-hover-bg: #0f766e;
+  --btn-active-bg: #115e59;
+  --switch-bg-url: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%232dd4bf'/%3e%3c/svg%3e");
+  --danger: #f87171;
+  --success: #4ade80;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.24);
+  --shadow-lg: 0 4px 14px rgba(0, 0, 0, 0.28);
+  --shadow-glow: 0 2px 8px rgba(13, 148, 136, 0.2);
+  --bg-glass: rgba(19, 12, 8, 0.9);
+}
+
+[data-theme='desert-wind'] body {
+  background: var(--bg);
+}
+
 /* Re-point Bootstrap's own design tokens at our palette so dark-theme-aware
    components (modal, offcanvas, form-control, nav, dropdown, ...) match. */
 [data-bs-theme='dark'] {
