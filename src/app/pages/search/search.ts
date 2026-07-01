@@ -2,6 +2,8 @@ import { Component, OnInit, computed, effect, inject, signal } from '@angular/co
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { SearchResolvedData } from './search.resolver';
 import {
+  AiSearchQueryService,
+  AiSearchStatus,
   AudioPlayerCommandService,
   Breadcrumbs,
   BreadcrumbItem,
@@ -19,7 +21,7 @@ import {
   TrackMenu,
 } from 'shared-utils';
 
-type ResultTab = 'artists' | 'albums' | 'tracks' | 'podcasts';
+type ResultTab = 'artists' | 'albums' | 'tracks' | 'podcasts' | 'ai';
 
 @Component({
   selector: 'app-search-page',
@@ -38,12 +40,17 @@ export class SearchPage implements OnInit {
   protected offline = inject(OfflineService);
   private podcastSelection = inject(PodcastSelectionService);
   private trackDownload = inject(TrackDownloadService);
+  private aiSearchQuery = inject(AiSearchQueryService);
 
   query = signal('');
   artists = signal<IGridItem[]>([]);
   albums = signal<IGridItem[]>([]);
   tracks = signal<ITrackItem[]>([]);
   podcasts = signal<IPodcast[]>([]);
+  aiTracks = signal<ITrackItem[]>([]);
+  aiAlbums = signal<IGridItem[]>([]);
+  aiArtists = signal<IGridItem[]>([]);
+  aiSearchStatus = signal<AiSearchStatus>('idle');
   activeTab = signal<ResultTab>('artists');
   menuTrack = signal<ITrackItem | null>(null);
   currentTrackId = signal<number | null>(null);
@@ -62,7 +69,9 @@ export class SearchPage implements OnInit {
       this.artists().length > 0 ||
       this.albums().length > 0 ||
       this.tracks().length > 0 ||
-      this.podcasts().length > 0,
+      this.podcasts().length > 0 ||
+      this.aiSearchStatus() === 'loading' ||
+      this.aiSearchStatus() === 'success',
   );
 
   tabsWithResults = computed<ResultTab[]>(() => {
@@ -71,6 +80,7 @@ export class SearchPage implements OnInit {
     if (this.albums().length > 0) tabs.push('albums');
     if (this.tracks().length > 0) tabs.push('tracks');
     if (this.podcasts().length > 0) tabs.push('podcasts');
+    if (this.offline.isOnline() && this.aiSearchStatus() !== 'idle') tabs.push('ai');
     return tabs;
   });
 
@@ -102,7 +112,25 @@ export class SearchPage implements OnInit {
       this.podcasts.set(resolved.podcasts);
       const firstTab = this.tabsWithResults()[0];
       if (firstTab) this.activeTab.set(firstTab);
+      this.loadAiResults(this.query());
     });
+  }
+
+  private async loadAiResults(query: string): Promise<void> {
+    if (!this.offline.isOnline() || !query.trim()) return;
+    this.aiSearchStatus.set('loading');
+    this.aiTracks.set([]);
+    this.aiAlbums.set([]);
+    this.aiArtists.set([]);
+    try {
+      const result = await this.aiSearchQuery.search(query);
+      this.aiTracks.set(result.tracks);
+      this.aiAlbums.set(result.albums);
+      this.aiArtists.set(result.artists);
+      this.aiSearchStatus.set('success');
+    } catch {
+      this.aiSearchStatus.set('error');
+    }
   }
 
   private async searchOffline(query: string): Promise<void> {
@@ -138,8 +166,9 @@ export class SearchPage implements OnInit {
   }
 
   playTrack(track: ITrackItem): void {
+    const queue = this.activeTab() === 'ai' ? this.aiTracks() : this.tracks();
     this.playHistory.recordPlay('search', `Search: "${this.query()}"`, ['/search', this.query()], track);
-    this.audioPlayerCommand.openTrack(track, this.tracks());
+    this.audioPlayerCommand.openTrack(track, queue);
   }
 
   openMenu(track: ITrackItem, event: Event): void {
