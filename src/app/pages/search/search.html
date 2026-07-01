@@ -27,7 +27,12 @@
   }
 </div>
 
-@if (!hasResults()) {
+@if (searchMode() === 'ai' && aiSearchStatus() === 'loading') {
+  <div class="ai-loading">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="text-muted">Finding matches…</p>
+  </div>
+} @else if (!hasResults()) {
   <p>No results found.</p>
 } @else if (viewMode() === 'tabs') {
 
@@ -42,14 +47,28 @@
           (click)="activeTab.set(tab)"
         >
           @switch (tab) {
-            @case ('artists') { <i class="fa-solid fa-microphone"></i> Artists ({{ artists().length }}) }
-            @case ('albums')  { <i class="fa-solid fa-compact-disc"></i> Albums ({{ albums().length }}) }
-            @case ('tracks')  { <i class="fa-solid fa-music"></i> Tracks ({{ tracks().length }}) }
-            @case ('podcasts'){ <i class="fa-solid fa-podcast"></i> Podcasts ({{ podcasts().length }}) }
+            @case ('artists') {
+              <i class="fa-solid fa-microphone"></i>
+              Artists ({{ searchMode() === 'ai' ? aiArtists().length : artists().length }})
+            }
+            @case ('albums')  {
+              <i class="fa-solid fa-compact-disc"></i>
+              Albums ({{ searchMode() === 'ai' ? aiAlbums().length : albums().length }})
+            }
+            @case ('tracks')  {
+              <i class="fa-solid fa-music"></i>
+              Tracks ({{ searchMode() === 'ai' ? aiTracks().length : tracks().length }})
+            }
+            @case ('podcasts'){
+              <i class="fa-solid fa-podcast"></i>
+              Podcasts ({{ searchMode() === 'ai' ? 0 : podcasts().length }})
+            }
             @case ('ai') {
-              <i class="fa-solid fa-wand-magic-sparkles"></i> AI Search
-              @if (aiSearchStatus() === 'loading') {
-                <span class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
+              @if (searchMode() === 'ai') {
+                <i class="fa-solid fa-wand-magic-sparkles"></i> AI Search
+                @if (aiSearchStatus() === 'loading') {
+                  <span class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
+                }
               }
             }
           }
@@ -59,125 +78,192 @@
   </ul>
 
   @if (activeTab() === 'artists') {
-    @if (artists().length > 0) {
-      <div class="search-grid">
-        @for (item of artists(); track item.ID) {
-          <lib-media-card
-            [thumbnail]="item.Thumbnail"
-            [title]="item.Name"
-            [caption]="item.TrackCount + ' tracks'"
-            [routerLink]="['/list', 'artist', item.ID, 1]"
-          />
-        }
-      </div>
+    @if (searchMode() === 'ai') {
+      @if (aiArtists().length > 0) {
+        <div class="search-grid">
+          @for (item of aiArtists(); track item.ID) {
+            <lib-media-card
+              [thumbnail]="item.Thumbnail"
+              [title]="item.Name"
+              [caption]="item.TrackCount + ' tracks'"
+              [routerLink]="['/list', 'artist', item.ID, 1]"
+            />
+          }
+        </div>
+      } @else {
+        <p class="text-muted">No matching artists.</p>
+      }
     } @else {
-      <p class="text-muted">No matching artists.</p>
+      @if (artists().length > 0) {
+        <div class="search-grid">
+          @for (item of artists(); track item.ID) {
+            <lib-media-card
+              [thumbnail]="item.Thumbnail"
+              [title]="item.Name"
+              [caption]="item.TrackCount + ' tracks'"
+              [routerLink]="['/list', 'artist', item.ID, 1]"
+            />
+          }
+        </div>
+      } @else {
+        <p class="text-muted">No matching artists.</p>
+      }
     }
   }
 
   @if (activeTab() === 'albums') {
-    @if (albums().length > 0) {
-      <div class="search-grid">
-        @for (item of albums(); track item.ID) {
-          <lib-media-card
-            [thumbnail]="item.Thumbnail"
-            [title]="item.Name"
-            [subtitle]="item.artistName ?? null"
-            [caption]="item.TrackCount + ' tracks'"
-            [routerLink]="['/list', 'album', item.ID, 1]"
-          />
-        }
-      </div>
+    @if (searchMode() === 'ai') {
+      @if (aiAlbums().length > 0) {
+        <div class="search-grid">
+          @for (item of aiAlbums(); track item.ID) {
+            <lib-media-card
+              [thumbnail]="item.Thumbnail"
+              [title]="item.Name"
+              [subtitle]="item.artistName ?? null"
+              [caption]="item.TrackCount + ' tracks'"
+              [routerLink]="['/list', 'album', item.ID, 1]"
+            />
+          }
+        </div>
+      } @else {
+        <p class="text-muted">No matching albums.</p>
+      }
     } @else {
-      <p class="text-muted">No matching albums.</p>
+      @if (albums().length > 0) {
+        <div class="search-grid">
+          @for (item of albums(); track item.ID) {
+            <lib-media-card
+              [thumbnail]="item.Thumbnail"
+              [title]="item.Name"
+              [subtitle]="item.artistName ?? null"
+              [caption]="item.TrackCount + ' tracks'"
+              [routerLink]="['/list', 'album', item.ID, 1]"
+            />
+          }
+        </div>
+      } @else {
+        <p class="text-muted">No matching albums.</p>
+      }
     }
   }
 
   @if (activeTab() === 'tracks') {
-    @if (tracks().length > 0) {
-      <div class="track-list">
-        @for (track of tracks(); track track.ID) {
-          <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
-            <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
-            <div class="track-info">
-              <div class="track-title">{{ track.Title }}</div>
-              <div class="track-artist">{{ track.artistName }}</div>
+    @if (searchMode() === 'ai') {
+      @if (aiTracks().length > 0) {
+        <div class="track-list">
+          @for (track of aiTracks(); track track.ID) {
+            <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+              <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
+              <div class="track-info">
+                <div class="track-title">{{ track.Title }}</div>
+                <div class="track-artist">{{ track.artistName }}</div>
+              </div>
+              <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+              <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
             </div>
-            <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
-            <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
-            </button>
-          </div>
-        }
-      </div>
+          }
+        </div>
+      } @else {
+        <p class="text-muted">No matching tracks.</p>
+      }
     } @else {
-      <p class="text-muted">No matching tracks.</p>
+      @if (tracks().length > 0) {
+        <div class="track-list">
+          @for (track of tracks(); track track.ID) {
+            <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+              <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
+              <div class="track-info">
+                <div class="track-title">{{ track.Title }}</div>
+                <div class="track-artist">{{ track.artistName }}</div>
+              </div>
+              <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+              <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="text-muted">No matching tracks.</p>
+      }
     }
   }
 
   @if (activeTab() === 'podcasts') {
-    @if (podcasts().length > 0) {
-      <div class="row">
-        @for (podcast of podcasts(); track podcast.feedUrl) {
-          <lib-podcast-card [podcast]="podcast" />
-        }
-      </div>
-    } @else {
+    @if (searchMode() === 'ai') {
+      <!-- AI search doesn't include podcasts -->
       <p class="text-muted">No matching podcasts.</p>
+    } @else {
+      @if (podcasts().length > 0) {
+        <div class="row">
+          @for (podcast of podcasts(); track podcast.feedUrl) {
+            <lib-podcast-card [podcast]="podcast" />
+          }
+        </div>
+      } @else {
+        <p class="text-muted">No matching podcasts.</p>
+      }
     }
   }
 
   @if (activeTab() === 'ai') {
-    @switch (aiSearchStatus()) {
-      @case ('loading') {
-        <div class="ai-loading">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p class="text-muted">Finding matches…</p>
-        </div>
-      }
-      @case ('error') {
-        <p class="error"><i class="fa-solid fa-circle-exclamation"></i> AI search unavailable.</p>
-      }
-      @case ('success') {
-        @if (!aiArtists().length && !aiAlbums().length && !aiTracks().length) {
-          <p class="text-muted">No AI results found.</p>
-        }
-        @if (aiArtists().length > 0) {
-          <h3 class="list-section-heading"><i class="fa-solid fa-microphone"></i> Artists</h3>
-          <div class="search-grid">
-            @for (item of aiArtists(); track item.ID) {
-              <lib-media-card [thumbnail]="item.Thumbnail" [title]="item.Name"
-                [caption]="item.TrackCount + ' tracks'" [routerLink]="['/list', 'artist', item.ID, 1]" />
-            }
+    @if (searchMode() === 'ai') {
+      <!-- AI results are shown in their respective type tabs for AI search mode -->
+      <p class="text-muted">AI results are shown in the Artists, Albums, and Tracks tabs above.</p>
+    } @else {
+      @switch (aiSearchStatus()) {
+        @case ('loading') {
+          <div class="ai-loading">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted">Finding matches…</p>
           </div>
         }
-        @if (aiAlbums().length > 0) {
-          <h3 class="list-section-heading"><i class="fa-solid fa-compact-disc"></i> Albums</h3>
-          <div class="search-grid">
-            @for (item of aiAlbums(); track item.ID) {
-              <lib-media-card [thumbnail]="item.Thumbnail" [title]="item.Name"
-                [subtitle]="item.artistName ?? null" [caption]="item.TrackCount + ' tracks'"
-                [routerLink]="['/list', 'album', item.ID, 1]" />
-            }
-          </div>
+        @case ('error') {
+          <p class="error"><i class="fa-solid fa-circle-exclamation"></i> AI search unavailable.</p>
         }
-        @if (aiTracks().length > 0) {
-          <h3 class="list-section-heading"><i class="fa-solid fa-music"></i> Tracks</h3>
-          <div class="track-list">
-            @for (track of aiTracks(); track track.ID) {
-              <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
-                <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
-                <div class="track-info">
-                  <div class="track-title">{{ track.Title }}</div>
-                  <div class="track-artist">{{ track.artistName }}</div>
+        @case ('success') {
+          @if (!aiArtists().length && !aiAlbums().length && !aiTracks().length) {
+            <p class="text-muted">No AI results found.</p>
+          }
+          @if (aiArtists().length > 0) {
+            <h3 class="list-section-heading"><i class="fa-solid fa-microphone"></i> Artists</h3>
+            <div class="search-grid">
+              @for (item of aiArtists(); track item.ID) {
+                <lib-media-card [thumbnail]="item.Thumbnail" [title]="item.Name"
+                  [caption]="item.TrackCount + ' tracks'" [routerLink]="['/list', 'artist', item.ID, 1]" />
+              }
+            </div>
+          }
+          @if (aiAlbums().length > 0) {
+            <h3 class="list-section-heading"><i class="fa-solid fa-compact-disc"></i> Albums</h3>
+            <div class="search-grid">
+              @for (item of aiAlbums(); track item.ID) {
+                <lib-media-card [thumbnail]="item.Thumbnail" [title]="item.Name"
+                  [subtitle]="item.artistName ?? null" [caption]="item.TrackCount + ' tracks'"
+                  [routerLink]="['/list', 'album', item.ID, 1]" />
+              }
+            </div>
+          }
+          @if (aiTracks().length > 0) {
+            <h3 class="list-section-heading"><i class="fa-solid fa-music"></i> Tracks</h3>
+            <div class="track-list">
+              @for (track of aiTracks(); track track.ID) {
+                <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+                  <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
+                  <div class="track-info">
+                    <div class="track-title">{{ track.Title }}</div>
+                    <div class="track-artist">{{ track.artistName }}</div>
+                  </div>
+                  <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+                  <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </button>
                 </div>
-                <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
-                <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
-                  <i class="fa-solid fa-ellipsis-vertical"></i>
-                </button>
-              </div>
-            }
-          </div>
+              }
+            </div>
+          }
         }
       }
     }
@@ -188,81 +274,147 @@
   <!-- ── List view ───────────────────────────────────────────────── -->
   <div class="list-view">
 
-    @if (artists().length > 0) {
-      <div class="list-section">
-        <h3 class="list-section-heading"><i class="fa-solid fa-microphone"></i> Artists</h3>
-        @for (item of artists(); track item.ID) {
-          <a class="list-row" [routerLink]="['/list', 'artist', item.ID, 1]">
-            <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="item.Thumbnail" [alt]="item.Name" />
-            <div class="list-info">
-              <div class="list-title">{{ item.Name }}</div>
-              <div class="list-meta">{{ item.TrackCount }} tracks</div>
-            </div>
-            <i class="fa-solid fa-chevron-right list-chevron"></i>
-          </a>
-        }
-      </div>
+    @if (searchMode() === 'ai') {
+      @if (aiArtists().length > 0) {
+        <div class="list-section">
+          <h3 class="list-section-heading"><i class="fa-solid fa-microphone"></i> Artists</h3>
+          @for (item of aiArtists(); track item.ID) {
+            <a class="list-row" [routerLink]="['/list', 'artist', item.ID, 1]">
+              <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="item.Thumbnail" [alt]="item.Name" />
+              <div class="list-info">
+                <div class="list-title">{{ item.Name }}</div>
+                <div class="list-meta">{{ item.TrackCount }} tracks</div>
+              </div>
+              <i class="fa-solid fa-chevron-right list-chevron"></i>
+            </a>
+          }
+        </div>
+      }
+    } @else {
+      @if (artists().length > 0) {
+        <div class="list-section">
+          <h3 class="list-section-heading"><i class="fa-solid fa-microphone"></i> Artists</h3>
+          @for (item of artists(); track item.ID) {
+            <a class="list-row" [routerLink]="['/list', 'artist', item.ID, 1]">
+              <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="item.Thumbnail" [alt]="item.Name" />
+              <div class="list-info">
+                <div class="list-title">{{ item.Name }}</div>
+                <div class="list-meta">{{ item.TrackCount }} tracks</div>
+              </div>
+              <i class="fa-solid fa-chevron-right list-chevron"></i>
+            </a>
+          }
+        </div>
+      }
     }
 
-    @if (albums().length > 0) {
-      <div class="list-section">
-        <h3 class="list-section-heading"><i class="fa-solid fa-compact-disc"></i> Albums</h3>
-        @for (item of albums(); track item.ID) {
-          <a class="list-row" [routerLink]="['/list', 'album', item.ID, 1]">
-            <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="item.Thumbnail" [alt]="item.Name" />
-            <div class="list-info">
-              <div class="list-title">{{ item.Name }}</div>
-              <div class="list-meta">{{ item.artistName }}</div>
-            </div>
-            <i class="fa-solid fa-chevron-right list-chevron"></i>
-          </a>
-        }
-      </div>
+    @if (searchMode() === 'ai') {
+      @if (aiAlbums().length > 0) {
+        <div class="list-section">
+          <h3 class="list-section-heading"><i class="fa-solid fa-compact-disc"></i> Albums</h3>
+          @for (item of aiAlbums(); track item.ID) {
+            <a class="list-row" [routerLink]="['/list', 'album', item.ID, 1]">
+              <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="item.Thumbnail" [alt]="item.Name" />
+              <div class="list-info">
+                <div class="list-title">{{ item.Name }}</div>
+                <div class="list-meta">{{ item.artistName }}</div>
+              </div>
+              <i class="fa-solid fa-chevron-right list-chevron"></i>
+            </a>
+          }
+        </div>
+      }
+    } @else {
+      @if (albums().length > 0) {
+        <div class="list-section">
+          <h3 class="list-section-heading"><i class="fa-solid fa-compact-disc"></i> Albums</h3>
+          @for (item of albums(); track item.ID) {
+            <a class="list-row" [routerLink]="['/list', 'album', item.ID, 1]">
+              <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="item.Thumbnail" [alt]="item.Name" />
+              <div class="list-info">
+                <div class="list-title">{{ item.Name }}</div>
+                <div class="list-meta">{{ item.artistName }}</div>
+              </div>
+              <i class="fa-solid fa-chevron-right list-chevron"></i>
+            </a>
+          }
+        </div>
+      }
     }
 
-    @if (tracks().length > 0) {
-      <div class="list-section">
-        <h3 class="list-section-heading"><i class="fa-solid fa-music"></i> Tracks</h3>
-        @for (track of tracks(); track track.ID) {
-          <div class="list-row track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
-            <img class="list-thumb track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
-            <div class="list-info">
-              <div class="list-title">{{ track.Title }}</div>
-              <div class="list-meta">{{ track.artistName }} · {{ track.albumName }}</div>
+    @if (searchMode() === 'ai') {
+      @if (aiTracks().length > 0) {
+        <div class="list-section">
+          <h3 class="list-section-heading"><i class="fa-solid fa-music"></i> Tracks</h3>
+          @for (track of aiTracks(); track track.ID) {
+            <div class="list-row track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+              <img class="list-thumb track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
+              <div class="list-info">
+                <div class="list-title">{{ track.Title }}</div>
+                <div class="list-meta">{{ track.artistName }} · {{ track.albumName }}</div>
+              </div>
+              <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+              <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
             </div>
-            <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
-            <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
-            </button>
-          </div>
-        }
-      </div>
+          }
+        </div>
+      }
+    } @else {
+      @if (tracks().length > 0) {
+        <div class="list-section">
+          <h3 class="list-section-heading"><i class="fa-solid fa-music"></i> Tracks</h3>
+          @for (track of tracks(); track track.ID) {
+            <div class="list-row track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+              <img class="list-thumb track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
+              <div class="list-info">
+                <div class="list-title">{{ track.Title }}</div>
+                <div class="list-meta">{{ track.artistName }} · {{ track.albumName }}</div>
+              </div>
+              <span class="track-time">{{ formatDuration(track.trackTime / 1000) }}</span>
+              <button type="button" class="track-menu-btn" (click)="openMenu(track, $event)">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+            </div>
+          }
+        </div>
+      }
     }
 
-    @if (podcasts().length > 0) {
-      <div class="list-section">
-        <h3 class="list-section-heading"><i class="fa-solid fa-podcast"></i> Podcasts</h3>
-        @for (podcast of podcasts(); track podcast.feedUrl) {
-          <a class="list-row" href="#" (click)="$event.preventDefault(); openPodcast(podcast)">
-            <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="podcast.artworkUrl60" [alt]="podcast.collectionName" />
-            <div class="list-info">
-              <div class="list-title">{{ podcast.collectionName }}</div>
-              <div class="list-meta">{{ podcast.artistName }}</div>
-            </div>
-            <i class="fa-solid fa-chevron-right list-chevron"></i>
-          </a>
-        }
-      </div>
+    @if (searchMode() === 'ai') {
+      <!-- AI search doesn't include podcasts -->
+    } @else {
+      @if (podcasts().length > 0) {
+        <div class="list-section">
+          <h3 class="list-section-heading"><i class="fa-solid fa-podcast"></i> Podcasts</h3>
+          @for (podcast of podcasts(); track podcast.feedUrl) {
+            <a class="list-row" href="#" (click)="$event.preventDefault(); openPodcast(podcast)">
+              <img class="list-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="podcast.artworkUrl60" [alt]="podcast.collectionName" />
+              <div class="list-info">
+                <div class="list-title">{{ podcast.collectionName }}</div>
+                <div class="list-meta">{{ podcast.artistName }}</div>
+              </div>
+              <i class="fa-solid fa-chevron-right list-chevron"></i>
+            </a>
+          }
+        </div>
+      }
     }
 
-    @if (aiSearchStatus() === 'loading') {
+        @if (searchMode() === 'ai' && aiSearchStatus() === 'loading') {
+      <div class="list-section ai-loading">
+        <span class="spinner-border spinner-border-sm" role="status"></span>
+        <span class="text-muted">AI results loading…</span>
+      </div>
+    } @else if (searchMode() !== 'ai' && aiSearchStatus() === 'loading') {
       <div class="list-section ai-loading">
         <span class="spinner-border spinner-border-sm" role="status"></span>
         <span class="text-muted">AI results loading…</span>
       </div>
     }
 
-    @if (aiSearchStatus() === 'success' && (aiArtists().length || aiAlbums().length || aiTracks().length)) {
+    @if (searchMode() !== 'ai' && aiSearchStatus() === 'success' && (aiArtists().length || aiAlbums().length || aiTracks().length)) {
       <div class="list-section">
         <h3 class="list-section-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Results</h3>
         @for (item of aiArtists(); track item.ID) {

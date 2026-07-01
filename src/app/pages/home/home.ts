@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { HomeResolvedData } from './home.resolver';
 import {
   AiSearchQueryService,
@@ -45,6 +45,7 @@ export class HomePage implements OnInit, OnDestroy {
   protected readonly formatDuration = formatDuration;
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   protected subscriptionsService = inject(PodcastSubscriptionsService);
   protected playHistory = inject(PlayHistoryService);
   private aiSearch = inject(AiSearchQueryService);
@@ -89,19 +90,8 @@ export class HomePage implements OnInit, OnDestroy {
 
   async runAiSearch(query: string): Promise<void> {
     if (!query.trim()) return;
-    this.aiStatus.set('loading');
-    this.aiTracks.set([]);
-    this.aiAlbums.set([]);
-    this.aiArtists.set([]);
-    try {
-      const result = await this.aiSearch.search(query);
-      this.aiTracks.set(result.tracks);
-      this.aiAlbums.set(result.albums);
-      this.aiArtists.set(result.artists);
-      this.aiStatus.set('success');
-    } catch {
-      this.aiStatus.set('error');
-    }
+    // Navigate to search page with AI mode
+    this.router.navigate(['/search', query], { queryParams: { mode: 'ai' } });
   }
 
   playAiTrack(track: ITrackItem): void {

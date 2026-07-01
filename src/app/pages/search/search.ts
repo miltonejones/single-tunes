@@ -54,6 +54,7 @@ export class SearchPage implements OnInit {
   activeTab = signal<ResultTab>('artists');
   menuTrack = signal<ITrackItem | null>(null);
   currentTrackId = signal<number | null>(null);
+  searchMode = signal<'keyword' | 'ai'>('keyword');
 
   viewMode = signal<'tabs' | 'list'>(
     (localStorage.getItem('sky-tunes-search-view') as 'tabs' | 'list') ?? 'tabs',
@@ -64,24 +65,40 @@ export class SearchPage implements OnInit {
     { label: `Search: "${this.query()}"` },
   ]);
 
-  hasResults = computed(
-    () =>
-      this.artists().length > 0 ||
-      this.albums().length > 0 ||
-      this.tracks().length > 0 ||
-      this.podcasts().length > 0 ||
-      this.aiSearchStatus() === 'loading' ||
-      this.aiSearchStatus() === 'success',
-  );
+  hasResults = computed(() => {
+    if (this.searchMode() === 'ai') {
+      // Only check AI results for AI search mode
+      return this.aiArtists().length > 0 ||
+             this.aiAlbums().length > 0 ||
+             this.aiTracks().length > 0;
+    } else {
+      // Check keyword results for keyword search mode
+      return this.artists().length > 0 ||
+             this.albums().length > 0 ||
+             this.tracks().length > 0 ||
+             this.podcasts().length > 0 ||
+             this.aiSearchStatus() === 'success';
+    }
+  });
 
   tabsWithResults = computed<ResultTab[]>(() => {
-    const tabs: ResultTab[] = [];
-    if (this.artists().length > 0) tabs.push('artists');
-    if (this.albums().length > 0) tabs.push('albums');
-    if (this.tracks().length > 0) tabs.push('tracks');
-    if (this.podcasts().length > 0) tabs.push('podcasts');
-    if (this.offline.isOnline() && this.aiSearchStatus() !== 'idle') tabs.push('ai');
-    return tabs;
+    if (this.searchMode() === 'ai') {
+      // Only show tabs with AI results
+      const tabs: ResultTab[] = [];
+      if (this.aiArtists().length > 0) tabs.push('artists');
+      if (this.aiAlbums().length > 0) tabs.push('albums');
+      if (this.aiTracks().length > 0) tabs.push('tracks');
+      return tabs;
+    } else {
+      // Show tabs with keyword results (existing logic)
+      const tabs: ResultTab[] = [];
+      if (this.artists().length > 0) tabs.push('artists');
+      if (this.albums().length > 0) tabs.push('albums');
+      if (this.tracks().length > 0) tabs.push('tracks');
+      if (this.podcasts().length > 0) tabs.push('podcasts');
+      if (this.offline.isOnline() && this.aiSearchStatus() !== 'idle') tabs.push('ai');
+      return tabs;
+    }
   });
 
   constructor() {
@@ -102,9 +119,25 @@ export class SearchPage implements OnInit {
       }
     });
 
+    // Handle query parameters for search mode
+    this.route.queryParamMap.subscribe((params) => {
+      const mode = params.get('mode');
+      this.searchMode.set(mode === 'ai' ? 'ai' : 'keyword');
+
+      if (mode === 'ai') {
+        // Clear keyword results for AI-only search
+        this.artists.set([]);
+        this.albums.set([]);
+        this.tracks.set([]);
+        this.podcasts.set([]);
+        // Load AI results only
+        this.loadAiResults(this.query());
+      }
+    });
+
     // data fires with fresh resolver output on every navigation
     this.route.data.subscribe((data) => {
-      if (!this.offline.isOnline()) return;
+      if (!this.offline.isOnline() || this.searchMode() === 'ai') return;
       const resolved = data['search'] as SearchResolvedData;
       this.artists.set(resolved.artists.records);
       this.albums.set(resolved.albums.records);
@@ -166,7 +199,12 @@ export class SearchPage implements OnInit {
   }
 
   playTrack(track: ITrackItem): void {
-    const queue = this.activeTab() === 'ai' ? this.aiTracks() : this.tracks();
+    let queue: ITrackItem[] = [];
+    if (this.searchMode() === 'ai') {
+      queue = this.aiTracks();
+    } else {
+      queue = this.activeTab() === 'ai' ? this.aiTracks() : this.tracks();
+    }
     this.playHistory.recordPlay('search', `Search: "${this.query()}"`, ['/search', this.query()], track);
     this.audioPlayerCommand.openTrack(track, queue);
   }
