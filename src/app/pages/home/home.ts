@@ -105,7 +105,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   playAiTrack(track: ITrackItem): void {
-    this.playHistory.recordPlay('home-ai', 'AI Search', ['/'], track);
+    this.playHistory.recordPlay('search', 'AI Search', ['/'], track);
     this.audioPlayerCommand.openTrack(track, this.aiTracks());
   }
 
