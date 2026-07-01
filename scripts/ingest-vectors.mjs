@@ -27,6 +27,9 @@ const AI_INGEST =
   'https://<ai-lambda-id>.execute-api.us-east-1.amazonaws.com';
 
 const BATCH_SIZE = Number(process.env.BATCH_SIZE ?? 50);
+// Comma-separated list of entity types to ingest. Defaults to all three.
+// e.g. TYPES=artist node scripts/ingest-vectors.mjs
+const TYPES = new Set((process.env.TYPES ?? 'track,album,artist').split(',').map((s) => s.trim()));
 const PAGE_SIZE = 100; // matches the app's PAGE_SIZE constant
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -201,41 +204,39 @@ log(`Ingest API  : ${AI_INGEST}`);
 log(`Batch size  : ${BATCH_SIZE}`);
 log('');
 
-// Fetch all catalog data
-log('Fetching tracks…');
-const tracks = await fetchAllTracks();
-log(`  → ${tracks.length} tracks\n`);
+const results = { tracks: null, albums: null, artists: null };
 
-log('Fetching albums…');
-const albums = await fetchAllAlbums();
-log(`  → ${albums.length} albums\n`);
+if (TYPES.has('track')) {
+  log('Fetching tracks…');
+  const tracks = await fetchAllTracks();
+  log(`  → ${tracks.length} tracks\n`);
+  log('Ingesting tracks…');
+  results.tracks = await ingestAll(buildTrackEntities(tracks), 'tracks');
+}
 
-log('Fetching artists…');
-const artists = await fetchAllArtists();
-log(`  → ${artists.length} artists\n`);
+if (TYPES.has('album')) {
+  log('\nFetching albums…');
+  const albums = await fetchAllAlbums();
+  log(`  → ${albums.length} albums\n`);
+  log('Ingesting albums…');
+  results.albums = await ingestAll(buildAlbumEntities(albums), 'albums');
+}
 
-// Build entity payloads
-const trackEntities = buildTrackEntities(tracks);
-const albumEntities = buildAlbumEntities(albums);
-const artistEntities = buildArtistEntities(artists);
-
-// Ingest
-log('Ingesting tracks…');
-const trackResult = await ingestAll(trackEntities, 'tracks');
-
-log('\nIngesting albums…');
-const albumResult = await ingestAll(albumEntities, 'albums');
-
-log('\nIngesting artists…');
-const artistResult = await ingestAll(artistEntities, 'artists');
+if (TYPES.has('artist')) {
+  log('\nFetching artists…');
+  const artists = await fetchAllArtists();
+  log(`  → ${artists.length} artists\n`);
+  log('Ingesting artists…');
+  results.artists = await ingestAll(buildArtistEntities(artists), 'artists');
+}
 
 // Summary
 log('\n=== Done ===');
-log(`Tracks  : ${trackResult.ingested} ingested, ${trackResult.failed} failed`);
-log(`Albums  : ${albumResult.ingested} ingested, ${albumResult.failed} failed`);
-log(`Artists : ${artistResult.ingested} ingested, ${artistResult.failed} failed`);
+let totalFailed = 0;
+if (results.tracks)  { log(`Tracks  : ${results.tracks.ingested} ingested, ${results.tracks.failed} failed`);  totalFailed += results.tracks.failed; }
+if (results.albums)  { log(`Albums  : ${results.albums.ingested} ingested, ${results.albums.failed} failed`);  totalFailed += results.albums.failed; }
+if (results.artists) { log(`Artists : ${results.artists.ingested} ingested, ${results.artists.failed} failed`); totalFailed += results.artists.failed; }
 
-const totalFailed = trackResult.failed + albumResult.failed + artistResult.failed;
 if (totalFailed > 0) {
   process.exitCode = 1;
 }
