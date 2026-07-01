@@ -180,6 +180,240 @@ resource "aws_acm_certificate_validation" "site" {
 }
 
 # ============================================
+# AI vector search — DynamoDB + Lambda + API Gateway
+# ============================================
+
+resource "aws_dynamodb_table" "vectors" {
+  name         = "sky-tunes-vectors"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  tags = local.tags
+}
+
+resource "aws_iam_role" "ai_lambda" {
+  name = "${var.project_name}-ai-lambda"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ai_lambda_basic" {
+  role       = aws_iam_role.ai_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_s3_bucket" "vector_cache" {
+  bucket = "${var.project_name}-vector-cache-${random_string.suffix.result}"
+  tags   = local.tags
+}
+
+resource "aws_s3_bucket_public_access_block" "vector_cache" {
+  bucket                  = aws_s3_bucket.vector_cache.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_iam_role_policy" "ai_lambda_perms" {
+  name = "${var.project_name}-ai-lambda-perms"
+  role = aws_iam_role.ai_lambda.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["dynamodb:PutItem", "dynamodb:BatchWriteItem", "dynamodb:Scan"]
+        Resource = aws_dynamodb_table.vectors.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = "bedrock:InvokeModel"
+        Resource = "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.titan-embed-text-v2:0"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject"]
+        Resource = "${aws_s3_bucket.vector_cache.arn}/*"
+      }
+    ]
+  })
+}
+
+data "archive_file" "ai_ingest" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/ai-ingest/index.mjs"
+  output_path = "${path.module}/.lambda-zips/ai-ingest.zip"
+}
+
+resource "aws_lambda_function" "ai_ingest" {
+  function_name    = "${var.project_name}-ai-ingest"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.ai_ingest.output_path
+  source_code_hash = data.archive_file.ai_ingest.output_base64sha256
+  timeout          = 300
+  memory_size      = 512
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.vectors.name
+    }
+  }
+
+  tags = local.tags
+}
+
+data "archive_file" "ai_search" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/ai-search/index.mjs"
+  output_path = "${path.module}/.lambda-zips/ai-search.zip"
+}
+
+resource "aws_lambda_function" "ai_search" {
+  function_name    = "${var.project_name}-ai-search"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.ai_search.output_path
+  source_code_hash = data.archive_file.ai_search.output_base64sha256
+  timeout          = 30
+  memory_size      = 1024
+
+  environment {
+    variables = {
+      TABLE_NAME   = aws_dynamodb_table.vectors.name
+      CACHE_BUCKET = aws_s3_bucket.vector_cache.bucket
+    }
+  }
+
+  tags = local.tags
+}
+
+data "archive_file" "cache_rebuild" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/cache-rebuild/index.mjs"
+  output_path = "${path.module}/.lambda-zips/cache-rebuild.zip"
+}
+
+resource "aws_lambda_function" "cache_rebuild" {
+  function_name    = "${var.project_name}-cache-rebuild"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.cache_rebuild.output_path
+  source_code_hash = data.archive_file.cache_rebuild.output_base64sha256
+  timeout          = 120
+  memory_size      = 512
+
+  environment {
+    variables = {
+      TABLE_NAME   = aws_dynamodb_table.vectors.name
+      CACHE_BUCKET = aws_s3_bucket.vector_cache.bucket
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "aws_apigatewayv2_integration" "cache_rebuild" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.cache_rebuild.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "cache_rebuild" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /rebuild-cache"
+  target    = "integrations/${aws_apigatewayv2_integration.cache_rebuild.id}"
+}
+
+resource "aws_lambda_permission" "cache_rebuild" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cache_rebuild.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+resource "aws_apigatewayv2_api" "ai" {
+  name          = "${var.project_name}-ai"
+  protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["POST", "OPTIONS"]
+    allow_headers = ["content-type"]
+    max_age       = 300
+  }
+
+  tags = local.tags
+}
+
+resource "aws_apigatewayv2_stage" "ai" {
+  api_id      = aws_apigatewayv2_api.ai.id
+  name        = "$default"
+  auto_deploy = true
+  tags        = local.tags
+}
+
+resource "aws_apigatewayv2_integration" "ai_ingest" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.ai_ingest.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "ai_ingest" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /ingest"
+  target    = "integrations/${aws_apigatewayv2_integration.ai_ingest.id}"
+}
+
+resource "aws_lambda_permission" "ai_ingest" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.ai_ingest.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+resource "aws_apigatewayv2_integration" "ai_search" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.ai_search.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "ai_search" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /search"
+  target    = "integrations/${aws_apigatewayv2_integration.ai_search.id}"
+}
+
+resource "aws_lambda_permission" "ai_search" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.ai_search.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+# ============================================
 # DNS record for the site itself
 # ============================================
 

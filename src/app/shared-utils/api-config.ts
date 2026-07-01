@@ -4,3 +4,4 @@ export const PHOTO_ENDPOINT = 'https://swkwp5a4m0.execute-api.us-east-1.amazonaw
 export const WIKIMEDIA_SEARCH_ENDPOINT =
   'https://api.wikimedia.org/core/v1/wikipedia/en/search/title';
 export const CLOUD_FRONT_URL = 'https://s3.amazonaws.com/box.import/';
+export const AI_SEARCH_ENDPOINT = 'https://ohb29b452e.execute-api.us-east-1.amazonaws.com';

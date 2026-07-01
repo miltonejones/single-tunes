@@ -13,3 +13,8 @@ output "cloudfront_domain_name" {
 output "site_url" {
   value = "https://${var.domain_name}"
 }
+
+output "ai_api_endpoint" {
+  value       = aws_apigatewayv2_stage.ai.invoke_url
+  description = "Base URL for AI search — paste into AI_SEARCH_ENDPOINT in api-config.ts and as AI_INGEST_ENDPOINT in the ingestion script"
+}

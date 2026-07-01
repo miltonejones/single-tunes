@@ -47,6 +47,7 @@ export class SearchPage implements OnInit {
   activeTab = signal<ResultTab>('artists');
   menuTrack = signal<ITrackItem | null>(null);
   currentTrackId = signal<number | null>(null);
+
   viewMode = signal<'tabs' | 'list'>(
     (localStorage.getItem('sky-tunes-search-view') as 'tabs' | 'list') ?? 'tabs',
   );
@@ -57,7 +58,11 @@ export class SearchPage implements OnInit {
   ]);
 
   hasResults = computed(
-    () => this.artists().length > 0 || this.albums().length > 0 || this.tracks().length > 0 || this.podcasts().length > 0,
+    () =>
+      this.artists().length > 0 ||
+      this.albums().length > 0 ||
+      this.tracks().length > 0 ||
+      this.podcasts().length > 0,
   );
 
   tabsWithResults = computed<ResultTab[]>(() => {
