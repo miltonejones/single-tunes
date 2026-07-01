@@ -20,7 +20,7 @@ const ddb = new DynamoDBClient({});
 const bedrock = new BedrockRuntimeClient({ region: process.env.AWS_REGION ?? 'us-east-1' });
 const TABLE = process.env.TABLE_NAME;
 const EMBED_MODEL = 'amazon.titan-embed-text-v2:0';
-const EMBED_DIM = 1024;
+const EMBED_DIM = 256; // must match the dimension used during ingestion
 
 // ── Cosine similarity ─────────────────────────────────────────────────────────
 

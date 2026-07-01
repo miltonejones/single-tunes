@@ -19,7 +19,7 @@ const ddb = new DynamoDBClient({});
 const bedrock = new BedrockRuntimeClient({ region: process.env.AWS_REGION ?? 'us-east-1' });
 const TABLE = process.env.TABLE_NAME;
 const EMBED_MODEL = 'amazon.titan-embed-text-v2:0';
-const EMBED_DIM = 1024; // Titan v2 supports 256 | 512 | 1024
+const EMBED_DIM = 256; // 256 dims → 4× smaller scan, cold start ~7s vs ~30s for 1024
 const CONCURRENCY = 5;  // parallel Bedrock calls per mini-batch
 
 async function embed(text) {
