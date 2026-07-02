@@ -42,6 +42,17 @@ export type { SkeletonVariant } from './skeleton-loader';
 export { TrackMenu } from './track-menu';
 export { ItunesSearchModal } from './itunes-search-modal';
 
+export { RecorderService } from './recorder.service';
+export type {
+  RecorderResult,
+  RecorderJob,
+  RecorderJobStatus,
+  RecorderBatch,
+} from './recorder.service';
+export { RecorderPanelService } from './recorder-panel.service';
+export { RecorderModal } from './recorder-modal';
+export { RecorderProgress } from './recorder-progress';
+
 // ── Podcast exports ──────────────────────────────────────────────────────
 
 export * from './podcast-models';

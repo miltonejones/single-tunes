@@ -1,0 +1,147 @@
+.recorder-progress {
+  position: fixed;
+  right: 16px;
+  bottom: 96px;
+  z-index: 1050;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface-2, #1c1c27);
+  border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.16));
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  font-size: 0.85rem;
+}
+
+/* Nudge above the player dock when a track is loaded. */
+:global(body.track-playing) .recorder-progress,
+:global(body.podcast-playing) .recorder-progress {
+  bottom: 160px;
+}
+
+.rp-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  background: linear-gradient(90deg, var(--accent-from, #6366f1), var(--accent-to, #ec4899));
+  color: #fff;
+}
+
+.rp-header-title {
+  font-weight: 600;
+  flex: 1;
+}
+
+.rp-header-count {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 0.75rem;
+}
+
+.rp-chevron {
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.rp-body {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.rp-batch {
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+
+.rp-batch:last-child {
+  margin-bottom: 0;
+}
+
+.rp-batch-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.rp-batch-label {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text, rgba(255, 255, 255, 0.94));
+}
+
+.rp-batch-summary {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.62));
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.rp-dismiss {
+  background: none;
+  border: none;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.62));
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.rp-dismiss:hover {
+  color: #dc3545;
+}
+
+.rp-job {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.62));
+}
+
+.rp-job-icon {
+  width: 16px;
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+.rp-job[data-status='done'] .rp-job-icon {
+  color: #22c55e;
+}
+
+.rp-job[data-status='failed'] .rp-job-icon {
+  color: #dc3545;
+}
+
+.rp-job[data-status='recording'] .rp-job-icon,
+.rp-job[data-status='uploading'] .rp-job-icon {
+  color: var(--accent, #818cf8);
+}
+
+.rp-job-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rp-job-error {
+  color: #f59e0b;
+  flex: 0 0 auto;
+}
+
+.spin {
+  animation: rp-spin 1.4s linear infinite;
+}
+
+@keyframes rp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

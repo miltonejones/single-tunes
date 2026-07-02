@@ -1,0 +1,39 @@
+@if (hasBatches()) {
+  <div class="recorder-progress" [class.collapsed]="collapsed()">
+    <div class="rp-header" (click)="collapsed.set(!collapsed())">
+      <i class="fa-solid fa-record-vinyl rp-header-icon" [class.spin]="recorderRunning()"></i>
+      <span class="rp-header-title">Recording</span>
+      <span class="rp-header-count">{{ batches().length }}</span>
+      <i class="fa-solid rp-chevron" [class.fa-chevron-down]="!collapsed()" [class.fa-chevron-up]="collapsed()"></i>
+    </div>
+
+    @if (!collapsed()) {
+      <div class="rp-body">
+        @for (batch of batches(); track batch.batchId) {
+          <div class="rp-batch">
+            <div class="rp-batch-head">
+              <span class="rp-batch-label" [title]="batch.label">{{ batch.label }}</span>
+              <span class="rp-batch-summary">{{ summary(batch) }}</span>
+              @if (!isRunning(batch)) {
+                <button type="button" class="rp-dismiss" title="Dismiss" (click)="dismiss(batch.batchId)">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              }
+            </div>
+            <div class="rp-jobs">
+              @for (job of batch.jobs; track job.jobId) {
+                <div class="rp-job" [attr.data-status]="job.status">
+                  <i class="fa-solid rp-job-icon" [class]="STATUS_ICON[job.status]" [class.spin]="job.status === 'recording' || job.status === 'uploading'"></i>
+                  <span class="rp-job-title">{{ displayName(job.output) }}</span>
+                  @if (job.error) {
+                    <span class="rp-job-error" [title]="job.error"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

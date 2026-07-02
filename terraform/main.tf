@@ -356,7 +356,7 @@ resource "aws_apigatewayv2_api" "ai" {
 
   cors_configuration {
     allow_origins = ["*"]
-    allow_methods = ["POST", "OPTIONS"]
+    allow_methods = ["GET", "POST", "OPTIONS"]
     allow_headers = ["content-type"]
     max_age       = 300
   }
@@ -409,6 +409,69 @@ resource "aws_lambda_permission" "ai_search" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.ai_search.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+# ============================================
+# Recorder proxy — keeps the recorder API key server-side
+# ============================================
+
+data "archive_file" "recorder_proxy" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/recorder-proxy/index.mjs"
+  output_path = "${path.module}/.lambda-zips/recorder-proxy.zip"
+}
+
+resource "aws_lambda_function" "recorder_proxy" {
+  function_name    = "${var.project_name}-recorder-proxy"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.recorder_proxy.output_path
+  source_code_hash = data.archive_file.recorder_proxy.output_base64sha256
+  timeout          = 30
+  memory_size      = 256
+
+  environment {
+    variables = {
+      RECORDER_API_ENDPOINT = var.recorder_api_endpoint
+      RECORDER_API_KEY      = var.recorder_api_key
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "aws_apigatewayv2_integration" "recorder_proxy" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.recorder_proxy.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "recorder_search" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "GET /recorder/search/{term}/{limit}"
+  target    = "integrations/${aws_apigatewayv2_integration.recorder_proxy.id}"
+}
+
+resource "aws_apigatewayv2_route" "recorder_record" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /recorder/record"
+  target    = "integrations/${aws_apigatewayv2_integration.recorder_proxy.id}"
+}
+
+resource "aws_apigatewayv2_route" "recorder_status" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "GET /recorder/record/{batchId}"
+  target    = "integrations/${aws_apigatewayv2_integration.recorder_proxy.id}"
+}
+
+resource "aws_lambda_permission" "recorder_proxy" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.recorder_proxy.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
 }

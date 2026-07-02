@@ -119,3 +119,9 @@
 }
 
 <app-settings-modal />
+
+@if (recorderPanel.isOpen()) {
+  <app-recorder-modal />
+}
+
+<app-recorder-progress />

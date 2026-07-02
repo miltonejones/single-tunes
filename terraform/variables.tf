@@ -33,3 +33,15 @@ variable "price_class" {
   type        = string
   default     = "PriceClass_100"
 }
+
+variable "recorder_api_endpoint" {
+  description = "Base URL of the recorder cloud API the proxy forwards to"
+  type        = string
+  default     = "https://2dojoa8lz3.execute-api.us-east-1.amazonaws.com"
+}
+
+variable "recorder_api_key" {
+  description = "x-api-key for the recorder API. Injected into the proxy Lambda's env; never committed. Pass via -var or a gitignored *.tfvars."
+  type        = string
+  sensitive   = true
+}

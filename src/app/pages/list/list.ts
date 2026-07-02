@@ -15,6 +15,7 @@ import {
   MediaCard,
   OfflineService,
   PlayHistoryService,
+  RecorderPanelService,
   SkeletonLoader,
   ToastService,
   TrackDownloadService,
@@ -50,6 +51,7 @@ export class ListPage implements OnInit {
   private playHistory = inject(PlayHistoryService);
   protected offline = inject(OfflineService);
   protected downloadService = inject(TrackDownloadService);
+  private recorderPanel = inject(RecorderPanelService);
 
   listType = signal<ListType>('album');
   listId = signal('');
@@ -264,6 +266,11 @@ export class ListPage implements OnInit {
 
   downloadAllTracks(): void {
     this.downloadService.downloadAll(this.tracks());
+  }
+
+  /** Opens the recorder modal from the library page (no artist-specific seed). */
+  openRecorder(): void {
+    this.recorderPanel.open();
   }
 
   isInPlaylist(track: ITrackItem): boolean {

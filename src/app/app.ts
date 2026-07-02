@@ -4,7 +4,15 @@ import { animate, group, query, style, transition, trigger } from '@angular/anim
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { AudioPlayerCommandService, OfflineService, PodcastAudioPlayerCommandService, Toast } from 'shared-utils';
+import {
+  AudioPlayerCommandService,
+  OfflineService,
+  PodcastAudioPlayerCommandService,
+  RecorderModal,
+  RecorderPanelService,
+  RecorderProgress,
+  Toast,
+} from 'shared-utils';
 
 const SEARCH_HISTORY_KEY = 'toolbar-search-history';
 const MAX_SEARCH_HISTORY = 10;
@@ -137,7 +145,7 @@ const routeAnimation = trigger('routeAnimation', [
   selector: 'app-root',
   imports: [
     RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, TrackQueue, SettingsModal, Toast,
-    PodcastAudioPlayer, EpisodeQueue, FormsModule,
+    PodcastAudioPlayer, EpisodeQueue, FormsModule, RecorderModal, RecorderProgress,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -149,6 +157,7 @@ export class App {
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private podcastAudioPlayerCommand = inject(PodcastAudioPlayerCommandService);
   protected settingsPanel = inject(SettingsPanelService);
+  protected recorderPanel = inject(RecorderPanelService);
   protected offlineService = inject(OfflineService);
   protected readonly NAV_ITEMS = NAV_ITEMS;
   activeSection = signal<NavSection>(resolveNavSection(this.router.url));

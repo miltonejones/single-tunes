@@ -1,0 +1,88 @@
+.count-input {
+  max-width: 72px;
+  flex: 0 0 auto;
+}
+
+.dur-input {
+  max-width: 90px;
+  flex: 0 0 auto;
+}
+
+.recorder-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.recorder-row:hover {
+  border-color: var(--accent, #0d6efd);
+}
+
+.recorder-row.selected {
+  border-color: var(--accent, #0d6efd);
+  background: rgba(129, 140, 248, 0.1);
+}
+
+.recorder-row input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent, #0d6efd);
+  flex: 0 0 auto;
+}
+
+.row-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-meta {
+  color: var(--text-secondary, #6c757d);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.row-link {
+  color: #ff0000;
+  flex: 0 0 auto;
+}
+
+.row-icon {
+  color: var(--text-tertiary, #adb5bd);
+  flex: 0 0 auto;
+}
+
+.queue-section {
+  border-top: 1px solid var(--border, #dee2e6);
+  padding-top: 12px;
+}
+
+.queue-heading {
+  margin-bottom: 10px;
+  color: var(--text-secondary, #6c757d);
+}
+
+.recorder-row.queued {
+  cursor: default;
+  background: rgba(129, 140, 248, 0.06);
+}
+
+.row-remove {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #6c757d);
+  cursor: pointer;
+  padding: 2px 6px;
+  flex: 0 0 auto;
+}
+
+.row-remove:hover {
+  color: #dc3545;
+}

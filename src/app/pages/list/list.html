@@ -80,6 +80,16 @@
 
   <div class="list-toolbar">
     <lib-breadcrumbs [items]="breadcrumbItems()" />
+    @if (listType() === 'library') {
+      <button
+        type="button"
+        class="library-add-btn"
+        title="Record tracks from YouTube"
+        (click)="openRecorder()"
+      >
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    }
     @if (listType() === 'artist') {
       <div class="view-toggle">
         <button

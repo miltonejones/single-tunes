@@ -1,0 +1,111 @@
+<div class="modal-backdrop fade show" (click)="close()"></div>
+
+<div class="modal fade show" style="display: block;" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-circle-plus me-2"></i> Record from YouTube</h5>
+        <button type="button" class="btn-close" (click)="close()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="search-section mb-3">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search YouTube…"
+              [value]="searchTerm()"
+              (input)="searchTerm.set($any($event).target.value)"
+              (keyup.enter)="search()"
+            />
+            <input
+              type="number"
+              class="form-control count-input"
+              min="1"
+              max="25"
+              title="Number of results"
+              [value]="count()"
+              (input)="count.set(+$any($event).target.value || 5)"
+            />
+            <input
+              type="number"
+              class="form-control dur-input"
+              min="1"
+              placeholder="dur (s)"
+              title="Clip length in seconds (blank = full video)"
+              [value]="duration()"
+              (input)="duration.set($any($event).target.value ? +$any($event).target.value : null)"
+            />
+            <button class="btn btn-primary" type="button" (click)="search()" [disabled]="isSearching()">
+              @if (isSearching()) {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+              } @else {
+                <i class="fa-solid fa-magnifying-glass"></i>
+              }
+              Search
+            </button>
+          </div>
+          <small class="form-text text-muted">
+            Tick results to build a batch — searches don't clear your selection.
+          </small>
+        </div>
+
+        @if (error()) {
+          <div class="alert alert-danger">{{ error() }}</div>
+        }
+
+        @if (results().length > 0) {
+          <div class="results-section mb-3">
+            @for (result of results(); track result.url) {
+              <label class="recorder-row" [class.selected]="isQueued(result)">
+                <input type="checkbox" [checked]="isQueued(result)" (change)="toggle(result)" />
+                <span class="row-title">{{ displayName(result.output) }}</span>
+                <span class="row-meta">{{ result.duration ? formatDuration(result.duration) : 'full' }}</span>
+                <a class="row-link" [href]="result.url" target="_blank" rel="noopener" (click)="$event.stopPropagation()">
+                  <i class="fa-brands fa-youtube"></i>
+                </a>
+              </label>
+            }
+          </div>
+        } @else if (!isSearching()) {
+          <div class="text-center py-4">
+            <i class="fa-brands fa-youtube fa-2x text-muted mb-2"></i>
+            <p class="text-muted">Search YouTube to find tracks to record.</p>
+          </div>
+        }
+
+        @if (queueCount() > 0) {
+          <div class="queue-section">
+            <h6 class="queue-heading">Batch queue ({{ queueCount() }})</h6>
+            @for (job of queue(); track job.url) {
+              <div class="recorder-row queued">
+                <i class="fa-solid fa-music row-icon"></i>
+                <span class="row-title">{{ displayName(job.output) }}</span>
+                <span class="row-meta">{{ job.duration ? formatDuration(job.duration) : 'full' }}</span>
+                <button type="button" class="row-remove" title="Remove" (click)="removeFromQueue(job.url)">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-success"
+          [disabled]="queueCount() === 0 || submitting()"
+          (click)="record()"
+        >
+          @if (submitting()) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+          } @else {
+            <i class="fa-solid fa-record-vinyl"></i>
+          }
+          Record {{ queueCount() > 0 ? queueCount() : '' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
