@@ -52,16 +52,16 @@
   border-bottom: 1px solid var(--border);
 }
 
-/* Stacks the visualizer directly above the player; both are fixed to the
-   viewport bottom as one unit regardless of either one's own height. */
+/* Anchors the player to the viewport bottom. The visualizer positions itself
+   (via `position: absolute`) above this box rather than sitting in normal
+   flow here, so a hidden/slid-away visualizer never makes this dock taller
+   than the player itself and swallow clicks on the page behind it. */
 .player-dock {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 100;
-  display: flex;
-  flex-direction: column;
 }
 
 .brand {

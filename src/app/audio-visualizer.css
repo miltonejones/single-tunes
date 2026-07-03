@@ -1,6 +1,11 @@
 .audio-visualizer {
   cursor: pointer;
-  margin: 1rem 1rem 1rem auto;
+  /* Positioned above the dock rather than stacked in its flex flow, so a
+     hidden/slid-away visualizer never forces the fixed dock to reserve
+     (and thus intercept clicks over) space it isn't visually using. */
+  position: absolute;
+  right: 1rem;
+  bottom: calc(100% + 1rem);
   width: 400px;
   max-width: calc(100vw - 2rem);
   padding: 0.5rem;
@@ -58,7 +63,8 @@
 @media (max-width: 450px) {
   .audio-visualizer {
     width: calc(100vw - 1.5rem);
-    margin: 0.75rem 0.75rem 0.75rem auto;
+    right: 0.75rem;
+    bottom: calc(100% + 0.75rem);
   }
 
   .audio-visualizer--visible {
@@ -70,7 +76,8 @@
 @media (min-width: 451px) and (max-width: 576px) {
   .audio-visualizer {
     width: min(400px, calc(100vw - 1.5rem));
-    margin: 0.75rem 0.75rem 0.75rem auto;
+    right: 0.75rem;
+    bottom: calc(100% + 0.75rem);
   }
 
   .audio-visualizer--visible {
