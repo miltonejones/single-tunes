@@ -23,12 +23,20 @@
             <div class="rp-jobs">
               @for (job of batch.jobs; track job.jobId) {
                 <div class="rp-job" [attr.data-status]="job.status">
-                  <i class="fa-solid rp-job-icon" [class]="STATUS_ICON[job.status]"></i>
+                  <i class="fa-solid rp-job-icon" [class]="icon(job.status)"></i>
                   <span class="rp-job-title">{{ displayName(job.output) }}</span>
+                  @if (!isTerminal(job)) {
+                    <span class="rp-job-phase">{{ phaseLabel(job) }}</span>
+                  }
                   @if (job.error) {
                     <span class="rp-job-error" [title]="job.error"><i class="fa-solid fa-triangle-exclamation"></i></span>
                   }
                 </div>
+                @if (job.status === 'downloading' && job.progress != null) {
+                  <div class="rp-job-bar">
+                    <div class="rp-job-bar-fill" [style.width.%]="job.progress"></div>
+                  </div>
+                }
               }
             </div>
           </div>

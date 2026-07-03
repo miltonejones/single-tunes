@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ListResolvedData } from './list.resolver';
 import {
@@ -16,6 +17,7 @@ import {
   OfflineService,
   PlayHistoryService,
   RecorderPanelService,
+  RecorderService,
   SkeletonLoader,
   ToastService,
   TrackDownloadService,
@@ -39,7 +41,7 @@ const LIST_TYPE_LABELS: Record<Exclude<ListType, 'library'>, string> = {
   templateUrl: './list.html',
   styleUrl: './list.css',
 })
-export class ListPage implements OnInit {
+export class ListPage implements OnInit, OnDestroy {
   protected readonly title = signal('list');
   protected readonly formatDuration = formatDuration;
 
@@ -52,6 +54,9 @@ export class ListPage implements OnInit {
   protected offline = inject(OfflineService);
   protected downloadService = inject(TrackDownloadService);
   private recorderPanel = inject(RecorderPanelService);
+  private recorder = inject(RecorderService);
+  private recorderSub?: Subscription;
+  private libraryRefreshTimer?: ReturnType<typeof setTimeout>;
 
   listType = signal<ListType>('album');
   listId = signal('');
@@ -229,6 +234,21 @@ export class ListPage implements OnInit {
       // Reset view mode to tracks when navigating to a new list
       this.viewMode.set('tracks');
     });
+
+    // When a recording batch finishes, give the S3->library ingest a moment
+    // to land, then refresh — but only if the user is still on the library.
+    this.recorderSub = this.recorder.batchCompleted$.subscribe((batch) => {
+      if (!batch.jobs.some((j) => j.status === 'done')) return;
+      clearTimeout(this.libraryRefreshTimer);
+      this.libraryRefreshTimer = setTimeout(() => {
+        if (this.listType() === 'library') this.loadLibrary(this.pageNum());
+      }, 5000);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.recorderSub?.unsubscribe();
+    clearTimeout(this.libraryRefreshTimer);
   }
 
   private parseListType(value: string | null): ListType {

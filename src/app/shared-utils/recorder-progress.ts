@@ -1,8 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RecorderService, RecorderBatch, RecorderJobStatus } from './recorder.service';
+import { RecorderService, RecorderBatch, RecorderJob, RecorderJobStatus } from './recorder.service';
 
 const STATUS_ICON: Record<RecorderJobStatus, string> = {
   queued: 'fa-clock',
+  starting: 'fa-hourglass-start',
+  extracting: 'fa-magnifying-glass',
+  downloading: 'fa-download',
+  processing: 'fa-gears',
   recording: 'fa-video',
   uploading: 'fa-cloud-arrow-up',
   done: 'fa-circle-check',
@@ -57,5 +61,22 @@ export class RecorderProgress {
 
   displayName(output: string): string {
     return output.replace(/\.mp4$/i, '');
+  }
+
+  // Older status docs (or future phases) may carry values this build doesn't
+  // know — fall back rather than rendering a broken icon class.
+  icon(status: RecorderJobStatus): string {
+    return STATUS_ICON[status] ?? 'fa-circle-question';
+  }
+
+  isTerminal(job: RecorderJob): boolean {
+    return TERMINAL.includes(job.status);
+  }
+
+  phaseLabel(job: RecorderJob): string {
+    if (job.status === 'downloading' && job.progress != null) {
+      return `downloading ${job.progress}%`;
+    }
+    return job.status;
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 import { RECORDER_API_ENDPOINT } from './api-config';
 
 /** One YouTube search hit, shaped as a ready-to-record job. */
@@ -10,12 +10,23 @@ export interface RecorderResult {
   duration?: number;
 }
 
-export type RecorderJobStatus = 'queued' | 'recording' | 'uploading' | 'done' | 'failed';
+export type RecorderJobStatus =
+  | 'queued'
+  | 'starting'
+  | 'extracting'
+  | 'downloading'
+  | 'processing'
+  | 'recording'
+  | 'uploading'
+  | 'done'
+  | 'failed';
 
 export interface RecorderJob extends RecorderResult {
   batchId: string;
   jobId: string;
   status: RecorderJobStatus;
+  /** Download percent (0-100), present only while status is 'downloading'. */
+  progress?: number;
   updatedAt?: number;
   error?: string;
 }
@@ -48,6 +59,10 @@ export class RecorderService {
   private readonly _batches = signal<RecorderBatch[]>(this.load());
   readonly batches = this._batches.asReadonly();
   readonly hasRunning = computed(() => this._batches().some(batchRunning));
+
+  private readonly completed$ = new Subject<RecorderBatch>();
+  /** Emits a batch the moment its last job reaches a terminal state. */
+  readonly batchCompleted$ = this.completed$.asObservable();
 
   private pollTimer?: ReturnType<typeof setInterval>;
 
@@ -95,10 +110,17 @@ export class RecorderService {
           `${RECORDER_API_ENDPOINT}/record/${encodeURIComponent(batchId)}`,
         ),
       );
+      let finished: RecorderBatch | null = null;
       this._batches.update((list) =>
-        list.map((b) => (b.batchId === batchId ? { ...b, jobs: res.jobs ?? b.jobs } : b)),
+        list.map((b) => {
+          if (b.batchId !== batchId) return b;
+          const updated = { ...b, jobs: res.jobs ?? b.jobs };
+          if (batchRunning(b) && !batchRunning(updated)) finished = updated;
+          return updated;
+        }),
       );
       this.persist();
+      if (finished) this.completed$.next(finished);
     } catch {
       // Transient failure — leave the batch as-is and retry on the next tick.
     }
