@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RecorderPanelService } from './recorder-panel.service';
 import { RecorderService, RecorderResult } from './recorder.service';
 import { ToastService } from './toast.service';
@@ -35,11 +35,16 @@ export class RecorderModal {
   queueCount = computed(() => this.selected().size);
 
   constructor() {
-    // Seed the search box from whoever opened the modal (e.g. artist banner).
+    // Seed the search box from whoever opened the modal (e.g. artist banner),
+    // and run the search right away when the caller asked for it.
     effect(() => {
       if (this.panel.isOpen()) {
         const seed = this.panel.seedTerm();
         if (seed) this.searchTerm.set(seed);
+        if (this.panel.autoSearch()) {
+          this.panel.autoSearch.set(false);
+          untracked(() => this.search());
+        }
       }
     });
   }

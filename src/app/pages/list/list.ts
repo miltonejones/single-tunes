@@ -13,6 +13,7 @@ import {
   ImgFallbackDirective,
   IPlaylistSummary,
   ITrackItem,
+  ItunesItem,
   MediaCard,
   OfflineService,
   PlayHistoryService,
@@ -22,6 +23,7 @@ import {
   ToastService,
   TrackDownloadService,
   TrackMenu,
+  TrackQueryService,
 } from 'shared-utils';
 
 const PAGE_SIZE = 100;
@@ -49,6 +51,8 @@ export class ListPage implements OnInit, OnDestroy {
   private router = inject(Router);
   private catalogQuery = inject(CatalogQueryService);
   private catalogCommand = inject(CatalogCommandService);
+  private trackQuery = inject(TrackQueryService);
+  private toast = inject(ToastService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private playHistory = inject(PlayHistoryService);
   protected offline = inject(OfflineService);
@@ -104,6 +108,11 @@ export class ListPage implements OnInit, OnDestroy {
   savingOrder = signal(false);
   private dragFromIndex = -1;
   protected viewMode = signal<'tracks' | 'albums'>('tracks');
+
+  // Signals for Apple Search functionality
+  isSearchingApple = signal(false);
+  appleSearchResults = signal<ItunesItem[]>([]);
+  missingTracks = signal<ItunesItem[]>([]);
 
   /** Groups tracks by album for the album grid view. */
   protected albumGrid = computed(() => {
@@ -381,6 +390,85 @@ export class ListPage implements OnInit, OnDestroy {
     if (this.listType() === 'playlist') {
       this.loadDetail('playlist', this.listId(), this.pageNum());
     }
+  }
+
+  /**
+   * Find missing tracks on the current album using Apple Search API
+   */
+  async findMissingTracks(): Promise<void> {
+    // Only works for album lists
+    if (this.listType() !== 'album') {
+      this.toast.show('This feature is only available for albums.');
+      return;
+    }
+
+    const albumEntity = this.entity();
+    if (!albumEntity) {
+      this.toast.show('No album information found.');
+      return;
+    }
+
+    const albumName = albumEntity.Name;
+    if (!albumName) {
+      this.toast.show('Album name not found.');
+      return;
+    }
+
+    // Get the artist name from the first track if available
+    const firstTrack = this.tracks()[0];
+    const artistName = firstTrack?.artistName;
+
+    this.isSearchingApple.set(true);
+    this.appleSearchResults.set([]);
+    this.missingTracks.set([]);
+
+    try {
+      const response = await this.trackQuery.searchAppleAlbumTracks(albumName, artistName);
+
+      // Filter to only include tracks that are part of the album (collectionName matches)
+      const albumTracks = response.results.filter(track =>
+        track.wrapperType === 'track' &&
+        track.kind === 'song' &&
+        track.collectionName &&
+        track.collectionName.toLowerCase().includes(albumName.toLowerCase())
+      );
+
+      // Find missing tracks by comparing track numbers
+      const existingTrackNumbers = new Set(
+        this.tracks()
+          .map(t => t.trackNumber)
+          .filter((n): n is number => n !== null && n !== undefined)
+      );
+
+      const missing = albumTracks.filter(track =>
+        track.trackNumber !== null &&
+        track.trackNumber !== undefined &&
+        !existingTrackNumbers.has(track.trackNumber)
+      );
+
+      this.appleSearchResults.set(albumTracks);
+      this.missingTracks.set(missing);
+
+      if (missing.length > 0) {
+        this.toast.show(`Found ${missing.length} missing track(s) on iTunes.`);
+      } else {
+        this.toast.show('No missing tracks found on iTunes.');
+      }
+    } catch (error) {
+      console.error('Error searching Apple catalog:', error);
+      this.toast.show('Failed to search iTunes catalog.');
+    } finally {
+      this.isSearchingApple.set(false);
+    }
+  }
+
+  /**
+   * Opens the recorder modal seeded with the missing track and runs the
+   * in-app YouTube search immediately, so the result can be recorded.
+   */
+  searchYouTubeForTrack(track: ItunesItem, event?: Event): void {
+    event?.stopPropagation();
+    this.recorderPanel.open(`${track.artistName} - ${track.trackName}`, true);
   }
 
   onTrackUpdated(updatedTrack: ITrackItem): void {

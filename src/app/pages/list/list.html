@@ -63,6 +63,22 @@
               <i class="fa-solid fa-download"></i>
             }
           </button>
+          @if (listType() === 'album') {
+            <button
+              type="button"
+              class="banner-search-btn"
+              [disabled]="isSearchingApple()"
+              [title]="'Find missing tracks on iTunes'"
+              (click)="findMissingTracks()"
+            >
+              @if (isSearchingApple()) {
+                <i class="fa-solid fa-spinner fa-spin"></i>
+              } @else {
+                <i class="fa-brands fa-apple"></i>
+              }
+              <span>Find Missing</span>
+            </button>
+          }
           @if (listType() === 'playlist') {
             <button
               type="button"
@@ -80,6 +96,22 @@
 
   <div class="list-toolbar">
     <lib-breadcrumbs [items]="breadcrumbItems()" />
+    @if (listType() === 'album' && !bannerImage()) {
+      <button
+        type="button"
+        class="toolbar-find-missing-btn"
+        [disabled]="isSearchingApple()"
+        title="Find missing tracks on iTunes"
+        (click)="findMissingTracks()"
+      >
+        @if (isSearchingApple()) {
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        } @else {
+          <i class="fa-brands fa-apple"></i>
+        }
+        Find Missing
+      </button>
+    }
     @if (listType() === 'library') {
       <button
         type="button"
@@ -283,6 +315,24 @@
   }
 }
 
-<app-track-menu [track]="menuTrack()" (closed)="closeMenu()" (trackUpdated)="onTrackUpdated($event)" (playlistToggled)="onPlaylistToggled($event)" />
+  @if (missingTracks().length > 0) {
+    <div class="missing-tracks-section">
+      <h3>Missing Tracks Found on iTunes <i class="fa-brands fa-apple"></i></h3>
+      <div class="missing-tracks-list">
+        @for (track of missingTracks(); track $index) {
+          <div class="missing-track-item">
+            <span class="missing-track-number">{{ track.trackNumber }}.</span>
+            <span class="missing-track-title">{{ track.trackName }}</span>
+            <span class="missing-track-time">{{ formatDuration(track.trackTimeMillis / 1000) }}</span>
+            <button class="missing-track-action-btn" (click)="searchYouTubeForTrack(track, $event)" title="Search on YouTube">
+              <i class="fa-brands fa-youtube"></i>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
-<router-outlet />
+  <app-track-menu [track]="menuTrack()" (closed)="closeMenu()" (trackUpdated)="onTrackUpdated($event)" (playlistToggled)="onPlaylistToggled($event)" />
+
+  <router-outlet />

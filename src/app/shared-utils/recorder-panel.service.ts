@@ -8,9 +8,12 @@ import { Injectable, signal } from '@angular/core';
 export class RecorderPanelService {
   readonly isOpen = signal(false);
   readonly seedTerm = signal('');
+  /** When true, the modal runs the seeded search immediately on open. */
+  readonly autoSearch = signal(false);
 
-  open(seedTerm = ''): void {
+  open(seedTerm = '', autoSearch = false): void {
     this.seedTerm.set(seedTerm);
+    this.autoSearch.set(autoSearch && !!seedTerm);
     this.isOpen.set(true);
   }
 
