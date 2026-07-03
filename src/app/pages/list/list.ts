@@ -356,6 +356,13 @@ export class ListPage implements OnInit {
     }
   }
 
+  onPlaylistToggled(playlists: IPlaylistSummary[]): void {
+    this.playlists.set(playlists);
+    if (this.listType() === 'playlist') {
+      this.loadDetail('playlist', this.listId(), this.pageNum());
+    }
+  }
+
   onTrackUpdated(updatedTrack: ITrackItem): void {
     // Update the track in the current list
     this.detail.update((currentDetail) => {

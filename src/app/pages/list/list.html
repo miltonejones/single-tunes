@@ -283,6 +283,6 @@
   }
 }
 
-<app-track-menu [track]="menuTrack()" (closed)="closeMenu()" (trackUpdated)="onTrackUpdated($event)" />
+<app-track-menu [track]="menuTrack()" (closed)="closeMenu()" (trackUpdated)="onTrackUpdated($event)" (playlistToggled)="onPlaylistToggled($event)" />
 
 <router-outlet />

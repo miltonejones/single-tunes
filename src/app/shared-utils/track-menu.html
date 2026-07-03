@@ -123,6 +123,29 @@
           <i class="fa-solid fa-arrow-left"></i> Back
         </button>
         <div class="track-menu-list">
+          <button type="button" class="track-menu-item" (click)="showNewPlaylistInput.set(!showNewPlaylistInput())">
+            <i class="fa-solid fa-plus"></i>
+            <span class="track-menu-label">New Playlist</span>
+            <span class="track-menu-caption">Create and add to a new playlist</span>
+          </button>
+          @if (showNewPlaylistInput()) {
+            <div class="track-menu-new-playlist">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Playlist name"
+                [value]="newPlaylistName()"
+                (input)="newPlaylistName.set($any($event.target).value)"
+                (keydown.enter)="createPlaylist()"
+              />
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                [disabled]="!newPlaylistName().trim()"
+                (click)="createPlaylist()"
+              >Create</button>
+            </div>
+          }
           @for (playlist of playlists(); track playlist.listKey) {
             <button type="button" class="track-menu-item" (click)="togglePlaylist(playlist)">
               @if (isTrackInPlaylist(playlist)) {

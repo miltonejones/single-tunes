@@ -9,6 +9,7 @@ import { TrackQueryService } from './track-query.service';
 import { TrackCommandService } from './track-command.service';
 import { ItunesSearchModal } from './itunes-search-modal';
 import { TrackDownloadService } from './track-download.service';
+import { createKey } from './domain/text';
 
 type MenuView = 'main' | 'playlists';
 
@@ -22,6 +23,7 @@ export class TrackMenu implements OnInit {
   track = input<ITrackItem | null>(null);
   closed = output<void>();
   trackUpdated = output<ITrackItem>();
+  playlistToggled = output<IPlaylistSummary[]>();
 
   private catalogQuery = inject(CatalogQueryService);
   private catalogCommand = inject(CatalogCommandService);
@@ -35,6 +37,8 @@ export class TrackMenu implements OnInit {
   private queueLength = signal(0);
   showEditModal = signal(false);
   editTrackItem = signal<ITrackItem | null>(null);
+  newPlaylistName = signal('');
+  showNewPlaylistInput = signal(false);
 
   canAddToQueue = computed(() => this.queueLength() > 0);
 
@@ -85,6 +89,27 @@ export class TrackMenu implements OnInit {
       this.playlists.update((list) =>
         list.map((p) => (p.listKey === playlist.listKey ? updated : p)),
       );
+      this.playlistToggled.emit(this.playlists());
+    });
+  }
+
+  createPlaylist(): void {
+    const name = this.newPlaylistName().trim();
+    const track = this.track();
+    if (!name || !track) return;
+
+    const newPlaylist: IPlaylistSummary = {
+      listKey: createKey(name),
+      Title: name,
+      TrackCount: 1,
+      related: [track.FileKey],
+    };
+
+    this.catalogCommand.savePlaylist(newPlaylist).then(() => {
+      this.playlists.update((list) => [...list, newPlaylist]);
+      this.playlistToggled.emit(this.playlists());
+      this.newPlaylistName.set('');
+      this.showNewPlaylistInput.set(false);
     });
   }
 
