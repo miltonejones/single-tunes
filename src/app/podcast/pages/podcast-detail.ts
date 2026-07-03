@@ -6,6 +6,7 @@ import {
   BreadcrumbItem,
   LoadingAnimation,
   PodcastAudioPlayerCommandService,
+  PodcastEpisodeDownloadService,
   PodcastQueryService,
   PodcastSelectionService,
   PodcastSubscriptionsService,
@@ -35,6 +36,7 @@ export class PodcastDetailPage {
   protected podcastSelection = inject(PodcastSelectionService);
   protected subscriptionsService = inject(PodcastSubscriptionsService);
   protected audioPlayerCommand = inject(PodcastAudioPlayerCommandService);
+  protected episodeDownload = inject(PodcastEpisodeDownloadService);
   private toast = inject(PodcastToastService);
 
   episodes = signal<ParsedEpisode[]>([]);
@@ -122,6 +124,16 @@ export class PodcastDetailPage {
       .filter((t): t is ITrack => t !== null);
 
     this.audioPlayerCommand.openTrack(track, queue);
+  }
+
+  downloadEpisode(episode: ParsedEpisode): void {
+    const podcast = this.podcast();
+    if (!podcast) return;
+    this.episodeDownload.download(episode, podcast);
+  }
+
+  removeDownload(episode: ParsedEpisode): void {
+    this.episodeDownload.remove(episode.guid, episode.title);
   }
 
   isFinished(guid: string): boolean {

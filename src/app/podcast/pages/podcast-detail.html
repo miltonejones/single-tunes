@@ -102,10 +102,28 @@
             }
           </div>
 
-          <button class="btn btn-sm" [class.btn-warning]="isCurrentTrack" [class.btn-primary]="!isCurrentTrack" (click)="playEpisode(item)">
-            <i class="p-1 fa-solid" [class.fa-pause]="isCurrentTrack" [class.fa-play]="!isCurrentTrack"></i>
-            {{ isCurrentTrack ? 'Pause' : (progress && !finished ? 'Resume' : 'Play') }}
-          </button>
+          <div class="d-flex gap-2 flex-shrink-0">
+            @if (item.enclosure?.url) {
+              @if (episodeDownload.isDownloading(item.guid)) {
+                <button class="btn btn-sm btn-outline-secondary" disabled title="Downloading episode">
+                  <i class="p-1 fa-solid fa-spinner fa-spin"></i>
+                </button>
+              } @else if (episodeDownload.isDownloaded(item.guid)) {
+                <button class="btn btn-sm btn-outline-success" title="Remove download" (click)="removeDownload(item)">
+                  <i class="p-1 fa-solid fa-circle-check"></i>
+                </button>
+              } @else {
+                <button class="btn btn-sm btn-outline-secondary" title="Download for offline listening" (click)="downloadEpisode(item)">
+                  <i class="p-1 fa-solid fa-download"></i>
+                </button>
+              }
+            }
+
+            <button class="btn btn-sm" [class.btn-warning]="isCurrentTrack" [class.btn-primary]="!isCurrentTrack" (click)="playEpisode(item)">
+              <i class="p-1 fa-solid" [class.fa-pause]="isCurrentTrack" [class.fa-play]="!isCurrentTrack"></i>
+              {{ isCurrentTrack ? 'Pause' : (progress && !finished ? 'Resume' : 'Play') }}
+            </button>
+          </div>
         </div>
 
         @if (progress > 0 && progress < 99) {

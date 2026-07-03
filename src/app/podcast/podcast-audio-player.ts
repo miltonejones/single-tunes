@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular
 import { Subscription } from 'rxjs';
 import {
   PodcastAudioPlayerCommandService,
+  PodcastEpisodeDownloadService,
   PodcastSelectionService,
   formatDuration,
   ITrack,
@@ -23,10 +24,12 @@ const RESUME_THRESHOLD = 97;
 export class PodcastAudioPlayer implements OnInit, OnDestroy {
   private audioPlayerCommand = inject(PodcastAudioPlayerCommandService);
   private podcastSelection = inject(PodcastSelectionService);
+  private episodeDownload = inject(PodcastEpisodeDownloadService);
   protected queuePanel = inject(EpisodeQueuePanelService);
   private subscription?: Subscription;
 
   private audio = new Audio();
+  private blobUrl: string | null = null;
 
   track = signal<ITrack | null>(null);
   isPlaying = signal(false);
@@ -90,11 +93,32 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
     this.audio.pause();
     this.audio.src = '';
+    this.releaseBlobUrl();
   }
 
-  private loadAndPlay(track: ITrack): void {
-    // Set the audio source and load it
-    this.audio.src = track.audioUrl;
+  private releaseBlobUrl(): void {
+    if (this.blobUrl) {
+      URL.revokeObjectURL(this.blobUrl);
+      this.blobUrl = null;
+    }
+  }
+
+  private async loadAndPlay(track: ITrack): Promise<void> {
+    // Prefer a locally downloaded copy so episodes play offline
+    const { src, isBlob } = await this.episodeDownload.getAudioSrc(track);
+
+    // A newer track may have been requested while the blob was being read
+    if (this.track()?.guid !== track.guid) {
+      if (isBlob) URL.revokeObjectURL(src);
+      return;
+    }
+
+    this.releaseBlobUrl();
+    if (isBlob) {
+      this.blobUrl = src;
+    }
+
+    this.audio.src = src;
     this.audio.load();
 
     // Set up a promise that resolves when the audio is ready to play

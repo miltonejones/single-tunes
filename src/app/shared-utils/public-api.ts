@@ -65,6 +65,8 @@ export type { IPodcastFeed } from './podcast-query.service';
 export { PodcastSelectionService } from './podcast-selection.service';
 export { PodcastAudioPlayerCommandService } from './podcast-audio-player-command.service';
 export { PodcastSubscriptionsService } from './podcast-subscriptions.service';
+export { PodcastEpisodeDownloadService } from './podcast-episode-download.service';
+export type { DownloadedEpisode } from './podcast-episode-download.service';
 export { PodcastToastService } from './podcast-toast.service';
 export { PodcastCard } from './podcast-card';
 export { PlayHistoryService } from './play-history.service';
