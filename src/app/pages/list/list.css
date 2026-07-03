@@ -342,6 +342,7 @@ a:is(.track-artist, .track-album, .track-genre):hover {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  padding-right: 1rem;
 }
 .list-toolbar lib-breadcrumbs {
   flex: 1;
