@@ -52,3 +52,10 @@ terraform/*.tfstate.*
 terraform/tfplan
 terraform/*.tfplan
 terraform/.lambda-zips/
+
+# Claude session artifacts
+IMPLEMENTATION_SUMMARY.md
+SEARCH_NAVIGATION_SOLUTION.md
+VERIFICATION_PLAN.md
+MEMORY.md
+screenie.png
