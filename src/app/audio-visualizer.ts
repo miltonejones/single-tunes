@@ -65,10 +65,11 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
 
   protected dockStyle = computed(() => {
     const progress = this.scrollHideProgress();
+    const interactive = this.showPanel() && progress === 0;
     return {
       transform: `translateY(${progress * 100}%)`,
       opacity: `${1 - progress}`,
-      'pointer-events': progress > 0 ? 'none' : 'auto',
+      'pointer-events': interactive ? 'auto' : 'none',
     };
   });
 
