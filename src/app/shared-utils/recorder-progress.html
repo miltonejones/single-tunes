@@ -1,7 +1,7 @@
 @if (hasBatches()) {
   <div class="recorder-progress" [class.collapsed]="collapsed()">
     <div class="rp-header" (click)="collapsed.set(!collapsed())">
-      <i class="fa-solid fa-record-vinyl rp-header-icon" [class.spin]="recorderRunning()"></i>
+      <i class="fa-solid fa-record-vinyl rp-header-icon"></i>
       <span class="rp-header-title">Recording</span>
       <span class="rp-header-count">{{ batches().length }}</span>
       <i class="fa-solid rp-chevron" [class.fa-chevron-down]="!collapsed()" [class.fa-chevron-up]="collapsed()"></i>
@@ -23,7 +23,7 @@
             <div class="rp-jobs">
               @for (job of batch.jobs; track job.jobId) {
                 <div class="rp-job" [attr.data-status]="job.status">
-                  <i class="fa-solid rp-job-icon" [class]="STATUS_ICON[job.status]" [class.spin]="job.status === 'recording' || job.status === 'uploading'"></i>
+                  <i class="fa-solid rp-job-icon" [class]="STATUS_ICON[job.status]"></i>
                   <span class="rp-job-title">{{ displayName(job.output) }}</span>
                   @if (job.error) {
                     <span class="rp-job-error" [title]="job.error"><i class="fa-solid fa-triangle-exclamation"></i></span>
