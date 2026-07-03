@@ -63,6 +63,34 @@
     </div>
   }
 
+  @if (recentlyAdded().length > 0) {
+    <div class="section-header">
+      <h3><i class="fa-solid fa-compact-disc"></i> Recently Added</h3>
+    </div>
+    <div class="dash-grid" libCoverflow>
+      @for (track of recentlyAdded(); track track.ID) {
+        <button
+          type="button"
+          class="recent-track-card"
+          [class.active]="track.ID === currentTrackId()"
+          (click)="playRecentTrack(track)"
+        >
+          <div class="recent-track-art">
+            <img
+              appImgFallback
+              [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'"
+              [src]="track.albumImage"
+              [alt]="track.Title"
+            />
+            <span class="recent-track-play"><i class="fa-solid fa-play"></i></span>
+          </div>
+          <div class="recent-track-title">{{ track.Title }}</div>
+          <div class="recent-track-subtitle">{{ track.artistName }}</div>
+        </button>
+      }
+    </div>
+  }
+
   <!-- ── AI Search ─────────────────────────────────────────────────── -->
   <div class="ai-search-widget">
     <div class="ai-search-input-row">

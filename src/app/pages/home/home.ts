@@ -56,6 +56,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   dashItems = signal<DashItem[]>([]);
   featuredPlaylists = signal<IPlaylistSummary[]>([]);
+  recentlyAdded = signal<ITrackItem[]>([]);
   carouselIndex = signal(0);
 
   aiStatus = signal<AiSearchStatus>('idle');
@@ -78,6 +79,7 @@ export class HomePage implements OnInit, OnDestroy {
     const data = this.route.snapshot.data['home'] as HomeResolvedData;
     this.dashItems.set(data.dashItems);
     this.featuredPlaylists.set(pickRandom(data.playlists, FEATURED_PLAYLIST_COUNT));
+    this.recentlyAdded.set(data.recentlyAdded);
     this.startCarousel();
     this.audioPlayerCommand.currentTrack$.subscribe((track) => {
       this.currentTrackId.set(track?.ID ?? null);
@@ -97,6 +99,11 @@ export class HomePage implements OnInit, OnDestroy {
   playAiTrack(track: ITrackItem): void {
     this.playHistory.recordPlay('search', 'AI Search', ['/'], track);
     this.audioPlayerCommand.openTrack(track, this.aiTracks());
+  }
+
+  playRecentTrack(track: ITrackItem): void {
+    this.playHistory.recordPlay('library', 'Recently Added', ['/list'], track);
+    this.audioPlayerCommand.openTrack(track, this.recentlyAdded());
   }
 
   nextSlide(): void {
