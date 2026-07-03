@@ -27,15 +27,6 @@
               [value]="count()"
               (input)="count.set(+$any($event).target.value || 5)"
             />
-            <input
-              type="number"
-              class="form-control dur-input"
-              min="1"
-              placeholder="dur (s)"
-              title="Clip length in seconds (blank = full video)"
-              [value]="duration()"
-              (input)="duration.set($any($event).target.value ? +$any($event).target.value : null)"
-            />
             <button class="btn btn-primary" type="button" (click)="search()" [disabled]="isSearching()">
               @if (isSearching()) {
                 <span class="spinner-border spinner-border-sm" role="status"></span>

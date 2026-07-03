@@ -1,11 +1,10 @@
-.count-input {
-  max-width: 72px;
-  flex: 0 0 auto;
-}
-
-.dur-input {
-  max-width: 90px;
-  flex: 0 0 auto;
+/* Fixed basis + no shrink: the search input flexes, this never collapses.
+   Selector must out-rank Bootstrap's `.input-group > .form-control`
+   (0,2,0), which otherwise wins and lets the search input crowd it out. */
+.input-group > input.count-input {
+  flex: 0 0 84px;
+  width: 84px;
+  min-width: 84px;
 }
 
 .recorder-row {

@@ -24,7 +24,6 @@ export class RecorderModal {
 
   searchTerm = signal('');
   count = signal(5);
-  duration = signal<number | null>(null);
   isSearching = signal(false);
   results = signal<RecorderResult[]>([]);
   error = signal('');
@@ -75,7 +74,7 @@ export class RecorderModal {
     this.results.set([]);
 
     this.recorder
-      .search(term, this.count(), this.duration() ?? undefined)
+      .search(term, this.count())
       .then((results) => {
         this.results.set(results);
         if (results.length === 0) this.toast.show('No YouTube results for that search.');
