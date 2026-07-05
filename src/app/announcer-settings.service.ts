@@ -29,6 +29,18 @@ export class AnnouncerSettingsService {
     this.settings.set(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }
+
+  /**
+   * Seeds the announcer "name" with the first-run name, but only if the user
+   * hasn't already customized it away from the default — so we never clobber a
+   * name the user deliberately set in the Settings modal.
+   */
+  setNameDefault(name: string): void {
+    const current = this.settings();
+    const isDefault = !current.name || current.name === DEFAULT_SETTINGS.name;
+    if (!isDefault || current.name === name) return;
+    this.update({ ...current, name });
+  }
 }
 
 function loadSettings(): AnnouncerSettings {

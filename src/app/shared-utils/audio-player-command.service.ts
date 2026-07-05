@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ITrackItem } from './models';
 import { ToastService } from './toast.service';
+import type { SyncState, SyncTrack } from './sync.service';
 
 @Injectable({
   providedIn: 'root',
@@ -79,8 +80,40 @@ export class AudioPlayerCommandService {
     this.togglePlayPause$.next();
   }
 
+  /**
+   * Applies a leader state snapshot on a follower instance — sets the now-playing
+   * track and queue subjects so the UI mirrors the leader, WITHOUT touching the
+   * local queue bookkeeping that drives leader playback. The SyncService wraps
+   * calls to this in an `isApplyingMirror` guard so its own subject subscriptions
+   * don't republish the mirrored values.
+   */
+  applyMirroredState(state: SyncState): void {
+    this.queue = state.queue.map(fromSyncTrack);
+    this.queue$.next(this.queue);
+    this.setCurrentTrack(state.track ? fromSyncTrack(state.track) : null);
+  }
+
   private setCurrentTrack(track: ITrackItem | null): void {
     this.nextInsertIndex = null;
     this.currentTrack$.next(track);
   }
+}
+
+/** Reconstructs an ITrackItem from the minimal SyncTrack shipped over the wire. */
+function fromSyncTrack(t: SyncTrack): ITrackItem {
+  return {
+    ID: t.ID,
+    Title: t.Title,
+    FileKey: t.FileKey,
+    albumImage: t.albumImage,
+    trackId: t.ID ?? 0,
+    Genre: '',
+    genreKey: null,
+    discNumber: null,
+    trackTime: t.trackTime,
+    trackNumber: null,
+    explicit: false,
+    artistName: t.artistName,
+    albumName: t.albumName,
+  };
 }

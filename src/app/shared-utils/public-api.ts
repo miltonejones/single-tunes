@@ -71,3 +71,8 @@ export { PodcastToastService } from './podcast-toast.service';
 export { PodcastCard } from './podcast-card';
 export { PlayHistoryService } from './play-history.service';
 export type { PlayHistoryEntry, RecentPlayItem } from './play-history.service';
+
+export { UserService } from './user.service';
+export type { UserProfile } from './user.service';
+export { SyncService } from './sync.service';
+export type { SyncState, SyncTrack, SyncMode } from './sync.service';
