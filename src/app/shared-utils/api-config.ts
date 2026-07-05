@@ -11,3 +11,8 @@ export const AI_SEARCH_ENDPOINT = 'https://ohb29b452e.execute-api.us-east-1.amaz
 // The API key lives only in the recorder-proxy Lambda (see terraform/main.tf);
 // the browser calls the proxy on the AI gateway, so no secret ships to clients.
 export const RECORDER_API_ENDPOINT = `${AI_SEARCH_ENDPOINT}/recorder`;
+
+// Shazam song recognition. The Bearer key lives only in the shazam-proxy
+// Lambda (see terraform/main.tf); the browser calls the proxy on the AI
+// gateway, so no secret ships to clients.
+export const SHAZAM_API_ENDPOINT = `${AI_SEARCH_ENDPOINT}/shazam`;

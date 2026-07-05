@@ -95,6 +95,16 @@
 
   <button
     type="button"
+    class="btn shazam-toggle"
+    aria-label="Identify a song"
+    title="Identify a song"
+    (click)="shazamPanel.open()"
+  >
+    <i class="fa-solid fa-headphones"></i>
+  </button>
+
+  <button
+    type="button"
     class="btn settings-toggle"
     aria-label="Settings"
     (click)="settingsPanel.toggle()"
@@ -126,6 +136,10 @@
 
 @if (recorderPanel.isOpen()) {
   <app-recorder-modal />
+}
+
+@if (shazamPanel.isOpen()) {
+  <app-shazam-modal />
 }
 
 <app-recorder-progress />

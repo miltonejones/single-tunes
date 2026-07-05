@@ -3,7 +3,7 @@
  *
  * POST /sync/heartbeat
  * Body: { userKey: string, instanceId: string }
- * Response: { leaderInstanceId?: string, leaseExpires?: number, state?: object }
+ * Response: { leaderInstanceId?: string, leaseExpires?: number, state?: object, stale?: boolean }
  *
  * Refreshes this instance's session row, reaps stale sessions (deleting their
  * queues), and returns the current lease so a displaced leader can stand down.
@@ -43,18 +43,27 @@ export const handler = async (event) => {
 
   const now = Date.now();
 
-  // Refresh this instance's heartbeat.
-  await ddb.send(
-    new UpdateItemCommand({
-      TableName: SESSIONS_TABLE,
-      Key: { userKey: { S: userKey }, instanceId: { S: instanceId } },
-      UpdateExpression: 'SET lastHeartbeat = :now, expiresAt = :exp',
-      ExpressionAttributeValues: {
-        ':now': { N: String(now) },
-        ':exp': { N: String(now + SESSION_TTL_MS) },
-      },
-    }),
-  );
+  // Refresh this instance's heartbeat. Conditional on the queue still being
+  // recorded: an unconditional update would resurrect a reaped session as a
+  // queue-less row. Instead the client is told it's stale so it re-registers.
+  let stale = false;
+  try {
+    await ddb.send(
+      new UpdateItemCommand({
+        TableName: SESSIONS_TABLE,
+        Key: { userKey: { S: userKey }, instanceId: { S: instanceId } },
+        UpdateExpression: 'SET lastHeartbeat = :now, expiresAt = :exp',
+        ConditionExpression: 'attribute_exists(queueUrl)',
+        ExpressionAttributeValues: {
+          ':now': { N: String(now) },
+          ':exp': { N: String(now + SESSION_TTL_MS) },
+        },
+      }),
+    );
+  } catch (e) {
+    if (e.name !== 'ConditionalCheckFailedException') throw e;
+    stale = true;
+  }
 
   // Reap stale sessions for this user (delete their queues + rows).
   await reapStaleSessions(userKey, now);
@@ -69,7 +78,7 @@ export const handler = async (event) => {
   );
   const item = lease.Item;
   if (!item || !item.leaderInstanceId) {
-    return resp(200, JSON.stringify({}));
+    return resp(200, JSON.stringify(stale ? { stale } : {}));
   }
   const flat = unmarshall(item);
   let state;
@@ -84,6 +93,7 @@ export const handler = async (event) => {
       leaderInstanceId: flat.leaderInstanceId,
       leaseExpires: flat.leaseExpires,
       state,
+      ...(stale && { stale }),
     }),
   );
 };
@@ -100,17 +110,24 @@ async function reapStaleSessions(userKey, now) {
     (res.Items ?? []).map(async (item) => {
       const last = item.lastHeartbeat ? Number(item.lastHeartbeat.N) : 0;
       if (now - last < SESSION_TTL_MS) return;
+      // Row first, so a concurrent poller sees "no session" (and re-registers)
+      // rather than a live row pointing at a deleted queue. Both steps are
+      // best-effort: one failure must not 500 the whole heartbeat.
+      try {
+        await ddb.send(
+          new DeleteItemCommand({
+            TableName: SESSIONS_TABLE,
+            Key: { userKey: { S: userKey }, instanceId: item.instanceId },
+          }),
+        );
+      } catch {
+        // retried on the next heartbeat — ignore
+      }
       try {
         if (item.queueUrl) await sqs.send(new DeleteQueueCommand({ QueueUrl: item.queueUrl.S }));
       } catch {
         // queue may already be gone — ignore
       }
-      await ddb.send(
-        new DeleteItemCommand({
-          TableName: SESSIONS_TABLE,
-          Key: { userKey: { S: userKey }, instanceId: item.instanceId },
-        }),
-      );
     }),
   );
 }

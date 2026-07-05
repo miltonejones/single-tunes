@@ -1,0 +1,57 @@
+<div class="modal-backdrop fade show" (click)="close()"></div>
+
+<div class="modal fade show" style="display: block;" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-headphones me-2"></i> Identify a Song</h5>
+        <button type="button" class="btn-close" (click)="close()"></button>
+      </div>
+      <div class="modal-body text-center">
+        @switch (phase()) {
+          @case ('requesting') {
+            <div class="shazam-badge"><i class="fa-solid fa-microphone-slash"></i></div>
+            <p class="shazam-status">Waiting for microphone access&hellip;</p>
+            <p class="text-muted mb-0">Allow the microphone permission prompt to continue.</p>
+          }
+          @case ('recording') {
+            <div class="shazam-badge listening"><i class="fa-solid fa-microphone"></i></div>
+            <p class="shazam-status">Listening&hellip; {{ secondsLeft() }}</p>
+            <p class="text-muted mb-0">Hold your device close to the music.</p>
+          }
+          @case ('identifying') {
+            <div class="shazam-badge identifying"><i class="fa-solid fa-wave-square"></i></div>
+            <p class="shazam-status">Identifying&hellip;</p>
+            <p class="text-muted mb-0">Matching your clip against Shazam.</p>
+          }
+          @case ('result') {
+            <div class="shazam-badge matched"><i class="fa-solid fa-circle-check"></i></div>
+            <h4 class="shazam-title">{{ track()?.title }}</h4>
+            <p class="shazam-artist">{{ track()?.subtitle }}</p>
+          }
+          @case ('no-match') {
+            <div class="shazam-badge"><i class="fa-solid fa-circle-question"></i></div>
+            <p class="shazam-status">No match found.</p>
+            <p class="text-muted mb-0">Try again closer to the speaker.</p>
+          }
+          @case ('error') {
+            <div class="alert alert-danger mb-0">{{ error() }}</div>
+          }
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+        @if (phase() === 'result' || phase() === 'no-match' || phase() === 'error') {
+          <button type="button" class="btn btn-outline-primary" (click)="listen()">
+            <i class="fa-solid fa-microphone"></i> Listen again
+          </button>
+        }
+        @if (phase() === 'result') {
+          <button type="button" class="btn btn-success" (click)="findOnYouTube()">
+            <i class="fa-brands fa-youtube"></i> Find on YouTube
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

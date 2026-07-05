@@ -477,6 +477,63 @@ resource "aws_lambda_permission" "recorder_proxy" {
 }
 
 # ============================================
+# Shazam proxy — keeps the Shazam Bearer key server-side
+# ============================================
+
+data "archive_file" "shazam_proxy" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/shazam-proxy/index.mjs"
+  output_path = "${path.module}/.lambda-zips/shazam-proxy.zip"
+}
+
+resource "aws_lambda_function" "shazam_proxy" {
+  function_name    = "${var.project_name}-shazam-proxy"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.shazam_proxy.output_path
+  source_code_hash = data.archive_file.shazam_proxy.output_base64sha256
+  timeout          = 30
+  memory_size      = 256
+
+  environment {
+    variables = {
+      SHAZAM_API_ENDPOINT = var.shazam_api_endpoint
+      SHAZAM_API_KEY      = var.shazam_api_key
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "aws_apigatewayv2_integration" "shazam_proxy" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.shazam_proxy.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "shazam_recognize" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /shazam/recognize"
+  target    = "integrations/${aws_apigatewayv2_integration.shazam_proxy.id}"
+}
+
+resource "aws_apigatewayv2_route" "shazam_results" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /shazam/results/{uuid}"
+  target    = "integrations/${aws_apigatewayv2_integration.shazam_proxy.id}"
+}
+
+resource "aws_lambda_permission" "shazam_proxy" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.shazam_proxy.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+# ============================================
 # Cross-instance sync — DynamoDB sessions/leases + per-instance SQS queues
 # ============================================
 

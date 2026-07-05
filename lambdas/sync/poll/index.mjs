@@ -39,7 +39,9 @@ export const handler = async (event) => {
   );
   const queueUrl = session.Item?.queueUrl?.S;
   if (!queueUrl) {
-    return resp(200, JSON.stringify({ messages: [] }));
+    // No session row (reaped) or a row without a queue — this instance can't
+    // receive anything until it re-registers.
+    return resp(200, JSON.stringify({ messages: [], stale: true }));
   }
 
   let messages = [];
@@ -53,6 +55,11 @@ export const handler = async (event) => {
     );
     messages = res.Messages ?? [];
   } catch (e) {
+    if (/QueueDoesNotExist|NonExistentQueue/i.test(`${e.name} ${e.message}`)) {
+      // Queue was reaped out from under a still-live session row.
+      return resp(200, JSON.stringify({ messages: [], stale: true }));
+    }
+    console.error('sync-poll: receive failed:', e);
     return resp(500, JSON.stringify({ error: `receive failed: ${e.message}` }));
   }
 
