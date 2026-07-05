@@ -15,7 +15,7 @@ npm test             # ng test (Vitest via @angular/build:unit-test)
 Run a subset of tests with Vitest's own filters, e.g.:
 
 ```bash
-npm test -- src/app/app.spec.ts
+npm test -- --include src/app/app.spec.ts
 npm test -- -t "should create the app"
 ```
 
