@@ -93,6 +93,9 @@ export class SyncService {
   private publishScheduled = false;
   private needsClaim = false;
   private pollAbort = false;
+  private registering = false;
+  /** ts of the newest announcement already toasted — everything older is a rebroadcast. */
+  private lastAnnouncementTs = 0;
   private subscriptions: Subscription[] = [];
   private isApplyingMirror = false;
 
@@ -113,16 +116,8 @@ export class SyncService {
 
   private async start(userKey: string): Promise<void> {
     if (this.queueUrl) return; // already started
-    try {
-      const reg = await firstValueFrom(
-        this.http.post<{ queueUrl: string }>(`${SYNC_ENDPOINT}/register`, {
-          userKey,
-          instanceId: this.instanceId,
-        }),
-      );
-      this.queueUrl = reg.queueUrl;
-    } catch (e) {
-      console.warn('sync: register failed, running unsynced', e);
+    if (!(await this.register(userKey))) {
+      console.warn('sync: register failed, running unsynced');
       return;
     }
 
@@ -165,6 +160,31 @@ export class SyncService {
 
     void this.heartbeat();
     void this.pollLoop();
+  }
+
+  /**
+   * Allocate (or re-allocate) this instance's SQS queue. Also the recovery
+   * path when the backend reports the session `stale` — e.g. after this tab
+   * slept past the session TTL and a peer reaped its queue.
+   */
+  private async register(userKey: string): Promise<boolean> {
+    if (this.registering) return false;
+    this.registering = true;
+    try {
+      const reg = await firstValueFrom(
+        this.http.post<{ queueUrl: string }>(`${SYNC_ENDPOINT}/register`, {
+          userKey,
+          instanceId: this.instanceId,
+        }),
+      );
+      this.queueUrl = reg.queueUrl;
+      return true;
+    } catch (e) {
+      console.warn('sync: register failed', e);
+      return false;
+    } finally {
+      this.registering = false;
+    }
   }
 
   private stop(): void {
@@ -243,6 +263,12 @@ export class SyncService {
       if (!res.granted || (res.leaderInstanceId && res.leaderInstanceId !== this.instanceId)) {
         this.stepDown();
       }
+      // An announcement is a one-shot event: once fanned out, drop it from the
+      // leader snapshot so the 2s position tick doesn't rebroadcast it forever.
+      // (Guard on ts — a newer announcement may have arrived during the await.)
+      if (state.announcement && this.leaderState.announcement?.ts === state.announcement.ts) {
+        this.leaderState = { ...this.leaderState, announcement: null };
+      }
     } catch (e) {
       // Network blip — stay leader; next publish/heartbeat retries.
       console.warn('sync: publish failed', e);
@@ -254,11 +280,15 @@ export class SyncService {
     if (!user) return;
     try {
       const res = await firstValueFrom(
-        this.http.post<{ leaderInstanceId?: string; leaseExpires?: number; state?: SyncState }>(
-          `${SYNC_ENDPOINT}/heartbeat`,
-          { userKey: user.userKey, instanceId: this.instanceId },
-        ),
+        this.http.post<{
+          leaderInstanceId?: string;
+          leaseExpires?: number;
+          state?: SyncState;
+          stale?: boolean;
+        }>(`${SYNC_ENDPOINT}/heartbeat`, { userKey: user.userKey, instanceId: this.instanceId }),
       );
+      // Session was reaped while this tab was asleep — get a fresh queue.
+      if (res.stale) void this.register(user.userKey);
       // If someone else holds the lease and we thought we were leader, stand down.
       if (
         this.mode() === 'leader' &&
@@ -287,10 +317,16 @@ export class SyncService {
     while (!this.pollAbort && this.queueUrl) {
       try {
         const res = await firstValueFrom(
-          this.http.get<{ messages: SyncState[] }>(
+          this.http.get<{ messages: SyncState[]; stale?: boolean }>(
             `${SYNC_ENDPOINT}/poll/${user.userKey}/${this.instanceId}`,
           ),
         );
+        if (res.stale) {
+          // Our queue was reaped (e.g. this tab slept past the session TTL) —
+          // re-register for a fresh one; back off if that fails too.
+          if (!(await this.register(user.userKey))) await sleep(5000);
+          continue;
+        }
         for (const msg of res.messages ?? []) {
           if (msg.leaderInstanceId === this.instanceId) continue; // own echo
           if (this.mode() === 'leader') {
@@ -311,11 +347,14 @@ export class SyncService {
     try {
       this.mirrored.set(state);
       this.mode.set('follower');
-      if (state.announcement?.text) {
-        // Show announcement as toast on follower instances
+      if (state.announcement?.text && state.announcement.ts > this.lastAnnouncementTs) {
+        // Show announcement as toast on follower instances. Dedup by ts: the
+        // same announcement can arrive many times (repeated state publishes,
+        // heartbeat lease snapshots, SQS at-least-once delivery).
+        this.lastAnnouncementTs = state.announcement.ts;
         this.toastService.show(state.announcement.text);
         this.mirroredAnnouncement.set(state.announcement.text);
-      } else if (this.mirroredAnnouncement()) {
+      } else if (!state.announcement?.text && this.mirroredAnnouncement()) {
         this.mirroredAnnouncement.set('');
       }
       // Drive the command service so TrackQueue / now-playing render the leader's view.
