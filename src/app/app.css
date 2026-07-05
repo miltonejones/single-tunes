@@ -170,8 +170,8 @@ nav .btn.btn-primary {
   display: none;
 }
 
+.shazam-toggle,
 .settings-toggle {
-  margin-left: auto;
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -179,6 +179,12 @@ nav .btn.btn-primary {
   flex-shrink: 0;
 }
 
+/* First button of the right-aligned group carries the auto margin. */
+.shazam-toggle {
+  margin-left: auto;
+}
+
+.shazam-toggle:hover,
 .settings-toggle:hover {
   background-color: var(--surface-hover);
   color: var(--text);
@@ -224,6 +230,7 @@ nav .btn.btn-primary {
     display: none;
   }
 
+  .toolbar.search-active .shazam-toggle,
   .toolbar.search-active .settings-toggle {
     display: none;
   }

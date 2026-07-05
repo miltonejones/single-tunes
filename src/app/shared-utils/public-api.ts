@@ -53,6 +53,11 @@ export { RecorderPanelService } from './recorder-panel.service';
 export { RecorderModal } from './recorder-modal';
 export { RecorderProgress } from './recorder-progress';
 
+export { ShazamService } from './shazam.service';
+export type { ShazamTrack } from './shazam.service';
+export { ShazamPanelService } from './shazam-panel.service';
+export { ShazamModal } from './shazam-modal';
+
 // ── Podcast exports ──────────────────────────────────────────────────────
 
 export * from './podcast-models';

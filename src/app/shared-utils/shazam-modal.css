@@ -1,0 +1,50 @@
+.shazam-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  margin: 12px auto 16px;
+  border-radius: 50%;
+  font-size: 2rem;
+  color: #fff;
+  background: var(--text-tertiary, #adb5bd);
+}
+
+.shazam-badge.listening {
+  background: var(--accent, #0d6efd);
+  animation: shazam-pulse 1.2s ease-out infinite;
+}
+
+.shazam-badge.identifying {
+  background: var(--accent, #0d6efd);
+  opacity: 0.85;
+}
+
+.shazam-badge.matched {
+  background: #198754;
+}
+
+@keyframes shazam-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 24px rgba(129, 140, 248, 0);
+  }
+}
+
+.shazam-status {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.shazam-title {
+  margin-bottom: 2px;
+}
+
+.shazam-artist {
+  color: var(--text-secondary, #6c757d);
+  margin-bottom: 0;
+}

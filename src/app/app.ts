@@ -11,6 +11,8 @@ import {
   RecorderModal,
   RecorderPanelService,
   RecorderProgress,
+  ShazamModal,
+  ShazamPanelService,
   SyncService,
   Toast,
   UserService,
@@ -148,7 +150,7 @@ const routeAnimation = trigger('routeAnimation', [
   selector: 'app-root',
   imports: [
     RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, TrackQueue, SettingsModal, Toast,
-    PodcastAudioPlayer, EpisodeQueue, FormsModule, RecorderModal, RecorderProgress, FirstRunGate,
+    PodcastAudioPlayer, EpisodeQueue, FormsModule, RecorderModal, RecorderProgress, ShazamModal, FirstRunGate,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -161,6 +163,7 @@ export class App {
   private podcastAudioPlayerCommand = inject(PodcastAudioPlayerCommandService);
   protected settingsPanel = inject(SettingsPanelService);
   protected recorderPanel = inject(RecorderPanelService);
+  protected shazamPanel = inject(ShazamPanelService);
   protected offlineService = inject(OfflineService);
   protected userService = inject(UserService);
   private syncService = inject(SyncService);

@@ -45,3 +45,15 @@ variable "recorder_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "shazam_api_endpoint" {
+  description = "Base URL of the Shazam recognition API the proxy forwards to"
+  type        = string
+  default     = "https://shazam-api.com/api"
+}
+
+variable "shazam_api_key" {
+  description = "Bearer key for the Shazam API. Injected into the proxy Lambda's env; never committed. Pass via -var or a gitignored *.tfvars."
+  type        = string
+  sensitive   = true
+}
