@@ -76,3 +76,7 @@ export { UserService } from './user.service';
 export type { UserProfile } from './user.service';
 export { SyncService } from './sync.service';
 export type { SyncState, SyncTrack, SyncMode } from './sync.service';
+
+// ── Sync Service Worker exports ──────────────────────────────────────────
+
+export * from './sync-sw';
