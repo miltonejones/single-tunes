@@ -1,0 +1,27 @@
+<div class="first-run-gate" data-bs-theme="dark">
+  <form class="first-run-card" (submit)="$event.preventDefault(); submit()">
+    <img class="first-run-logo" src="sky-tunes-logo.png" alt="SkyTunes logo" />
+    <h1 class="first-run-title">Welcome to SkyTunes</h1>
+    <p class="first-run-subtitle">What's your first name?</p>
+
+    <input
+      type="text"
+      class="form-control first-run-input"
+      placeholder="Your first name"
+      [(ngModel)]="name"
+      name="firstName"
+      autocomplete="given-name"
+      autofocus
+      (keyup.enter)="submit()"
+    />
+
+    <button type="submit" class="btn btn-primary first-run-submit" [disabled]="!canSubmit">
+      {{ submitting() ? 'Starting…' : 'Continue' }}
+    </button>
+
+    <p class="first-run-hint">
+      Your name links every device and tab opened with the same name, so playback stays in sync
+      across them.
+    </p>
+  </form>
+</div>

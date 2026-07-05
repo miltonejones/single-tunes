@@ -11,13 +11,16 @@ import {
   RecorderModal,
   RecorderPanelService,
   RecorderProgress,
+  SyncService,
   Toast,
+  UserService,
 } from 'shared-utils';
 
 const SEARCH_HISTORY_KEY = 'toolbar-search-history';
 const MAX_SEARCH_HISTORY = 10;
 import { AudioPlayer } from './audio-player';
 import { AudioVisualizer } from './audio-visualizer';
+import { FirstRunGate } from './first-run-gate';
 import { SettingsModal } from './settings-modal';
 import { SettingsPanelService } from './settings-panel.service';
 import { TrackQueue } from './track-queue';
@@ -145,7 +148,7 @@ const routeAnimation = trigger('routeAnimation', [
   selector: 'app-root',
   imports: [
     RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, TrackQueue, SettingsModal, Toast,
-    PodcastAudioPlayer, EpisodeQueue, FormsModule, RecorderModal, RecorderProgress,
+    PodcastAudioPlayer, EpisodeQueue, FormsModule, RecorderModal, RecorderProgress, FirstRunGate,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -159,6 +162,8 @@ export class App {
   protected settingsPanel = inject(SettingsPanelService);
   protected recorderPanel = inject(RecorderPanelService);
   protected offlineService = inject(OfflineService);
+  protected userService = inject(UserService);
+  private syncService = inject(SyncService);
   protected readonly NAV_ITEMS = NAV_ITEMS;
   activeSection = signal<NavSection>(resolveNavSection(this.router.url));
   searchOpen = signal(false);

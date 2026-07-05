@@ -477,6 +477,274 @@ resource "aws_lambda_permission" "recorder_proxy" {
 }
 
 # ============================================
+# Cross-instance sync — DynamoDB sessions/leases + per-instance SQS queues
+# ============================================
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_dynamodb_table" "sync_sessions" {
+  name         = "${var.project_name}-sync-sessions"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "userKey"
+  range_key    = "instanceId"
+
+  attribute {
+    name = "userKey"
+    type = "S"
+  }
+  attribute {
+    name = "instanceId"
+    type = "S"
+  }
+
+  tags = local.tags
+}
+
+resource "aws_dynamodb_table" "sync_leases" {
+  name         = "${var.project_name}-sync-leases"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "userKey"
+
+  attribute {
+    name = "userKey"
+    type = "S"
+  }
+
+  tags = local.tags
+}
+
+resource "aws_iam_role" "sync_lambda" {
+  name = "${var.project_name}-sync-lambda"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "sync_lambda_basic" {
+  role       = aws_iam_role.sync_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "sync_lambda_perms" {
+  name = "${var.project_name}-sync-lambda-perms"
+  role = aws_iam_role.sync_lambda.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+        ]
+        Resource = [
+          aws_dynamodb_table.sync_sessions.arn,
+          aws_dynamodb_table.sync_leases.arn,
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:CreateQueue",
+          "sqs:GetQueueUrl",
+          "sqs:SendMessage",
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:DeleteQueue",
+          "sqs:GetQueueAttributes",
+          "sqs:SetQueueAttributes",
+        ]
+        Resource = "arn:aws:sqs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:sky-tunes-sync-*"
+      },
+    ]
+  })
+}
+
+locals {
+  sync_env = {
+    SYNC_SESSIONS_TABLE = aws_dynamodb_table.sync_sessions.name
+    SYNC_LEASES_TABLE   = aws_dynamodb_table.sync_leases.name
+  }
+}
+
+data "archive_file" "sync_register" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/sync/register/index.mjs"
+  output_path = "${path.module}/.lambda-zips/sync-register.zip"
+}
+
+resource "aws_lambda_function" "sync_register" {
+  function_name    = "${var.project_name}-sync-register"
+  role             = aws_iam_role.sync_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.sync_register.output_path
+  source_code_hash = data.archive_file.sync_register.output_base64sha256
+  timeout          = 10
+  memory_size      = 256
+  environment {
+    variables = local.sync_env
+  }
+  tags = local.tags
+}
+
+data "archive_file" "sync_heartbeat" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/sync/heartbeat/index.mjs"
+  output_path = "${path.module}/.lambda-zips/sync-heartbeat.zip"
+}
+
+resource "aws_lambda_function" "sync_heartbeat" {
+  function_name    = "${var.project_name}-sync-heartbeat"
+  role             = aws_iam_role.sync_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.sync_heartbeat.output_path
+  source_code_hash = data.archive_file.sync_heartbeat.output_base64sha256
+  timeout          = 30
+  memory_size      = 256
+  environment {
+    variables = local.sync_env
+  }
+  tags = local.tags
+}
+
+data "archive_file" "sync_publish" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/sync/publish/index.mjs"
+  output_path = "${path.module}/.lambda-zips/sync-publish.zip"
+}
+
+resource "aws_lambda_function" "sync_publish" {
+  function_name    = "${var.project_name}-sync-publish"
+  role             = aws_iam_role.sync_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.sync_publish.output_path
+  source_code_hash = data.archive_file.sync_publish.output_base64sha256
+  timeout          = 10
+  memory_size      = 256
+  environment {
+    variables = local.sync_env
+  }
+  tags = local.tags
+}
+
+data "archive_file" "sync_poll" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/sync/poll/index.mjs"
+  output_path = "${path.module}/.lambda-zips/sync-poll.zip"
+}
+
+resource "aws_lambda_function" "sync_poll" {
+  function_name    = "${var.project_name}-sync-poll"
+  role             = aws_iam_role.sync_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.sync_poll.output_path
+  source_code_hash = data.archive_file.sync_poll.output_base64sha256
+  timeout          = 30
+  memory_size      = 256
+  environment {
+    variables = local.sync_env
+  }
+  tags = local.tags
+}
+
+resource "aws_apigatewayv2_integration" "sync_register" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.sync_register.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "sync_register" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /sync/register"
+  target    = "integrations/${aws_apigatewayv2_integration.sync_register.id}"
+}
+
+resource "aws_lambda_permission" "sync_register" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.sync_register.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+resource "aws_apigatewayv2_integration" "sync_heartbeat" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.sync_heartbeat.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "sync_heartbeat" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /sync/heartbeat"
+  target    = "integrations/${aws_apigatewayv2_integration.sync_heartbeat.id}"
+}
+
+resource "aws_lambda_permission" "sync_heartbeat" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.sync_heartbeat.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+resource "aws_apigatewayv2_integration" "sync_publish" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.sync_publish.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "sync_publish" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /sync/publish"
+  target    = "integrations/${aws_apigatewayv2_integration.sync_publish.id}"
+}
+
+resource "aws_lambda_permission" "sync_publish" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.sync_publish.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+resource "aws_apigatewayv2_integration" "sync_poll" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.sync_poll.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "sync_poll" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "GET /sync/poll/{userKey}/{instanceId}"
+  target    = "integrations/${aws_apigatewayv2_integration.sync_poll.id}"
+}
+
+resource "aws_lambda_permission" "sync_poll" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.sync_poll.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+# ============================================
 # DNS record for the site itself
 # ============================================
 

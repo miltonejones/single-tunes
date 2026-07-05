@@ -1,3 +1,7 @@
+@if (!userService.user()) {
+  <app-first-run-gate />
+} @else {
+
 @if (navigating()) {
   <div class="nav-progress-bar"></div>
 }
@@ -125,3 +129,5 @@
 }
 
 <app-recorder-progress />
+
+}

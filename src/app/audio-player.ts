@@ -20,6 +20,7 @@ import {
   PlayHistoryService,
   shouldAnnounceForFrequency,
   SpeechPlaybackService,
+  SyncService,
   TrackDownloadService,
   TrackMenu,
 } from 'shared-utils';
@@ -51,6 +52,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private playHistory = inject(PlayHistoryService);
   private trackDownload = inject(TrackDownloadService);
   private trackDedication = inject(TrackDedicationService);
+  protected sync = inject(SyncService);
   private blobUrl: string | null = null;
   protected queuePanel = inject(TrackQueuePanelService);
   protected visualizerPanel = inject(AudioVisualizerPanelService);
@@ -69,6 +71,8 @@ export class AudioPlayer implements OnInit, OnDestroy {
   protected isMuted = signal(false);
 
   private playRequestId = 0;
+  private loadingTrack = false;
+  private lastReportedTime = -1;
 
   /** The source context (list type + name) of the most recently played track. */
   protected currentSource = computed(() => {
@@ -90,6 +94,16 @@ export class AudioPlayer implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.audioPlayerCommand.currentTrack$.subscribe((track) => {
         this.track.set(track);
+        // Followers mirror the leader's UI without producing audio or TTS.
+        if (this.sync.following()) {
+          if (track) {
+            this.mirrorTrack(track);
+            this.updateMediaSession(track);
+          } else {
+            this.clearMediaSession();
+          }
+          return;
+        }
         if (track) {
           this.loadAndPlay(track);
           this.updateMediaSession(track);
@@ -245,7 +259,15 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
   private async loadAndPlay(track: ITrackItem): Promise<void> {
     const requestId = ++this.playRequestId;
+    this.loadingTrack = true;
+    try {
+      await this.loadAndPlayInner(track, requestId);
+    } finally {
+      this.loadingTrack = false;
+    }
+  }
 
+  private async loadAndPlayInner(track: ITrackItem, requestId: number): Promise<void> {
     if (this.isCasting()) {
       // Suppress the auto-advance guard: the Cast device may briefly go IDLE
       // while transitioning to the new track, and we don't want that to
@@ -274,7 +296,10 @@ export class AudioPlayer implements OnInit, OnDestroy {
             this.originalVolume = this.castService.getVolume();
             this.setVolume(ANNOUNCING_VOLUME);
           },
-          () => this.setVolume(this.originalVolume),
+          (_e, messageContent) => {
+            this.setVolume(this.originalVolume);
+            if (messageContent) this.sync.reportAnnouncement(messageContent);
+          },
           () => this.setVolume(this.originalVolume),
         );
       }
@@ -320,7 +345,10 @@ export class AudioPlayer implements OnInit, OnDestroy {
           this.originalVolume = this.audioEl.volume;
           this.setVolume(ANNOUNCING_VOLUME);
         },
-        () => this.setVolume(this.originalVolume),
+        (_e, messageContent) => {
+          this.setVolume(this.originalVolume);
+          if (messageContent) this.sync.reportAnnouncement(messageContent);
+        },
         () => this.setVolume(this.originalVolume),
       );
     }
@@ -329,6 +357,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
     this.announcing.set(false);
     this.play();
+    this.sync.reportPlayback({ isPlaying: true, duration: this.audioEl.duration || 0 });
   }
 
   /** Load a track on the native <audio> element, optionally seeking to a position. */
@@ -437,6 +466,36 @@ export class AudioPlayer implements OnInit, OnDestroy {
         if (details.seekTime != null) this.seekTo(details.seekTime);
       });
     }
+
+    // ── Cross-instance sync ───────────────────────────────────────────────────
+    // Follower: drive display signals from the leader's mirrored state.
+    effect(() => {
+      if (!this.sync.following()) return;
+      const m = this.sync.mirrored();
+      if (!m) return;
+      this.isPlaying.set(m.isPlaying);
+      this.currentTime.set(m.currentTime);
+      this.duration.set(m.duration);
+      this.volume.set(m.volume);
+      this.isMuted.set(m.muted);
+      this.announcing.set(!!m.announcement?.text);
+    });
+
+    // Leadership changes: take over audible playback, or mute+release on stand-down.
+    effect(() => {
+      const mode = this.sync.mode();
+      if (mode === 'leader' && this.track() && !this.isCasting() && !this.loadingTrack) {
+        // Resume from the mirrored position when continuing the same track;
+        // start from 0 when the user picked a different track.
+        const mirrored = this.sync.mirrored();
+        const sameTrack = mirrored?.track?.ID != null && mirrored.track.ID === this.track()?.ID;
+        const pos = sameTrack ? mirrored!.currentTime : 0;
+        void this.loadAudioElement(this.track()!, pos);
+        this.sync.reportPlayback({ isPlaying: true });
+      } else if (mode === 'follower') {
+        this.muteAndReleaseAudio();
+      }
+    });
   }
 
   // ── Public methods ───────────────────────────────────────────────────────────
@@ -487,6 +546,35 @@ export class AudioPlayer implements OnInit, OnDestroy {
     this.isExpanded.set(false);
   }
 
+  /**
+   * Follower mirror: render the leader's track in the UI (album art tint,
+   * media session) without producing audio or TTS. Display signals
+   * (isPlaying/position/duration/volume) are driven by the sync effect in the
+   * constructor from `sync.mirrored()`.
+   */
+  private mirrorTrack(track: ITrackItem): void {
+    if (track.albumImage) {
+      this.extractDominantColor(track.albumImage);
+    } else {
+      this.dominantColor.set(null);
+    }
+    this.audioEl?.pause();
+    this.speechPlayback.stop();
+    this.announcing.set(false);
+  }
+
+  /**
+   * Called when this instance is displaced from leadership: stop emitting audio
+   * but leave the current track in place so the UI continues mirroring the new
+   * leader. Does NOT clear the queue — SyncService drives mirror state next.
+   */
+  private muteAndReleaseAudio(): void {
+    if (!this.audioElRef?.nativeElement) return;
+    this.audioEl.pause();
+    this.speechPlayback.stop();
+    this.releaseWakeLock();
+  }
+
   seekTo(time: number): void {
     if (this.isCasting()) {
       this.castService.seekTo(time);
@@ -502,6 +590,9 @@ export class AudioPlayer implements OnInit, OnDestroy {
       this.castService.setVolume(volume);
     } else {
       this.audioEl.volume = Math.max(0, Math.min(1, volume));
+    }
+    if (this.sync.mode() === 'leader' && !this.isMuted()) {
+      this.sync.reportPlayback({ volume: this.audioEl.volume, muted: false });
     }
   }
 
@@ -522,10 +613,12 @@ export class AudioPlayer implements OnInit, OnDestroy {
     if (this.isMuted()) {
       this.setVolume(this.volume());
       this.isMuted.set(false);
+      this.sync.reportPlayback({ muted: false });
     } else {
       this.volume.set(this.audioEl.volume);
       this.setVolume(0);
       this.isMuted.set(true);
+      this.sync.reportPlayback({ muted: true });
     }
   }
 
@@ -543,10 +636,12 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
   onPlay(): void {
     if (!this.isCasting()) this.isPlaying.set(true);
+    this.sync.reportPlayback({ isPlaying: true });
   }
 
   onPause(): void {
     if (!this.isCasting()) this.isPlaying.set(false);
+    this.sync.reportPlayback({ isPlaying: false });
   }
 
   onEnded(): void {
@@ -555,10 +650,19 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
   onTimeUpdate(): void {
     if (!this.isCasting()) this.currentTime.set(this.audioEl.currentTime);
+    // Report position to peers ~1/sec while leading (avoids SQS spam).
+    if (this.sync.mode() === 'leader' && !this.isCasting()) {
+      const t = this.audioEl.currentTime;
+      if (Math.abs(t - this.lastReportedTime) >= 1) {
+        this.lastReportedTime = t;
+        this.sync.reportPlayback({ currentTime: t });
+      }
+    }
   }
 
   onLoadedMetadata(): void {
     if (!this.isCasting()) this.duration.set(this.audioEl.duration);
+    this.sync.reportPlayback({ duration: this.audioEl.duration || 0 });
   }
 
   /** Fires when the audio element fails to load/play its current source. The most

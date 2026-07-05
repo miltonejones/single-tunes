@@ -12,7 +12,9 @@
         <div class="audio-player-info">
           <div class="audio-player-title">{{ track.Title }}</div>
           @if (announcing()) {
-            <div class="audio-player-artist audio-player-announcing">Announcing&hellip;</div>
+            <div class="audio-player-artist audio-player-announcing">
+              {{ sync.following() && sync.mirroredAnnouncement() ? sync.mirroredAnnouncement() : 'Announcing&hellip;' }}
+            </div>
           } @else {
             <div class="audio-player-artist">{{ track.artistName }}</div>
           }
