@@ -5,6 +5,9 @@ import { RecorderPanelService } from './recorder-panel.service';
 import { ToastService } from './toast.service';
 
 const RECORD_SECONDS = 5;
+// Each retry listens longer, giving Shazam more audio to match against.
+const RETRY_EXTRA_SECONDS = 3;
+const MAX_RECORD_SECONDS = 15;
 // webm/opus everywhere except Safari, which only records audio/mp4.
 const MIME_CANDIDATES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
 
@@ -35,6 +38,7 @@ export class ShazamModal implements OnInit, OnDestroy {
   private stream?: MediaStream;
   private recorder?: MediaRecorder;
   private countdownTimer?: ReturnType<typeof setInterval>;
+  private attempts = 0;
   // Bumped whenever a capture is abandoned so stale async results are dropped.
   private session = 0;
 
@@ -52,7 +56,12 @@ export class ShazamModal implements OnInit, OnDestroy {
     this.stopCapture();
     this.track.set(null);
     this.error.set('');
-    this.secondsLeft.set(RECORD_SECONDS);
+    const duration = Math.min(
+      RECORD_SECONDS + this.attempts * RETRY_EXTRA_SECONDS,
+      MAX_RECORD_SECONDS,
+    );
+    this.attempts++;
+    this.secondsLeft.set(duration);
     this.phase.set('requesting');
 
     let stream: MediaStream;
