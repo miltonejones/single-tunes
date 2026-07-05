@@ -11,7 +11,8 @@
     "build": "ng build",
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "reindex:tracks": "node scripts/reindex-tracks.mjs"
   },
   "prettier": {
     "printWidth": 100,

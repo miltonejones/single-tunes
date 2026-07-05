@@ -8,6 +8,7 @@ export * from './domain/text';
 export * from './domain/track';
 export * from './domain/announcement';
 export * from './domain/listing';
+export * from './domain/track-search-indexing';
 
 export { AnnouncementQueryService } from './announcement-query.service';
 export { AnnouncementCommandService } from './announcement-command.service';
