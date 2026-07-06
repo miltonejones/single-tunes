@@ -169,7 +169,7 @@
       </div>
 
       <div class="audio-player-fullscreen-visualizer">
-        <app-audio-visualizer />
+        <app-audio-visualizer [isPlaying]="isPlaying()" />
       </div>
 
       @if (showTrackMenu()) {
