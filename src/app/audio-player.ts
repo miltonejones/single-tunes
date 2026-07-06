@@ -222,10 +222,17 @@ export class AudioPlayer implements OnInit, OnDestroy {
     return this.audioElRef.nativeElement;
   }
 
-  /** Extracts a dominant color from the album art image for dynamic background tinting. */
+  /** Extracts a dominant color from the album art image for dynamic background tinting.
+   *  Tries with CORS first (allows canvas pixel reading); if the server doesn't support
+   *  CORS, retries without it so the image at least loads (canvas read will be blocked,
+   *  but that's handled gracefully). */
   private extractDominantColor(imageUrl: string): void {
+    this.tryExtractColor(imageUrl, true);
+  }
+
+  private tryExtractColor(imageUrl: string, useCors: boolean): void {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    if (useCors) img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
         const canvas = document.createElement('canvas');
@@ -251,10 +258,22 @@ export class AudioPlayer implements OnInit, OnDestroy {
           this.dominantColor.set(`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`);
         }
       } catch {
-        // Silently fail — color extraction is non-critical
+        // Canvas tainted (CORS without permissive server) or other error.
+        // If we haven't tried without CORS yet, retry.
+        if (useCors) {
+          this.tryExtractColor(imageUrl, false);
+        }
       }
     };
-    img.onerror = () => this.dominantColor.set(null);
+    img.onerror = () => {
+      if (useCors) {
+        // CORS preflight failed — retry without CORS so the image at least loads
+        // (canvas pixel read will be blocked, but the catch above handles that).
+        this.tryExtractColor(imageUrl, false);
+      } else {
+        this.dominantColor.set(null);
+      }
+    };
     img.src = imageUrl;
   }
 
