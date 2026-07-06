@@ -68,6 +68,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   protected showTrackMenu = signal(false);
   protected volume = signal(1);
   protected dominantColor = signal<string | null>(null);
+  protected hasDominantColor = computed(() => this.dominantColor() !== null);
   protected isMuted = signal(false);
 
   private playRequestId = 0;
