@@ -7,13 +7,6 @@
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-top: 1px solid var(--border);
-  transition: background 0.6s ease;
-}
-
-.audio-player[style*='--dominant'] {
-  background:
-    radial-gradient(circle at 0% 50%, var(--dominant-color), transparent 65%),
-    var(--bg-glass);
 }
 
 .audio-player-row {
