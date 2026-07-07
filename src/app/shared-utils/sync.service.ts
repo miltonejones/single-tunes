@@ -6,6 +6,7 @@ import { AudioPlayerCommandService } from './audio-player-command.service';
 import { ITrackItem } from './models';
 import { UserService } from './user.service';
 import { ToastService } from './toast.service';
+import { SyncClient } from './sync-sw/sync-client';
 
 /**
  * Cross-instance playback sync over SQS (routed through the AI gateway).
@@ -77,6 +78,7 @@ export class SyncService {
   private userService = inject(UserService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private toastService = inject(ToastService);
+  private syncClient = inject(SyncClient);
 
   /** Current role of this instance. */
   readonly mode = signal<SyncMode>('idle');
@@ -97,6 +99,7 @@ export class SyncService {
   /** ts of the newest announcement already toasted — everything older is a rebroadcast. */
   private lastAnnouncementTs = 0;
   private subscriptions: Subscription[] = [];
+  private heartbeatSub: Subscription | null = null;
   private isApplyingMirror = false;
 
   /** Latest leader-side snapshot in memory (driven by AudioPlayer + command service). */
@@ -153,13 +156,55 @@ export class SyncService {
       }),
     );
 
-    this.heartbeatTimer = setInterval(() => void this.heartbeat(), HEARTBEAT_MS);
+    // Try the service-worker-backed heartbeat first; fall back to in-tab setInterval.
+    this.tryStartSwHeartbeat(userKey).then((swOk) => {
+      if (!swOk) {
+        this.heartbeatTimer = setInterval(() => void this.heartbeat(), HEARTBEAT_MS);
+        void this.heartbeat();
+      }
+    });
+
     this.positionTimer = setInterval(() => {
       if (this.mode() === 'leader') this.schedulePublish();
     }, POSITION_TICK_MS);
 
-    void this.heartbeat();
     void this.pollLoop();
+  }
+
+  /**
+   * Attempt to start the heartbeat via the sync service worker.
+   * Returns true if the SW was registered and INIT sent successfully.
+   */
+  private async tryStartSwHeartbeat(userKey: string): Promise<boolean> {
+    try {
+      await this.syncClient.init(userKey, this.instanceId);
+      // SW heartbeat is active — subscribe to results.
+      this.heartbeatSub = this.syncClient.heartbeatResults.subscribe((result) => {
+        this.onSwHeartbeatResult(result);
+      });
+      return true;
+    } catch {
+      console.warn('sync: SW heartbeat unavailable, falling back to in-tab');
+      return false;
+    }
+  }
+
+  /** Handle a heartbeat result forwarded from the service worker. */
+  private onSwHeartbeatResult(result: { leaderInstanceId?: string; stale?: boolean; state?: SyncState }): void {
+    if (result.stale) {
+      void this.register(this.userService.user()!.userKey).then((ok) => {
+        if (ok && this.queueUrl) this.syncClient.sendRegister(this.queueUrl);
+      });
+    }
+    // If someone else holds the lease and we thought we were leader, stand down.
+    if (
+      this.mode() === 'leader' &&
+      result.leaderInstanceId &&
+      result.leaderInstanceId !== this.instanceId
+    ) {
+      this.stepDown();
+      if (result.state) this.applyMirror(result.state);
+    }
   }
 
   /**
@@ -191,6 +236,9 @@ export class SyncService {
     clearInterval(this.heartbeatTimer);
     clearInterval(this.positionTimer);
     clearTimeout(this.publishTimer);
+    this.heartbeatSub?.unsubscribe();
+    this.heartbeatSub = null;
+    this.syncClient.destroy();
     this.pollAbort = true;
     for (const s of this.subscriptions) s.unsubscribe();
     this.subscriptions = [];

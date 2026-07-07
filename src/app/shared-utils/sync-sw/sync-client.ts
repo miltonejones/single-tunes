@@ -1,72 +1,96 @@
 import { Injectable } from '@angular/core';
-import { SyncMessage, InitMessage, UserActionMessage } from './sync-messages';
+import { Subject } from 'rxjs';
+import { HeartbeatResultMessage } from './sync-messages';
 
+export interface HeartbeatResult {
+  leaderInstanceId?: string;
+  stale?: boolean;
+  state?: any;
+}
+
+/**
+ * Client-side interface to the sync service worker.
+ *
+ * Registers the sync SW, sends INIT to start the background heartbeat, and
+ * forwards heartbeat results back to SyncService via an observable.
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SyncClient {
-  private registration: ServiceWorkerRegistration | null = null;
-  private messageQueue: SyncMessage[] = [];
-  private isReady = false;
+  /** Emits each time the SW forwards a heartbeat result. */
+  readonly heartbeatResults = new Subject<HeartbeatResult>();
 
+  private registration: ServiceWorkerRegistration | null = null;
+  private swReady = false;
+
+  /**
+   * Register the sync service worker and start the background heartbeat.
+   * Resolves when the SW is active and INIT has been sent.
+   * Rejects if SW are unsupported or registration fails.
+   */
   async init(userKey: string, instanceId: string): Promise<void> {
     if (!('serviceWorker' in navigator)) {
-      console.warn('Service workers not supported');
-      return;
+      throw new Error('Service workers not supported');
     }
 
     try {
-      // Register the service worker
-      this.registration = await navigator.serviceWorker.register('/sync-service-worker.js');
+      this.registration = await navigator.serviceWorker.register('/sync-service-worker.js', {
+        scope: '/',
+      });
 
-      // Wait for the service worker to be ready
       await navigator.serviceWorker.ready;
-      this.isReady = true;
+      this.swReady = true;
 
-      // Send initialization message
-      const initMessage: InitMessage = {
-        type: 'INIT',
-        userKey,
-        instanceId
-      };
+      // Listen for messages from the SW.
+      navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
+        this.handleMessage(event);
+      });
 
-      this.sendMessage(initMessage);
-
-      // Process any queued messages
-      this.processMessageQueue();
-
-    } catch (error) {
-      console.error('Failed to initialize service worker:', error);
-    }
-  }
-
-  private sendMessage(message: SyncMessage): void {
-    if (this.isReady && this.registration?.active) {
-      this.registration.active.postMessage(message);
-    } else {
-      // Queue the message for later
-      this.messageQueue.push(message);
-    }
-  }
-
-  private processMessageQueue(): void {
-    while (this.messageQueue.length > 0 && this.isReady && this.registration?.active) {
-      const message = this.messageQueue.shift();
-      if (message) {
-        this.sendMessage(message);
+      // Send INIT to start the heartbeat.
+      if (this.registration.active) {
+        this.registration.active.postMessage({
+          type: 'INIT',
+          userKey,
+          instanceId,
+        });
       }
+    } catch (error) {
+      this.swReady = false;
+      throw error;
     }
   }
 
-  sendUserAction(action: string, data?: any): void {
-    const message: UserActionMessage = {
-      type: 'USER_ACTION',
-      action,
-      data
-    };
-
-    this.sendMessage(message);
+  /** Forward a queue URL to the SW after a successful /sync/register. */
+  sendRegister(queueUrl: string): void {
+    if (this.registration?.active) {
+      this.registration.active.postMessage({
+        type: 'REGISTER',
+        queueUrl,
+      });
+    }
   }
 
-  // Add more methods for other message types as needed
+  /** True when the SW is registered and ready. */
+  get isReady(): boolean {
+    return this.swReady;
+  }
+
+  /** Clean up — complete the subject. */
+  destroy(): void {
+    this.heartbeatResults.complete();
+  }
+
+  // ── Private ──────────────────────────────────────────────────────────────
+
+  private handleMessage(event: MessageEvent): void {
+    const msg = event.data as HeartbeatResultMessage;
+    if (!msg || msg.type !== 'HEARTBEAT_RESULT') return;
+
+    this.heartbeatResults.next({
+      leaderInstanceId: msg.leaderInstanceId,
+      stale: msg.stale,
+      state: msg.state,
+    });
+  }
 }

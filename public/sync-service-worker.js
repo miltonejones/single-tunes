@@ -1,66 +1,45 @@
-// Service worker core logic
-// This file will be registered as a service worker
-
-// Listen for messages from the client
-self.addEventListener('message', async (event) => {
+// src/app/shared-utils/sync-sw/sync-service-worker.ts
+var SYNC_ENDPOINT = "https://ohb29b452e.execute-api.us-east-1.amazonaws.com/sync";
+var HEARTBEAT_MS = 2e4;
+var userKey = null;
+var instanceId = null;
+var heartbeatInterval = null;
+self.addEventListener("message", (event) => {
   const message = event.data;
-
+  if (!message || !message.type) return;
   switch (message.type) {
-    case 'INIT':
-      await initializeSync(message.userKey, message.instanceId);
+    case "INIT":
+      if (heartbeatInterval) break;
+      userKey = message.userKey;
+      instanceId = message.instanceId;
+      heartbeatInterval = setInterval(performHeartbeat, HEARTBEAT_MS);
+      performHeartbeat();
       break;
-    case 'USER_ACTION':
-      await handleUserAction(message.action, message.data);
-      break;
-    // Add more message handlers as needed
   }
 });
-
-async function initializeSync(userKey: string, instanceId: string): Promise<void> {
-  console.log('Initializing sync for user:', userKey);
-  // TODO: Implement sync initialization
-  // - Register with backend
-  // - Set up periodic sync
-  // - Initialize storage
-}
-
-async function handleUserAction(action: string, data?: any): Promise<void> {
-  console.log('Handling user action:', action, data);
-  // TODO: Implement user action handling
-  // - Queue actions for sync
-  // - Update local state
-  // - Notify backend when online
-}
-
-// Background sync event handler
-self.addEventListener('sync', (event: any) => {
-  if (event.tag === 'sync-heartbeat') {
-    event.waitUntil(performHeartbeat());
-  } else if (event.tag === 'sync-publish') {
-    event.waitUntil(publishPendingChanges());
+async function performHeartbeat() {
+  if (!userKey || !instanceId) return;
+  try {
+    const response = await fetch(`${SYNC_ENDPOINT}/heartbeat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userKey, instanceId })
+    });
+    if (!response.ok) {
+      console.warn("sync-sw: heartbeat returned", response.status);
+      return;
+    }
+    const data = await response.json();
+    const allClients = await self.clients.matchAll();
+    for (const client of allClients) {
+      client.postMessage({
+        type: "HEARTBEAT_RESULT",
+        leaderInstanceId: data.leaderInstanceId,
+        stale: data.stale,
+        state: data.state
+      });
+    }
+  } catch (e) {
+    console.warn("sync-sw: heartbeat failed", e);
   }
-});
-
-async function performHeartbeat(): Promise<void> {
-  console.log('Performing heartbeat sync');
-  // TODO: Implement heartbeat logic
 }
-
-async function publishPendingChanges(): Promise<void> {
-  console.log('Publishing pending changes');
-  // TODO: Implement pending changes publishing
-}
-
-// Periodic sync event handler
-self.addEventListener('periodicsync', (event: any) => {
-  if (event.tag === 'sync-poll') {
-    event.waitUntil(pollForUpdates());
-  }
-});
-
-async function pollForUpdates(): Promise<void> {
-  console.log('Polling for updates');
-  // TODO: Implement polling logic
-}
-
-export {}; // Make this a module

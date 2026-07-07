@@ -10,6 +10,7 @@
     "off": "bash skytunes.sh off",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
+    "build:sw": "esbuild src/app/shared-utils/sync-sw/sync-service-worker.ts --bundle --outfile=public/sync-service-worker.js --platform=browser --format=esm --target=es2022 --external:./node_modules/*",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
