@@ -115,6 +115,19 @@
     @if (listType() === 'library') {
       <button
         type="button"
+        class="library-refresh-btn"
+        [disabled]="refreshing()"
+        title="Refresh library"
+        (click)="refreshLibrary()"
+      >
+        @if (refreshing()) {
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        } @else {
+          <i class="fa-solid fa-rotate"></i>
+        }
+      </button>
+      <button
+        type="button"
         class="library-add-btn"
         title="Record tracks from YouTube"
         (click)="openRecorder()"

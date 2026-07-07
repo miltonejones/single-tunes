@@ -1,48 +1,60 @@
 # Service Worker Sync Implementation
 
-This directory contains the implementation for moving the sync functionality to service workers.
+This directory contains the sync service worker that runs the heartbeat
+in the background, independent of any single tab's lifecycle.
 
-## Planned Structure
+## Current Status (2026-07-06)
+
+**Phase 1 complete** — Heartbeat moved to service worker.
+
+The heartbeat POST (every 20s) runs in `sync-service-worker.ts`, compiled
+via esbuild to `public/sync-service-worker.js` and served as a standalone
+service worker. The client (`SyncClient`) registers the SW, sends INIT
+with userKey/instanceId, and forwards heartbeat results to `SyncService`
+via a Subject. If SW registration fails, `SyncService` falls back to the
+original in-tab `setInterval` heartbeat.
+
+## Structure
 
 ```
 sync-sw/
-├── sync-service-worker.ts    # Main service worker logic
-├── sync-client.ts           # Client-side interface to service worker
-├── sync-messages.ts         # Message definitions between client and SW
-├── sync-storage.ts          # IndexedDB storage for offline state
-└── sync-strategy.ts         # Sync strategies (immediate, background, batch)
+├── index.ts                  # Barrel exports
+├── sync-service-worker.ts    # SW heartbeat logic (compiled separately)
+├── sync-client.ts            # Client-side interface to the SW
+├── sync-messages.ts          # Message type definitions
+├── sync-storage.ts           # IndexedDB storage (stub — for future phases)
+├── sync-strategy.ts          # Retry/backoff strategy (stub — for future phases)
+└── sync-sw.spec.ts           # Basic module tests
 ```
 
-## Implementation Plan
+## Build
 
-1. **Phase 1**: Architecture Design
-   - Define message passing architecture
-   - Set up service worker registration and lifecycle
+```bash
+npm run build:sw    # Compiles sync-service-worker.ts → public/sync-service-worker.js
+```
 
-2. **Phase 2**: Core Implementation
-   - Implement service worker core logic
-   - Create client-side interface
+The output is included in the Angular build as a static asset (served at
+`/sync-service-worker.js`).
 
-3. **Phase 3**: Background Sync
-   - Implement background sync registration
-   - Add periodic background tasks
+## Architecture
 
-4. **Phase 4**: Offline-First Implementation
-   - Add IndexedDB storage for offline state
-   - Implement offline queue management
+```
+┌─────────────────────┐       postMessage         ┌──────────────────────┐
+│  SyncService        │ ◄───────────────────────► │  sync-service-worker │
+│  (browser tab)      │   HEARTBEAT_RESULT,        │  (service worker)    │
+│                     │   INIT, REGISTER            │                      │
+│  - owns mode signal │                             │  - setInterval       │
+│  - handles publish  │                             │    heartbeat every   │
+│  - handles poll     │                             │    20s               │
+│  - fallback: in-tab │                             │  - POST /heartbeat   │
+│    heartbeat if no  │                             │  - forward results   │
+│    SW available     │                             │    to all clients    │
+└─────────────────────┘                             └──────────────────────┘
+```
 
-5. **Phase 5**: Network Resilience
-   - Add exponential backoff for retries
-   - Handle network status changes
+## Future Phases
 
-6. **Phase 6**: Client Integration
-   - Update SyncService to use service worker
-   - Maintain backward compatibility
-
-7. **Phase 7**: Migration Strategy
-   - Implement progressive enhancement
-   - Add feature detection
-
-8. **Phase 8**: Testing and Monitoring
-   - Add comprehensive testing
-   - Implement performance monitoring
+- **Phase 2**: Move publish (POST /sync/publish) to the SW
+- **Phase 3**: Move poll (GET /sync/poll) to the SW (Periodic Background Sync)
+- **Phase 4**: Offline queue management via IndexedDB
+- **Phase 5**: Network resilience with exponential backoff

@@ -67,6 +67,7 @@ export class ListPage implements OnInit, OnDestroy {
   pageNum = signal(1);
   detail = signal<IDetailResponse | null>(null);
   loading = signal(false);
+  refreshing = signal(false);
   error = signal('');
   currentTrackId = signal<number | null>(null);
   bannerImage = signal<string | null>(null);
@@ -542,7 +543,19 @@ export class ListPage implements OnInit, OnDestroy {
           this.error.set('Failed to load. Check your connection and try again.');
         }
       })
-      .finally(() => this.loading.set(false));
+      .finally(() => {
+        this.loading.set(false);
+        this.refreshing.set(false);
+      });
+  }
+
+  /** Manual refresh for the library view — useful when the auto-refresh
+   *  after a recording batch completes doesn't pick up new tracks because
+   *  the S3→library ingest pipeline hadn't finished yet. */
+  protected refreshLibrary(): void {
+    if (this.listType() !== 'library') return;
+    this.refreshing.set(true);
+    this.loadLibrary(this.pageNum());
   }
 
   private loadDetail(listType: ListType, listId: string, pageNum: number): void {
