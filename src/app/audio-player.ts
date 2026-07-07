@@ -17,6 +17,7 @@ import {
   formatDuration,
   ImgFallbackDirective,
   ITrackItem,
+  LocationService,
   PlayHistoryService,
   shouldAnnounceForFrequency,
   SpeechPlaybackService,
@@ -46,6 +47,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private announcementCommand = inject(AnnouncementCommandService);
   private announcerSettings = inject(AnnouncerSettingsService);
+  private locationService = inject(LocationService);
   private speechPlayback = inject(SpeechPlaybackService);
   private audioAnalyser = inject(AudioAnalyserService);
   private castService = inject(CastService);
@@ -311,7 +313,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
         this.announcing.set(true);
         await this.announcementCommand.announceTrackChange(
           track.artistName, track.Title, track.trackTime,
-          announcerName, settings.zip, settings.chatType, settings.voiceURI,
+          announcerName, this.locationService.resolvedZip(), settings.chatType, settings.voiceURI,
           () => {
             this.originalVolume = this.castService.getVolume();
             this.setVolume(ANNOUNCING_VOLUME);
@@ -360,7 +362,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
       this.announcing.set(true);
       await this.announcementCommand.announceTrackChange(
         track.artistName, track.Title, track.trackTime,
-        announcerName, settings.zip, settings.chatType, settings.voiceURI,
+        announcerName, this.locationService.resolvedZip(), settings.chatType, settings.voiceURI,
         () => {
           this.originalVolume = this.audioEl.volume;
           this.setVolume(ANNOUNCING_VOLUME);

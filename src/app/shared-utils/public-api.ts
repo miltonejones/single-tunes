@@ -57,6 +57,9 @@ export { RecorderProgress } from './recorder-progress';
 
 export { ShazamService } from './shazam.service';
 export type { ShazamTrack } from './shazam.service';
+
+export { LocationService } from './location.service';
+export type { ZipSource } from './location.service';
 export { ShazamPanelService } from './shazam-panel.service';
 export { ShazamModal } from './shazam-modal';
 

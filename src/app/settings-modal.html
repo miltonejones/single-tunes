@@ -101,16 +101,33 @@
 
             <div class="mb-3">
               <label for="announcerZip" class="form-label">Postal Code</label>
-              <input
-                type="text"
-                class="form-control"
-                id="announcerZip"
-                [disabled]="form().frequency === 'never'"
-                [value]="form().zip"
-                (input)="setField('zip', $event)"
-                placeholder="Enter your zip/postal code"
-              />
-              <div class="form-text">Used for local weather mentions.</div>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="announcerZip"
+                  [disabled]="form().frequency === 'never'"
+                  [value]="form().zip"
+                  (input)="setField('zip', $event)"
+                  placeholder="Enter your zip/postal code"
+                />
+                @if (locationService.source() !== 'settings' && locationService.source() !== 'none') {
+                  <span class="input-group-text" title="Auto-detected from your location">
+                    <i class="fa-solid fa-location-dot"></i>
+                  </span>
+                }
+              </div>
+              <div class="form-text">
+                @if (locationService.resolving()) {
+                  Detecting location&hellip;
+                } @else if (locationService.source() === 'geolocation') {
+                  Auto-detected from your browser location. Used for local weather mentions.
+                } @else if (locationService.source() === 'ip') {
+                  Auto-detected from your IP address. Used for local weather mentions.
+                } @else {
+                  Used for local weather mentions.
+                }
+              </div>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { Component, effect, inject, OnDestroy, signal } from '@angular/core';
 import { AnnouncerSettings, AnnouncerSettingsService } from './announcer-settings.service';
 import { SettingsPanelService } from './settings-panel.service';
 import { ThemeService, THEMES } from './theme.service';
-import { SpeechPlaybackService } from 'shared-utils';
+import { LocationService, SpeechPlaybackService } from 'shared-utils';
 
 @Component({
   selector: 'app-settings-modal',
@@ -13,6 +13,7 @@ import { SpeechPlaybackService } from 'shared-utils';
 export class SettingsModal implements OnDestroy {
   private announcerSettings = inject(AnnouncerSettingsService);
   private speechPlayback = inject(SpeechPlaybackService);
+  protected locationService = inject(LocationService);
   protected panel = inject(SettingsPanelService);
   protected themeService = inject(ThemeService);
   protected readonly themes = THEMES;
