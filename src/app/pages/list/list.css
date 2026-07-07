@@ -143,6 +143,60 @@
   cursor: default;
   opacity: 0.7;
 }
+.toolbar-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+.toolbar-play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent-gradient, linear-gradient(135deg, #4f46e5, #ec4899));
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-glow);
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+.toolbar-play-btn:hover {
+  transform: scale(1.1);
+  filter: brightness(1.12);
+}
+.toolbar-shuffle-btn,
+.toolbar-download-btn,
+.toolbar-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+.toolbar-shuffle-btn:hover,
+.toolbar-download-btn:hover:not(:disabled),
+.toolbar-edit-btn:hover {
+  background: var(--surface-hover);
+  color: var(--accent);
+}
+.toolbar-download-btn.all-downloaded {
+  color: var(--success);
+}
+.toolbar-download-btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
 .edit-mode-bar {
   display: flex;
   align-items: center;

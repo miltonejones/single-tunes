@@ -96,21 +96,67 @@
 
   <div class="list-toolbar">
     <lib-breadcrumbs [items]="breadcrumbItems()" />
-    @if (listType() === 'album' && !bannerImage()) {
-      <button
-        type="button"
-        class="toolbar-find-missing-btn"
-        [disabled]="isSearchingApple()"
-        title="Find missing tracks on iTunes"
-        (click)="findMissingTracks()"
-      >
-        @if (isSearchingApple()) {
-          <i class="fa-solid fa-spinner fa-spin"></i>
-        } @else {
-          <i class="fa-brands fa-apple"></i>
+    @if (!bannerImage()) {
+      <div class="toolbar-list-actions">
+        <button
+          type="button"
+          class="toolbar-play-btn"
+          [title]="isPlayingThisList() ? 'Stop' : 'Play all'"
+          (click)="togglePlayList()"
+        >
+          <i class="fa-solid" [class.fa-play]="!isPlayingThisList()" [class.fa-stop]="isPlayingThisList()"></i>
+        </button>
+        <button
+          type="button"
+          class="toolbar-shuffle-btn"
+          title="Shuffle play"
+          (click)="shuffleAndPlay()"
+        >
+          <i class="fa-solid fa-shuffle"></i>
+        </button>
+        <button
+          type="button"
+          class="toolbar-download-btn"
+          [class.all-downloaded]="allTracksDownloaded()"
+          [disabled]="anyTrackDownloading()"
+          [title]="allTracksDownloaded() ? 'All tracks downloaded' : 'Download all tracks'"
+          (click)="downloadAllTracks()"
+        >
+          @if (anyTrackDownloading()) {
+            <i class="fa-solid fa-spinner fa-spin"></i>
+          } @else if (allTracksDownloaded()) {
+            <i class="fa-solid fa-check"></i>
+          } @else {
+            <i class="fa-solid fa-download"></i>
+          }
+        </button>
+        @if (listType() === 'album') {
+          <button
+            type="button"
+            class="toolbar-find-missing-btn"
+            [disabled]="isSearchingApple()"
+            title="Find missing tracks on iTunes"
+            (click)="findMissingTracks()"
+          >
+            @if (isSearchingApple()) {
+              <i class="fa-solid fa-spinner fa-spin"></i>
+            } @else {
+              <i class="fa-brands fa-apple"></i>
+            }
+            Find Missing
+          </button>
         }
-        Find Missing
-      </button>
+        @if (listType() === 'playlist') {
+          <button
+            type="button"
+            class="toolbar-edit-btn"
+            title="Edit playlist order"
+            (click)="enterEditMode()"
+          >
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+        }
+      </div>
     }
     @if (listType() === 'library') {
       <button
