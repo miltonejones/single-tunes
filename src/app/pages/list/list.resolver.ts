@@ -34,16 +34,30 @@ export const listResolver: ResolveFn<ListResolvedData> = async (route) => {
     }
   }
 
-  const artistFk = detail.related.records.find((t) => t.artistFk)?.artistFk;
-  if (!artistFk) {
-    return { detail, bannerImage: null, bannerName: null };
+  // Collect up to 3 distinct artist FKs from the track list
+  const seen = new Set<number>();
+  const candidateFks: number[] = [];
+  for (const t of detail.related.records) {
+    const fk = t.artistFk;
+    if (fk && !seen.has(fk)) {
+      seen.add(fk);
+      candidateFks.push(fk);
+      if (candidateFks.length >= 3) break;
+    }
   }
 
-  try {
-    const artistRes = await catalogQuery.getArtistDetail(artistFk);
-    const artist = artistRes.row[0];
-    return { detail, bannerImage: artist?.imageLg ?? null, bannerName: artist?.Name ?? null };
-  } catch {
-    return { detail, bannerImage: null, bannerName: null };
+  // Try each candidate until we find one with an imageLg
+  for (const fk of candidateFks) {
+    try {
+      const artistRes = await catalogQuery.getArtistDetail(fk);
+      const artist = artistRes.row[0];
+      if (artist?.imageLg) {
+        return { detail, bannerImage: artist.imageLg, bannerName: artist?.Name ?? null };
+      }
+    } catch {
+      // skip to next candidate
+    }
   }
+
+  return { detail, bannerImage: null, bannerName: null };
 };
