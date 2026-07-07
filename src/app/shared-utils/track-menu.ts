@@ -8,6 +8,8 @@ import { IPlaylistSummary, ITrackItem } from './models';
 import { TrackQueryService } from './track-query.service';
 import { TrackCommandService } from './track-command.service';
 import { ItunesSearchModal } from './itunes-search-modal';
+import { TrackEditModal } from './track-edit-modal';
+import { FEATURE_FLAGS } from './feature-flags';
 import { TrackDownloadService } from './track-download.service';
 import { createKey } from './domain/text';
 
@@ -15,7 +17,7 @@ type MenuView = 'main' | 'playlists';
 
 @Component({
   selector: 'app-track-menu',
-  imports: [RouterLink, ImgFallbackDirective, ItunesSearchModal],
+  imports: [RouterLink, ImgFallbackDirective, ItunesSearchModal, TrackEditModal],
   templateUrl: './track-menu.html',
   styleUrl: './track-menu.css',
 })
@@ -31,12 +33,15 @@ export class TrackMenu implements OnInit {
   private trackQuery = inject(TrackQueryService);
   private trackCommand = inject(TrackCommandService);
   protected downloadService = inject(TrackDownloadService);
+  protected readonly featureFlags = FEATURE_FLAGS;
 
   menuView = signal<MenuView>('main');
   playlists = signal<IPlaylistSummary[]>([]);
   private queueLength = signal(0);
   showEditModal = signal(false);
   editTrackItem = signal<ITrackItem | null>(null);
+  showTrackEditModal = signal(false);
+  editTrackItemProps = signal<ITrackItem | null>(null);
   newPlaylistName = signal('');
   showNewPlaylistInput = signal(false);
 
@@ -117,7 +122,7 @@ export class TrackMenu implements OnInit {
     const track = this.track();
     if (!track) return;
 
-    // Close the main menu and open the edit modal
+    // Close the main menu and open the iTunes search modal
     this.close();
     this.editTrackItem.set(track);
     this.showEditModal.set(true);
@@ -126,6 +131,21 @@ export class TrackMenu implements OnInit {
   closeEditModal(): void {
     this.showEditModal.set(false);
     this.editTrackItem.set(null);
+  }
+
+  editTrackProperties(): void {
+    const track = this.track();
+    if (!track) return;
+
+    // Close the main menu and open the properties edit modal
+    this.close();
+    this.editTrackItemProps.set(track);
+    this.showTrackEditModal.set(true);
+  }
+
+  closeTrackEditModal(): void {
+    this.showTrackEditModal.set(false);
+    this.editTrackItemProps.set(null);
   }
 
   onTrackUpdated(updatedTrack: ITrackItem): void {

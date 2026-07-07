@@ -1,0 +1,215 @@
+<div class="modal-backdrop fade show" (click)="close()"></div>
+
+<div class="modal fade show" style="display: block;" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Edit Track Properties</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+      </div>
+      <div class="modal-body">
+        @if (track(); as track) {
+          <div class="track-info mb-4">
+            <div class="d-flex align-items-center">
+              <img
+                class="track-art me-3"
+                [src]="track.albumImage"
+                [alt]="track.Title"
+                width="60"
+                height="60"
+              />
+              <div>
+                <h6 class="mb-1">{{ track.Title }}</h6>
+                <small class="text-muted">{{ track.artistName }} &bull; {{ track.albumName }}</small>
+              </div>
+            </div>
+          </div>
+
+          @if (error()) {
+            <div class="alert alert-danger">{{ error() }}</div>
+          }
+
+          <div class="edit-form-grid">
+            <div class="edit-form-column">
+              <div class="mb-3">
+                <label for="trackTitle" class="form-label">Title</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="trackTitle"
+                  [value]="title()"
+                  (input)="title.set($any($event).target.value)"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="trackGenre" class="form-label">Genre</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="trackGenre"
+                  [value]="genre()"
+                  (input)="genre.set($any($event).target.value)"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="trackNumber" class="form-label">Track Number</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="trackNumber"
+                  min="1"
+                  [value]="trackNumber()"
+                  (input)="trackNumber.set($any($event).target.valueAsNumber || null)"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="discNumber" class="form-label">Disc Number</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="discNumber"
+                  min="1"
+                  [value]="discNumber()"
+                  (input)="discNumber.set($any($event).target.valueAsNumber || null)"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="albumImage" class="form-label">Album Image URL</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="albumImage"
+                  [value]="albumImage()"
+                  (input)="albumImage.set($any($event).target.value)"
+                />
+              </div>
+            </div>
+
+            <div class="edit-form-column">
+              <div class="mb-3">
+                <label class="form-label">Album</label>
+                @if (albumFk()) {
+                  <div class="selected-entity">
+                    <i class="fa-solid fa-compact-disc"></i>
+                    <span>{{ selectedAlbumName() }} (ID: {{ albumFk() }})</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary ms-auto"
+                      (click)="albumFk.set(null); selectedAlbumName.set('')"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                }
+                <div class="input-group mt-1">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search album name..."
+                    [value]="albumSearchTerm()"
+                    (input)="albumSearchTerm.set($any($event).target.value)"
+                    (keyup.enter)="searchAlbum()"
+                  />
+                  <button
+                    class="btn btn-primary"
+                    type="button"
+                    (click)="searchAlbum()"
+                    [disabled]="isSearchingAlbum()"
+                  >
+                    @if (isSearchingAlbum()) {
+                      <span class="spinner-border spinner-border-sm" role="status"></span>
+                    } @else {
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                    }
+                  </button>
+                </div>
+                @if (albumSearchResults().length > 0) {
+                  <div class="search-results">
+                    @for (item of albumSearchResults(); track item.ID) {
+                      <button
+                        type="button"
+                        class="search-result-item"
+                        (click)="selectAlbum(item)"
+                      >
+                        <span class="search-result-name">{{ item.Name }}</span>
+                        <span class="search-result-count">{{ item.TrackCount }} tracks</span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Artist</label>
+                @if (artistFk()) {
+                  <div class="selected-entity">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span>{{ selectedArtistName() }} (ID: {{ artistFk() }})</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary ms-auto"
+                      (click)="artistFk.set(null); selectedArtistName.set('')"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                }
+                <div class="input-group mt-1">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search artist name..."
+                    [value]="artistSearchTerm()"
+                    (input)="artistSearchTerm.set($any($event).target.value)"
+                    (keyup.enter)="searchArtist()"
+                  />
+                  <button
+                    class="btn btn-primary"
+                    type="button"
+                    (click)="searchArtist()"
+                    [disabled]="isSearchingArtist()"
+                  >
+                    @if (isSearchingArtist()) {
+                      <span class="spinner-border spinner-border-sm" role="status"></span>
+                    } @else {
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                    }
+                  </button>
+                </div>
+                @if (artistSearchResults().length > 0) {
+                  <div class="search-results">
+                    @for (item of artistSearchResults(); track item.ID) {
+                      <button
+                        type="button"
+                        class="search-result-item"
+                        (click)="selectArtist(item)"
+                      >
+                        <span class="search-result-name">{{ item.Name }}</span>
+                        <span class="search-result-count">{{ item.TrackCount }} tracks</span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+          } @else {
+            <i class="fa-solid fa-floppy-disk"></i>
+          }
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

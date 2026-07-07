@@ -32,6 +32,13 @@
             <span class="track-menu-label">Edit Track</span>
             <span class="track-menu-caption">Update metadata from iTunes</span>
           </button>
+          @if (featureFlags.trackEditModal) {
+            <button type="button" class="track-menu-item" (click)="editTrackProperties()">
+              <i class="fa-solid fa-sliders"></i>
+              <span class="track-menu-label">Edit Properties</span>
+              <span class="track-menu-caption">Edit title, genre, track number, and more</span>
+            </button>
+          }
           @if (downloadService.isDownloaded(track.ID)) {
             <button type="button" class="track-menu-item" (click)="removeDownload()">
               <i class="fa-solid fa-trash"></i>
@@ -166,6 +173,14 @@
   <app-itunes-search-modal
     [track]="editTrackItem()"
     (closed)="closeEditModal()"
+    (trackUpdated)="onTrackUpdated($event)"
+  />
+}
+
+@if (showTrackEditModal()) {
+  <app-track-edit-modal
+    [track]="editTrackItemProps()"
+    (closed)="closeTrackEditModal()"
     (trackUpdated)="onTrackUpdated($event)"
   />
 }

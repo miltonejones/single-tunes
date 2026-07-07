@@ -41,6 +41,8 @@ export { SkeletonLoader } from './skeleton-loader';
 export type { SkeletonVariant } from './skeleton-loader';
 export { TrackMenu } from './track-menu';
 export { ItunesSearchModal } from './itunes-search-modal';
+export { TrackEditModal } from './track-edit-modal';
+export { FEATURE_FLAGS } from './feature-flags';
 
 export { RecorderService } from './recorder.service';
 export type {
