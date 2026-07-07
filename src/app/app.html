@@ -17,6 +17,15 @@
   class="toolbar d-flex align-items-center justify-content-between flex-nowrap gap-2"
   [class.search-active]="searchOpen()"
 >
+  <button
+    type="button"
+    class="btn back-btn d-sm-none"
+    (click)="goBack()"
+    aria-label="Go back"
+  >
+    <i class="fa-solid fa-arrow-left"></i>
+  </button>
+
   <a routerLink="/" class="brand">
     <img class="brand-mark" src="sky-tunes-logo.png" alt="SkyTunes logo" />
     <span class="brand-name">SkyTunes</span>

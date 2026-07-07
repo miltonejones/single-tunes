@@ -170,6 +170,19 @@ nav .btn.btn-primary {
   display: none;
 }
 
+.back-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.back-btn:hover {
+  color: var(--text);
+}
+
 .shazam-toggle,
 .settings-toggle {
   border: none;

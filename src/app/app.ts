@@ -1,6 +1,7 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { animate, group, query, style, transition, trigger } from '@angular/animations';
+import { Location } from '@angular/common';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -158,6 +159,7 @@ const routeAnimation = trigger('routeAnimation', [
 })
 export class App {
   private router = inject(Router);
+  private location = inject(Location);
   private titleService = inject(Title);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
   private podcastAudioPlayerCommand = inject(PodcastAudioPlayerCommandService);
@@ -268,6 +270,10 @@ export class App {
     const updated = [term, ...this.searchHistory().filter((h) => h !== term)].slice(0, MAX_SEARCH_HISTORY);
     this.searchHistory.set(updated);
     localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updated));
+  }
+
+  protected goBack(): void {
+    this.location.back();
   }
 
   protected navigateTo(item: NavItem): void {
