@@ -196,6 +196,24 @@ resource "aws_dynamodb_table" "vectors" {
   tags = local.tags
 }
 
+resource "aws_dynamodb_table" "track_index_state" {
+  name         = "${var.project_name}-track-index-state"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "idempotencyKey"
+
+  attribute {
+    name = "idempotencyKey"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "expiresAt"
+    enabled        = true
+  }
+
+  tags = local.tags
+}
+
 resource "aws_iam_role" "ai_lambda" {
   name = "${var.project_name}-ai-lambda"
   assume_role_policy = jsonencode({
@@ -240,6 +258,11 @@ resource "aws_iam_role_policy" "ai_lambda_perms" {
       },
       {
         Effect   = "Allow"
+        Action   = ["dynamodb:GetItem", "dynamodb:PutItem"]
+        Resource = aws_dynamodb_table.track_index_state.arn
+      },
+      {
+        Effect   = "Allow"
         Action   = "bedrock:InvokeModel"
         Resource = "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.titan-embed-text-v2:0"
       },
@@ -247,9 +270,40 @@ resource "aws_iam_role_policy" "ai_lambda_perms" {
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:PutObject"]
         Resource = "${aws_s3_bucket.vector_cache.arn}/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage",
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes",
+          "sqs:ChangeMessageVisibility",
+        ]
+        Resource = aws_sqs_queue.track_index.arn
       }
     ]
   })
+}
+
+
+resource "aws_sqs_queue" "track_index_dlq" {
+  name                        = "${var.project_name}-track-index-dlq.fifo"
+  fifo_queue                  = true
+  content_based_deduplication = false
+  tags                        = local.tags
+}
+
+resource "aws_sqs_queue" "track_index" {
+  name                        = "${var.project_name}-track-index.fifo"
+  fifo_queue                  = true
+  content_based_deduplication = false
+  visibility_timeout_seconds  = 120
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.track_index_dlq.arn
+    maxReceiveCount     = 5
+  })
+  tags = local.tags
 }
 
 data "archive_file" "ai_ingest" {
@@ -409,6 +463,87 @@ resource "aws_lambda_permission" "ai_search" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.ai_search.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+
+data "archive_file" "track_index_events" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/track-index-events/index.mjs"
+  output_path = "${path.module}/.lambda-zips/track-index-events.zip"
+}
+
+resource "aws_lambda_function" "track_index_events" {
+  function_name    = "${var.project_name}-track-index-events"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.track_index_events.output_path
+  source_code_hash = data.archive_file.track_index_events.output_base64sha256
+  timeout          = 10
+  memory_size      = 256
+
+  environment {
+    variables = {
+      TRACK_INDEX_QUEUE_URL = aws_sqs_queue.track_index.id
+    }
+  }
+
+  tags = local.tags
+}
+
+data "archive_file" "track_index_worker" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/track-index-worker/index.mjs"
+  output_path = "${path.module}/.lambda-zips/track-index-worker.zip"
+}
+
+resource "aws_lambda_function" "track_index_worker" {
+  function_name    = "${var.project_name}-track-index-worker"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.track_index_worker.output_path
+  source_code_hash = data.archive_file.track_index_worker.output_base64sha256
+  timeout          = 120
+  memory_size      = 512
+
+  environment {
+    variables = {
+      TUNE_API_ENDPOINT       = var.tune_api_endpoint
+      TRACK_INDEX_STATE_TABLE = aws_dynamodb_table.track_index_state.name
+      TRACK_INDEX_UPSERT_MODE = "stub"
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "aws_lambda_event_source_mapping" "track_index_worker" {
+  event_source_arn        = aws_sqs_queue.track_index.arn
+  function_name           = aws_lambda_function.track_index_worker.arn
+  batch_size              = 10
+  function_response_types = ["ReportBatchItemFailures"]
+}
+
+resource "aws_apigatewayv2_integration" "track_index_events" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.track_index_events.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "track_index_events" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /track-events"
+  target    = "integrations/${aws_apigatewayv2_integration.track_index_events.id}"
+}
+
+resource "aws_lambda_permission" "track_index_events" {
+  statement_id  = "AllowAPIGatewayInvokeTrackIndexEvents"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.track_index_events.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
 }

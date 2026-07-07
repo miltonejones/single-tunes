@@ -57,3 +57,9 @@ variable "shazam_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "tune_api_endpoint" {
+  description = "Base URL of the catalog API used by the track indexing worker"
+  type        = string
+  default     = "https://u8m0btl997.execute-api.us-east-1.amazonaws.com"
+}
