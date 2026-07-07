@@ -590,23 +590,44 @@ export class ListPage implements OnInit, OnDestroy {
       .finally(() => this.loading.set(false));
   }
 
-  /** Finds the first track with an artistFk and fetches that artist's imageLg for the banner. */
+  /** Finds the first track with an artistFk whose artist has an imageLg for the banner,
+   *  trying up to 3 distinct artists before giving up. */
   private loadArtistBanner(tracks: ITrackItem[]): void {
-    const artistFk = tracks.find((track) => track.artistFk)?.artistFk;
-    if (!artistFk) {
+    const seen = new Set<number>();
+    const candidateFks: number[] = [];
+    for (const track of tracks) {
+      const fk = track.artistFk;
+      if (fk && !seen.has(fk)) {
+        seen.add(fk);
+        candidateFks.push(fk);
+        if (candidateFks.length >= 3) break;
+      }
+    }
+    if (candidateFks.length === 0) return;
+
+    this.tryNextArtistBanner(candidateFks, 0);
+  }
+
+  private tryNextArtistBanner(artistFks: number[], index: number): void {
+    if (index >= artistFks.length) {
+      this.bannerImage.set(null);
+      this.bannerName.set(null);
       return;
     }
 
     this.catalogQuery
-      .getArtistDetail(artistFk)
+      .getArtistDetail(artistFks[index])
       .then((res) => {
         const artist = res.row[0];
-        this.bannerImage.set(artist?.imageLg ?? null);
-        this.bannerName.set(artist?.Name ?? null);
+        if (artist?.imageLg) {
+          this.bannerImage.set(artist.imageLg);
+          this.bannerName.set(artist.Name ?? null);
+        } else {
+          this.tryNextArtistBanner(artistFks, index + 1);
+        }
       })
       .catch(() => {
-        this.bannerImage.set(null);
-        this.bannerName.set(null);
+        this.tryNextArtistBanner(artistFks, index + 1);
       });
   }
 
