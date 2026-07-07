@@ -52,6 +52,7 @@ terraform/*.tfstate.*
 terraform/tfplan
 terraform/*.tfplan
 terraform/.lambda-zips/
+terraform/*.auto.tfvars
 
 # Claude session artifacts
 IMPLEMENTATION_SUMMARY.md
