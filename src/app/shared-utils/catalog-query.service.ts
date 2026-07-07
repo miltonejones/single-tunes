@@ -98,12 +98,15 @@ export class CatalogQueryService {
   getLibrary(
     page: number,
     sort: ISortProp = { field: 'ID', direction: 'DESC' },
+    cacheBust = false,
   ): Promise<IDetailResponse> {
+    let url = `${TUNE_API_ENDPOINT}${buildAppendFilterPath('music', sort, page)}`;
+    if (cacheBust) {
+      url += `?_t=${Date.now()}`;
+    }
     return firstValueFrom(
       this.http
-        .get<{ count: number; records: ITrackItem[] }>(
-          `${TUNE_API_ENDPOINT}${buildAppendFilterPath('music', sort, page)}`,
-        )
+        .get<{ count: number; records: ITrackItem[] }>(url)
         .pipe(map((related) => ({ row: [], related }))),
     );
   }

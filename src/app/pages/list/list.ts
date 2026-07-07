@@ -531,7 +531,7 @@ export class ListPage implements OnInit, OnDestroy {
     this.bannerName.set(null);
 
     this.catalogQuery
-      .getLibrary(pageNum)
+      .getLibrary(pageNum, undefined, true)
       .then((res) => {
         this.detail.set(res);
         this.loadArtistBanner(res.related.records);
