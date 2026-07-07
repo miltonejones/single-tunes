@@ -2,12 +2,12 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  Input,
   OnDestroy,
   OnInit,
   ViewChild,
   computed,
   inject,
+  input,
   signal,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -45,7 +45,7 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
   hasTrack = signal(false);
 
   /** Whether audio is actively playing (not paused/stopped) on this player instance. */
-  @Input() isPlaying = false;
+  readonly isPlaying = input(false);
 
   private modeIndex = signal(0);
   protected mode = computed(() => VISUALIZER_MODES[this.modeIndex()]);
@@ -59,10 +59,10 @@ export class AudioVisualizer implements OnInit, AfterViewInit, OnDestroy {
   protected isCasting = signal(false);
 
   isVisible = computed(
-    () => this.hasTrack() && this.isPlaying && this.audioAnalyserService.available() && this.visualizerPanel.isOpen(),
+    () => this.hasTrack() && this.isPlaying() && this.audioAnalyserService.available() && this.visualizerPanel.isOpen(),
   );
 
-  showPanel = computed(() => this.hasTrack() && this.isPlaying && !this.isCasting() && this.visualizerPanel.isOpen());
+  showPanel = computed(() => this.hasTrack() && this.isPlaying() && !this.isCasting() && this.visualizerPanel.isOpen());
 
   /** 0 = resting in place above the player, 1 = fully slid out of view. */
   private scrollHideProgress = signal(0);
