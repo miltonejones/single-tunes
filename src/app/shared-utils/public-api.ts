@@ -42,6 +42,9 @@ export type { SkeletonVariant } from './skeleton-loader';
 export { TrackMenu } from './track-menu';
 export { ItunesSearchModal } from './itunes-search-modal';
 export { TrackEditModal } from './track-edit-modal';
+export { ReportIssueModal } from './report-issue-modal';
+export { GithubCommandService } from './github-command.service';
+export type { GithubIssueRequest, GithubIssueResult } from './github-command.service';
 export { FEATURE_FLAGS } from './feature-flags';
 
 export { RecorderService } from './recorder.service';

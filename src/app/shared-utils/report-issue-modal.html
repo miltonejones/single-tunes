@@ -1,0 +1,65 @@
+<div class="modal-backdrop fade show" (click)="close()"></div>
+
+<div class="modal fade show" style="display: block;" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+      </div>
+      <div class="modal-body">
+        @if (track(); as track) {
+          <div class="report-issue-track mb-3">
+            <small class="text-muted">
+              Reporting an issue for <strong>{{ track.Title }}</strong> by {{ track.artistName }}
+            </small>
+          </div>
+        }
+
+        @if (error()) {
+          <div class="alert alert-danger">{{ error() }}</div>
+        }
+
+        <div class="mb-3">
+          <label for="issueTitle" class="form-label">Title</label>
+          <input
+            type="text"
+            class="form-control"
+            id="issueTitle"
+            placeholder="Briefly describe the issue"
+            [value]="title()"
+            (input)="title.set($any($event).target.value)"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="issueDescription" class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            id="issueDescription"
+            rows="5"
+            placeholder="What happened? What did you expect to happen?"
+            [value]="description()"
+            (input)="description.set($any($event).target.value)"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="submitting() || !title().trim()"
+          (click)="submit()"
+        >
+          @if (submitting()) {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+          } @else {
+            <i class="fa-solid fa-paper-plane"></i>
+          }
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

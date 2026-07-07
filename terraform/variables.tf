@@ -57,3 +57,21 @@ variable "shazam_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "github_owner" {
+  description = "GitHub owner of the repo the github-proxy Lambda files issues against"
+  type        = string
+  default     = "miltonejones"
+}
+
+variable "github_repo" {
+  description = "GitHub repo the github-proxy Lambda files issues against"
+  type        = string
+  default     = "single-tunes"
+}
+
+variable "github_token" {
+  description = "GitHub personal access token (issues:write) for the github-proxy Lambda. Injected into the proxy Lambda's env; never committed. Pass via -var or a gitignored *.tfvars."
+  type        = string
+  sensitive   = true
+}
