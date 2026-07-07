@@ -191,5 +191,5 @@
 }
 
 @if (showReportIssueModal()) {
-  <app-report-issue-modal [track]="reportIssueTrack()" (closed)="closeReportIssueModal()" />
+  <app-report-issue-modal (closed)="closeReportIssueModal()" />
 }

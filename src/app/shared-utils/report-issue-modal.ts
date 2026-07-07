@@ -1,7 +1,6 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, inject, output, signal } from '@angular/core';
 import { GithubCommandService } from './github-command.service';
 import { ToastService } from './toast.service';
-import { ITrackItem } from './models';
 
 @Component({
   selector: 'app-report-issue-modal',
@@ -10,7 +9,6 @@ import { ITrackItem } from './models';
   styleUrl: './report-issue-modal.css',
 })
 export class ReportIssueModal {
-  track = input<ITrackItem | null>(null);
   closed = output<void>();
 
   private githubCommand = inject(GithubCommandService);
@@ -32,15 +30,10 @@ export class ReportIssueModal {
     this.submitting.set(true);
     this.error.set('');
 
-    const track = this.track();
-    const context = track
-      ? `\n\n---\n**Track:** ${track.Title}\n**Artist:** ${track.artistName}\n**Album:** ${track.albumName}\n**File key:** ${track.FileKey}`
-      : '';
-
     try {
       const issue = await this.githubCommand.createIssue({
         title,
-        body: `${this.description().trim()}${context}`,
+        body: this.description().trim(),
       });
       this.toast.show(`Issue #${issue.number} created`);
       this.title.set('');

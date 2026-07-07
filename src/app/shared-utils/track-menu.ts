@@ -44,7 +44,6 @@ export class TrackMenu implements OnInit {
   showTrackEditModal = signal(false);
   editTrackItemProps = signal<ITrackItem | null>(null);
   showReportIssueModal = signal(false);
-  reportIssueTrack = signal<ITrackItem | null>(null);
   newPlaylistName = signal('');
   showNewPlaylistInput = signal(false);
 
@@ -161,13 +160,11 @@ export class TrackMenu implements OnInit {
 
     // Close the main menu and open the report-an-issue modal
     this.close();
-    this.reportIssueTrack.set(track);
     this.showReportIssueModal.set(true);
   }
 
   closeReportIssueModal(): void {
     this.showReportIssueModal.set(false);
-    this.reportIssueTrack.set(null);
   }
 
   downloadTrack(): void {

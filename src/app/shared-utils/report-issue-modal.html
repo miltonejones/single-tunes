@@ -8,14 +8,6 @@
         <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
       </div>
       <div class="modal-body">
-        @if (track(); as track) {
-          <div class="report-issue-track mb-3">
-            <small class="text-muted">
-              Reporting an issue for <strong>{{ track.Title }}</strong> by {{ track.artistName }}
-            </small>
-          </div>
-        }
-
         @if (error()) {
           <div class="alert alert-danger">{{ error() }}</div>
         }
