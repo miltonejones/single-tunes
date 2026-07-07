@@ -16,3 +16,8 @@ export const RECORDER_API_ENDPOINT = `${AI_SEARCH_ENDPOINT}/recorder`;
 // Lambda (see terraform/main.tf); the browser calls the proxy on the AI
 // gateway, so no secret ships to clients.
 export const SHAZAM_API_ENDPOINT = `${AI_SEARCH_ENDPOINT}/shazam`;
+
+// GitHub issue reporting. The personal access token lives only in the
+// github-proxy Lambda (see terraform/main.tf); the browser calls the proxy
+// on the AI gateway, so no secret ships to clients.
+export const GITHUB_PROXY_ENDPOINT = `${AI_SEARCH_ENDPOINT}/github`;

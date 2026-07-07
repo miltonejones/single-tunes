@@ -124,6 +124,11 @@
             <span class="track-menu-label">Add to Queue</span>
             <span class="track-menu-caption">Play this track next</span>
           </button>
+          <button type="button" class="track-menu-item" (click)="reportIssue()">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span class="track-menu-label">Report an Issue</span>
+            <span class="track-menu-caption">File a GitHub issue about this track</span>
+          </button>
         </div>
       } @else {
         <button type="button" class="track-menu-back" (click)="menuView.set('main')">
@@ -183,4 +188,8 @@
     (closed)="closeTrackEditModal()"
     (trackUpdated)="onTrackUpdated($event)"
   />
+}
+
+@if (showReportIssueModal()) {
+  <app-report-issue-modal [track]="reportIssueTrack()" (closed)="closeReportIssueModal()" />
 }

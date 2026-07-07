@@ -534,6 +534,58 @@ resource "aws_lambda_permission" "shazam_proxy" {
 }
 
 # ============================================
+# GitHub proxy — keeps the GitHub personal access token server-side
+# ============================================
+
+data "archive_file" "github_proxy" {
+  type        = "zip"
+  source_file = "${path.module}/../lambdas/github-proxy/index.mjs"
+  output_path = "${path.module}/.lambda-zips/github-proxy.zip"
+}
+
+resource "aws_lambda_function" "github_proxy" {
+  function_name    = "${var.project_name}-github-proxy"
+  role             = aws_iam_role.ai_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  filename         = data.archive_file.github_proxy.output_path
+  source_code_hash = data.archive_file.github_proxy.output_base64sha256
+  timeout          = 30
+  memory_size      = 256
+
+  environment {
+    variables = {
+      GITHUB_OWNER = var.github_owner
+      GITHUB_REPO  = var.github_repo
+      GITHUB_TOKEN = var.github_token
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "aws_apigatewayv2_integration" "github_proxy" {
+  api_id                 = aws_apigatewayv2_api.ai.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.github_proxy.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "github_issues" {
+  api_id    = aws_apigatewayv2_api.ai.id
+  route_key = "POST /github/issues"
+  target    = "integrations/${aws_apigatewayv2_integration.github_proxy.id}"
+}
+
+resource "aws_lambda_permission" "github_proxy" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.github_proxy.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.ai.execution_arn}/*/*"
+}
+
+# ============================================
 # Cross-instance sync — DynamoDB sessions/leases + per-instance SQS queues
 # ============================================
 

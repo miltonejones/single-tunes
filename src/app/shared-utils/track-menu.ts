@@ -9,6 +9,7 @@ import { TrackQueryService } from './track-query.service';
 import { TrackCommandService } from './track-command.service';
 import { ItunesSearchModal } from './itunes-search-modal';
 import { TrackEditModal } from './track-edit-modal';
+import { ReportIssueModal } from './report-issue-modal';
 import { FEATURE_FLAGS } from './feature-flags';
 import { TrackDownloadService } from './track-download.service';
 import { createKey } from './domain/text';
@@ -17,7 +18,7 @@ type MenuView = 'main' | 'playlists';
 
 @Component({
   selector: 'app-track-menu',
-  imports: [RouterLink, ImgFallbackDirective, ItunesSearchModal, TrackEditModal],
+  imports: [RouterLink, ImgFallbackDirective, ItunesSearchModal, TrackEditModal, ReportIssueModal],
   templateUrl: './track-menu.html',
   styleUrl: './track-menu.css',
 })
@@ -42,6 +43,8 @@ export class TrackMenu implements OnInit {
   editTrackItem = signal<ITrackItem | null>(null);
   showTrackEditModal = signal(false);
   editTrackItemProps = signal<ITrackItem | null>(null);
+  showReportIssueModal = signal(false);
+  reportIssueTrack = signal<ITrackItem | null>(null);
   newPlaylistName = signal('');
   showNewPlaylistInput = signal(false);
 
@@ -150,6 +153,21 @@ export class TrackMenu implements OnInit {
 
   onTrackUpdated(updatedTrack: ITrackItem): void {
     this.trackUpdated.emit(updatedTrack);
+  }
+
+  reportIssue(): void {
+    const track = this.track();
+    if (!track) return;
+
+    // Close the main menu and open the report-an-issue modal
+    this.close();
+    this.reportIssueTrack.set(track);
+    this.showReportIssueModal.set(true);
+  }
+
+  closeReportIssueModal(): void {
+    this.showReportIssueModal.set(false);
+    this.reportIssueTrack.set(null);
   }
 
   downloadTrack(): void {
