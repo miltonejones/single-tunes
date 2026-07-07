@@ -56,7 +56,7 @@ export class TrackMenu implements OnInit {
   }
 
   ngOnInit(): void {
-    this.catalogQuery.getPlaylists().then((playlists) => this.playlists.set(playlists));
+    this.catalogQuery.getPlaylists({ field: 'Title', direction: 'DESC' }).then((playlists) => this.playlists.set(playlists));
     this.audioPlayerCommand.queue$.subscribe((queue) => this.queueLength.set(queue.length));
   }
 
