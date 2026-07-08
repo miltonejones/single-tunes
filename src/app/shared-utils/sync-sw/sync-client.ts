@@ -26,10 +26,9 @@ export interface SyncState {
 }
 
 /**
- * Client-side interface to the sync service worker.
- *
- * Registers the sync SW, sends INIT to start the background sync engine,
- * relays tab→SW actions, and exposes SW→tab state/mode updates as observables.
+ * Client-side interface to the sync engine running inside the main service
+ * worker (/sw.js). Does NOT register its own SW — it communicates with the
+ * already-active SW via postMessage.
  */
 @Injectable({
   providedIn: 'root',
@@ -41,47 +40,34 @@ export class SyncClient {
   /** Emits when the SW changes this tab's leadership mode. */
   readonly modeChanges$ = new Subject<'leader' | 'follower' | 'idle'>();
 
-  /** Emits each time the SW forwards a heartbeat result (existing). */
+  /** Emits each time the SW forwards a heartbeat result. */
   readonly heartbeatResults = new Subject<HeartbeatResult>();
 
-  private registration: ServiceWorkerRegistration | null = null;
   private swReady = false;
 
   /**
-   * Register the sync service worker and start the background sync engine.
-   * Resolves when the SW is active and INIT has been sent.
-   * Rejects if SW are unsupported or registration fails.
+   * Wait for the main SW to be ready and send INIT to start the sync engine.
+   * Rejects if SW are unsupported or no SW is active.
    */
   async init(userKey: string, instanceId: string): Promise<void> {
     if (!('serviceWorker' in navigator)) {
       throw new Error('Service workers not supported');
     }
 
-    try {
-      this.registration = await navigator.serviceWorker.register('/sync-service-worker.js', {
-        scope: '/',
-      });
-
-      await navigator.serviceWorker.ready;
-      this.swReady = true;
-
-      // Listen for messages from the SW.
-      navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
-        this.handleMessage(event);
-      });
-
-      // Send INIT to start the sync engine.
-      if (this.registration.active) {
-        this.registration.active.postMessage({
-          type: 'INIT',
-          userKey,
-          instanceId,
-        });
-      }
-    } catch (error) {
-      this.swReady = false;
-      throw error;
+    const reg = await navigator.serviceWorker.ready;
+    if (!reg.active) {
+      throw new Error('No active service worker');
     }
+
+    this.swReady = true;
+
+    // Listen for messages from the SW.
+    navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
+      this.handleMessage(event);
+    });
+
+    // Send INIT to start the sync engine inside the main SW.
+    reg.active.postMessage({ type: 'INIT', userKey, instanceId });
   }
 
   // ── Tab → SW ──────────────────────────────────────────────────────────────
@@ -116,7 +102,7 @@ export class SyncClient {
     this.postToSw({ type: 'REGISTER', queueUrl });
   }
 
-  /** True when the SW is registered and ready. */
+  /** True when the SW is ready. */
   get isReady(): boolean {
     return this.swReady;
   }
@@ -131,8 +117,8 @@ export class SyncClient {
   // ── Private ────────────────────────────────────────────────────────────────
 
   private postToSw(message: any): void {
-    if (this.registration?.active) {
-      this.registration.active.postMessage(message);
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage(message);
     }
   }
 
