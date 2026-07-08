@@ -94,114 +94,139 @@
     </div>
   }
 
-  <div class="list-toolbar">
+  <ng-template #toolbarActionsTpl>
+    <div class="toolbar-list-actions">
+      <button
+        type="button"
+        class="toolbar-play-btn"
+        [title]="isPlayingThisList() ? 'Stop' : 'Play all'"
+        (click)="togglePlayList()"
+      >
+        <i class="fa-solid" [class.fa-play]="!isPlayingThisList()" [class.fa-stop]="isPlayingThisList()"></i>
+      </button>
+      <button
+        type="button"
+        class="toolbar-shuffle-btn"
+        title="Shuffle play"
+        (click)="shuffleAndPlay()"
+      >
+        <i class="fa-solid fa-shuffle"></i>
+      </button>
+      <button
+        type="button"
+        class="toolbar-download-btn"
+        [class.all-downloaded]="allTracksDownloaded()"
+        [disabled]="anyTrackDownloading()"
+        [title]="allTracksDownloaded() ? 'All tracks downloaded' : 'Download all tracks'"
+        (click)="downloadAllTracks()"
+      >
+        @if (anyTrackDownloading()) {
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        } @else if (allTracksDownloaded()) {
+          <i class="fa-solid fa-check"></i>
+        } @else {
+          <i class="fa-solid fa-download"></i>
+        }
+      </button>
+      @if (listType() === 'album') {
+        <button
+          type="button"
+          class="toolbar-find-missing-btn"
+          [disabled]="isSearchingApple()"
+          title="Find missing tracks on iTunes"
+          (click)="findMissingTracks()"
+        >
+          @if (isSearchingApple()) {
+            <i class="fa-solid fa-spinner fa-spin"></i>
+          } @else {
+            <i class="fa-brands fa-apple"></i>
+          }
+          Find Missing
+        </button>
+      }
+      @if (listType() === 'playlist') {
+        <button
+          type="button"
+          class="toolbar-edit-btn"
+          title="Edit playlist order"
+          (click)="enterEditMode()"
+        >
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+      }
+    </div>
+  </ng-template>
+
+  <ng-template #libraryActionsTpl>
+    <button
+      type="button"
+      class="library-refresh-btn"
+      [disabled]="refreshing()"
+      title="Refresh library"
+      (click)="refreshLibrary()"
+    >
+      @if (refreshing()) {
+        <i class="fa-solid fa-spinner fa-spin"></i>
+      } @else {
+        <i class="fa-solid fa-rotate"></i>
+      }
+    </button>
+    <button
+      type="button"
+      class="library-add-btn"
+      title="Record tracks from YouTube"
+      (click)="openRecorder()"
+    >
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  </ng-template>
+
+  <ng-template #viewToggleTpl>
+    <div class="view-toggle">
+      <button
+        type="button"
+        class="view-btn"
+        [class.active]="viewMode() === 'tracks'"
+        (click)="viewMode.set('tracks')"
+        title="Track list"
+      >
+        <i class="fa-solid fa-list"></i>
+      </button>
+      <button
+        type="button"
+        class="view-btn"
+        [class.active]="viewMode() === 'albums'"
+        (click)="viewMode.set('albums')"
+        title="Album grid"
+      >
+        <i class="fa-solid fa-compact-disc"></i>
+      </button>
+    </div>
+  </ng-template>
+
+  <div class="sticky-list-toolbar" [class.visible]="stickyToolbarVisible()">
+    <lib-breadcrumbs [items]="breadcrumbItems()" />
+    <div class="sticky-toolbar-actions">
+      <ng-container [ngTemplateOutlet]="toolbarActionsTpl" />
+      @if (listType() === 'library') {
+        <ng-container [ngTemplateOutlet]="libraryActionsTpl" />
+      }
+      @if (listType() === 'artist') {
+        <ng-container [ngTemplateOutlet]="viewToggleTpl" />
+      }
+    </div>
+  </div>
+
+  <div class="list-toolbar" #listToolbarEl>
     <lib-breadcrumbs [items]="breadcrumbItems()" />
     @if (!bannerImage()) {
-      <div class="toolbar-list-actions">
-        <button
-          type="button"
-          class="toolbar-play-btn"
-          [title]="isPlayingThisList() ? 'Stop' : 'Play all'"
-          (click)="togglePlayList()"
-        >
-          <i class="fa-solid" [class.fa-play]="!isPlayingThisList()" [class.fa-stop]="isPlayingThisList()"></i>
-        </button>
-        <button
-          type="button"
-          class="toolbar-shuffle-btn"
-          title="Shuffle play"
-          (click)="shuffleAndPlay()"
-        >
-          <i class="fa-solid fa-shuffle"></i>
-        </button>
-        <button
-          type="button"
-          class="toolbar-download-btn"
-          [class.all-downloaded]="allTracksDownloaded()"
-          [disabled]="anyTrackDownloading()"
-          [title]="allTracksDownloaded() ? 'All tracks downloaded' : 'Download all tracks'"
-          (click)="downloadAllTracks()"
-        >
-          @if (anyTrackDownloading()) {
-            <i class="fa-solid fa-spinner fa-spin"></i>
-          } @else if (allTracksDownloaded()) {
-            <i class="fa-solid fa-check"></i>
-          } @else {
-            <i class="fa-solid fa-download"></i>
-          }
-        </button>
-        @if (listType() === 'album') {
-          <button
-            type="button"
-            class="toolbar-find-missing-btn"
-            [disabled]="isSearchingApple()"
-            title="Find missing tracks on iTunes"
-            (click)="findMissingTracks()"
-          >
-            @if (isSearchingApple()) {
-              <i class="fa-solid fa-spinner fa-spin"></i>
-            } @else {
-              <i class="fa-brands fa-apple"></i>
-            }
-            Find Missing
-          </button>
-        }
-        @if (listType() === 'playlist') {
-          <button
-            type="button"
-            class="toolbar-edit-btn"
-            title="Edit playlist order"
-            (click)="enterEditMode()"
-          >
-            <i class="fa-solid fa-pen-to-square"></i>
-          </button>
-        }
-      </div>
+      <ng-container [ngTemplateOutlet]="toolbarActionsTpl" />
     }
     @if (listType() === 'library') {
-      <button
-        type="button"
-        class="library-refresh-btn"
-        [disabled]="refreshing()"
-        title="Refresh library"
-        (click)="refreshLibrary()"
-      >
-        @if (refreshing()) {
-          <i class="fa-solid fa-spinner fa-spin"></i>
-        } @else {
-          <i class="fa-solid fa-rotate"></i>
-        }
-      </button>
-      <button
-        type="button"
-        class="library-add-btn"
-        title="Record tracks from YouTube"
-        (click)="openRecorder()"
-      >
-        <i class="fa-solid fa-plus"></i>
-      </button>
+      <ng-container [ngTemplateOutlet]="libraryActionsTpl" />
     }
     @if (listType() === 'artist') {
-      <div class="view-toggle">
-        <button
-          type="button"
-          class="view-btn"
-          [class.active]="viewMode() === 'tracks'"
-          (click)="viewMode.set('tracks')"
-          title="Track list"
-        >
-          <i class="fa-solid fa-list"></i>
-        </button>
-        <button
-          type="button"
-          class="view-btn"
-          [class.active]="viewMode() === 'albums'"
-          (click)="viewMode.set('albums')"
-          title="Album grid"
-        >
-          <i class="fa-solid fa-compact-disc"></i>
-        </button>
-      </div>
+      <ng-container [ngTemplateOutlet]="viewToggleTpl" />
     }
   </div>
 
