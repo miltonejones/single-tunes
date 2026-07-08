@@ -171,14 +171,6 @@
         <i class="fa-solid fa-rotate"></i>
       }
     </button>
-    <button
-      type="button"
-      class="library-add-btn"
-      title="Record tracks from YouTube"
-      (click)="openRecorder()"
-    >
-      <i class="fa-solid fa-plus"></i>
-    </button>
   </ng-template>
 
   <ng-template #viewToggleTpl>
@@ -211,6 +203,14 @@
       @if (listType() === 'library') {
         <ng-container [ngTemplateOutlet]="libraryActionsTpl" />
       }
+      <button
+        type="button"
+        class="library-add-btn"
+        title="Record tracks from YouTube"
+        (click)="openRecorder()"
+      >
+        <i class="fa-solid fa-plus"></i>
+      </button>
       @if (listType() === 'artist') {
         <ng-container [ngTemplateOutlet]="viewToggleTpl" />
       }
@@ -225,6 +225,14 @@
     @if (listType() === 'library') {
       <ng-container [ngTemplateOutlet]="libraryActionsTpl" />
     }
+    <button
+      type="button"
+      class="library-add-btn"
+      title="Record tracks from YouTube"
+      (click)="openRecorder()"
+    >
+      <i class="fa-solid fa-plus"></i>
+    </button>
     @if (listType() === 'artist') {
       <ng-container [ngTemplateOutlet]="viewToggleTpl" />
     }
