@@ -622,6 +622,20 @@ export class ListPage implements OnInit, OnDestroy {
         if (artist?.imageLg) {
           this.bannerImage.set(artist.imageLg);
           this.bannerName.set(artist.Name ?? null);
+        } else if (artist?.iArtistID) {
+          // No imageLg but has an iTunes ID — try to fetch one
+          this.catalogQuery.fetchArtistImage(artist.iArtistID).then((data) => {
+            if (data?.messageContent) {
+              // Persist so subsequent loads find it immediately
+              this.catalogCommand.updateArtist(data.messageContent, artistFks[index], artist.iArtistID!);
+              this.bannerImage.set(data.messageContent);
+              this.bannerName.set(artist.Name ?? null);
+            } else {
+              this.tryNextArtistBanner(artistFks, index + 1);
+            }
+          }).catch(() => {
+            this.tryNextArtistBanner(artistFks, index + 1);
+          });
         } else {
           this.tryNextArtistBanner(artistFks, index + 1);
         }

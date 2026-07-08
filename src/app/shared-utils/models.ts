@@ -107,6 +107,7 @@ export interface IDetailRow {
   albumImage?: string | null;
   imageLg?: string | null;
   artistName?: string | null;
+  iArtistID?: number | null;
   TrackCount: number;
 }
 

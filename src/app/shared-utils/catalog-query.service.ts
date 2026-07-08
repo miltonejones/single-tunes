@@ -226,4 +226,11 @@ export class CatalogQueryService {
   getImageLg(address: string): Promise<unknown> {
     return firstValueFrom(this.http.post(`${PHOTO_ENDPOINT}lookup`, { address }));
   }
+
+  /** Fetches an artist image from iTunes via the photo endpoint. */
+  fetchArtistImage(iArtistID: number): Promise<{ messageContent?: string }> {
+    return firstValueFrom(
+      this.http.post<{ messageContent?: string }>(`${PHOTO_ENDPOINT}artist`, { id: iArtistID }),
+    );
+  }
 }
