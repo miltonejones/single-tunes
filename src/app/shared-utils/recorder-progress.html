@@ -14,7 +14,15 @@
             <div class="rp-batch-head">
               <span class="rp-batch-label" [title]="batch.label">{{ batch.label }}</span>
               <span class="rp-batch-summary">{{ summary(batch) }}</span>
-              @if (!isRunning(batch)) {
+              @if (isRunning(batch)) {
+                <button type="button" class="rp-cancel" title="Cancel all jobs in this batch" (click)="cancelBatch(batch.batchId)" [disabled]="cancelling().has(batch.batchId)">
+                  @if (cancelling().has(batch.batchId)) {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                  } @else {
+                    <i class="fa-solid fa-ban"></i>
+                  }
+                </button>
+              } @else {
                 <button type="button" class="rp-dismiss" title="Dismiss" (click)="dismiss(batch.batchId)">
                   <i class="fa-solid fa-xmark"></i>
                 </button>

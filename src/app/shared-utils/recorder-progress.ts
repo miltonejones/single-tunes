@@ -11,9 +11,10 @@ const STATUS_ICON: Record<RecorderJobStatus, string> = {
   uploading: 'fa-cloud-arrow-up',
   done: 'fa-circle-check',
   failed: 'fa-circle-xmark',
+  cancelled: 'fa-ban',
 };
 
-const TERMINAL: RecorderJobStatus[] = ['done', 'failed'];
+const TERMINAL: RecorderJobStatus[] = ['done', 'failed', 'cancelled'];
 
 /**
  * App-wide recorder progress. Hosted once in the app shell so any submitted
@@ -34,9 +35,21 @@ export class RecorderProgress {
   recorderRunning = this.recorder.hasRunning;
 
   hasBatches = computed(() => this.batches().length > 0);
+  cancelling = signal<Set<string>>(new Set());
 
   dismiss(batchId: string): void {
     this.recorder.dismiss(batchId);
+  }
+
+  cancelBatch(batchId: string): void {
+    this.cancelling.update((s) => new Set(s).add(batchId));
+    this.recorder.cancel(batchId).finally(() => {
+      this.cancelling.update((s) => {
+        const next = new Set(s);
+        next.delete(batchId);
+        return next;
+      });
+    });
   }
 
   isRunning(batch: RecorderBatch): boolean {
@@ -51,12 +64,21 @@ export class RecorderProgress {
     return batch.jobs.filter((j) => j.status === 'failed').length;
   }
 
+  cancelledCount(batch: RecorderBatch): number {
+    return batch.jobs.filter((j) => j.status === 'cancelled').length;
+  }
+
   summary(batch: RecorderBatch): string {
     const total = batch.jobs.length;
     const done = this.doneCount(batch);
     if (this.isRunning(batch)) return `${done}/${total} done`;
+    const parts: string[] = [];
+    if (done > 0) parts.push(`${done} done`);
     const failed = this.failedCount(batch);
-    return failed > 0 ? `${done}/${total} done · ${failed} failed` : `All ${total} done`;
+    if (failed > 0) parts.push(`${failed} failed`);
+    const cancelled = this.cancelledCount(batch);
+    if (cancelled > 0) parts.push(`${cancelled} cancelled`);
+    return parts.length > 0 ? parts.join(' · ') : `All ${total} done`;
   }
 
   displayName(output: string): string {

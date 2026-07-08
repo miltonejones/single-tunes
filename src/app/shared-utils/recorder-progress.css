@@ -97,6 +97,27 @@
   color: #dc3545;
 }
 
+.rp-cancel {
+  background: none;
+  border: none;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.62));
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.rp-cancel:hover:not(:disabled) {
+  color: #f59e0b;
+}
+
+.rp-cancel:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.rp-job[data-status='cancelled'] .rp-job-icon {
+  color: #f59e0b;
+}
+
 .rp-job {
   display: flex;
   align-items: center;

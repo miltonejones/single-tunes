@@ -19,7 +19,8 @@ export type RecorderJobStatus =
   | 'recording'
   | 'uploading'
   | 'done'
-  | 'failed';
+  | 'failed'
+  | 'cancelled';
 
 export interface RecorderJob extends RecorderResult {
   batchId: string;
@@ -41,7 +42,7 @@ export interface RecorderBatch {
 
 const STORAGE_KEY = 'sky-tunes-recorder-batches';
 const POLL_MS = 3000;
-const TERMINAL: RecorderJobStatus[] = ['done', 'failed'];
+const TERMINAL: RecorderJobStatus[] = ['done', 'failed', 'cancelled'];
 
 function batchRunning(batch: RecorderBatch): boolean {
   return batch.jobs.length === 0 || batch.jobs.some((j) => !TERMINAL.includes(j.status));
@@ -101,6 +102,31 @@ export class RecorderService {
   dismiss(batchId: string): void {
     this._batches.update((list) => list.filter((b) => b.batchId !== batchId));
     this.persist();
+  }
+
+  /** Cancels all running jobs in a batch. */
+  async cancel(batchId: string): Promise<void> {
+    // Optimistically mark all non-terminal jobs as cancelled so the UI
+    // responds instantly; the poller will confirm by writing the status doc.
+    this._batches.update((list) =>
+      list.map((b) => {
+        if (b.batchId !== batchId) return b;
+        return {
+          ...b,
+          jobs: b.jobs.map((j) =>
+            TERMINAL.includes(j.status) ? j : { ...j, status: 'cancelled' as const },
+          ),
+        };
+      }),
+    );
+    this.persist();
+    try {
+      await firstValueFrom(
+        this.http.post(`${RECORDER_API_ENDPOINT}/record/${encodeURIComponent(batchId)}/cancel`, {}),
+      );
+    } catch {
+      // Optimistic update already applied — the next poll tick will reconcile.
+    }
   }
 
   private async refresh(batchId: string): Promise<void> {
