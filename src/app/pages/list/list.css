@@ -404,16 +404,53 @@ a:is(.track-artist, .track-album, .track-genre):hover {
 .pager-disabled {
   color: var(--text-tertiary);
 }
-.list-toolbar {
+.list-toolbar,
+.sticky-list-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+}
+.list-toolbar {
   padding-right: 1rem;
 }
-.list-toolbar lib-breadcrumbs {
+.list-toolbar lib-breadcrumbs,
+.sticky-list-toolbar lib-breadcrumbs {
   flex: 1;
   min-width: 0;
+}
+.sticky-list-toolbar {
+  position: fixed;
+  top: 4rem;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  padding: 0.55rem 1.25rem;
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+.sticky-list-toolbar.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.sticky-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+@media (max-width: 576px) {
+  .sticky-list-toolbar {
+    top: 3.5rem;
+    padding: 0.5rem 0.75rem;
+  }
 }
 .view-toggle {
   display: flex;

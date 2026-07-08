@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ListResolvedData } from './list.resolver';
@@ -39,7 +40,7 @@ const LIST_TYPE_LABELS: Record<Exclude<ListType, 'library'>, string> = {
 
 @Component({
   selector: 'app-list-page',
-  imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, SkeletonLoader, TrackMenu],
+  imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, SkeletonLoader, TrackMenu, NgTemplateOutlet],
   templateUrl: './list.html',
   styleUrl: './list.css',
 })
@@ -61,6 +62,28 @@ export class ListPage implements OnInit, OnDestroy {
   private recorder = inject(RecorderService);
   private recorderSub?: Subscription;
   private libraryRefreshTimer?: ReturnType<typeof setTimeout>;
+
+  private listToolbarEl = viewChild<ElementRef<HTMLElement>>('listToolbarEl');
+  private breadcrumbObserver?: IntersectionObserver;
+  /** True once the breadcrumb/actions row has scrolled out of view, showing the sticky toolbar. */
+  protected stickyToolbarVisible = signal(false);
+
+  constructor() {
+    effect((onCleanup) => {
+      const el = this.listToolbarEl()?.nativeElement;
+      this.breadcrumbObserver?.disconnect();
+      if (!el) return;
+
+      const mainToolbarHeight = window.matchMedia('(max-width: 576px)').matches ? 56 : 64;
+      this.breadcrumbObserver = new IntersectionObserver(
+        ([entry]) => this.stickyToolbarVisible.set(!entry.isIntersecting),
+        { rootMargin: `-${mainToolbarHeight}px 0px 0px 0px` },
+      );
+      this.breadcrumbObserver.observe(el);
+
+      onCleanup(() => this.breadcrumbObserver?.disconnect());
+    });
+  }
 
   listType = signal<ListType>('album');
   listId = signal('');
@@ -263,6 +286,7 @@ export class ListPage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.recorderSub?.unsubscribe();
     clearTimeout(this.libraryRefreshTimer);
+    this.breadcrumbObserver?.disconnect();
   }
 
   private parseListType(value: string | null): ListType {
@@ -533,6 +557,7 @@ export class ListPage implements OnInit, OnDestroy {
     this.error.set('');
     this.bannerImage.set(null);
     this.bannerName.set(null);
+    this.stickyToolbarVisible.set(false);
 
     this.catalogQuery
       .getLibrary(pageNum, undefined, true)
@@ -567,6 +592,7 @@ export class ListPage implements OnInit, OnDestroy {
     this.error.set('');
     this.bannerImage.set(null);
     this.bannerName.set(null);
+    this.stickyToolbarVisible.set(false);
 
     let request: Promise<IDetailResponse>;
     switch (listType) {
