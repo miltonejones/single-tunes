@@ -121,34 +121,31 @@ export class SyncService {
     try {
       await this.syncClient.init(userKey, this.instanceId);
 
-      // SW → Tab: state updates from other devices.
+      // SW → Tab: state updates from other devices. `leaderInstanceId` on the
+      // wire is the SW's own device id (see sync-service-worker), never the
+      // tab's instanceId, so `this.mode()` — kept in sync via the MODE
+      // messages below — is the only reliable "is this mine" signal here.
       this.stateSub = this.syncClient.stateUpdates$.subscribe((state) => {
         // Leader tabs ignore their own state echoed back.
         if (this.mode() === 'leader') return;
-        if (state.leaderInstanceId === this.instanceId) return;
         this.applyMirror(state);
       });
 
       // SW → Tab: mode changes.
       this.modeSub = this.syncClient.modeChanges$.subscribe((mode) => {
         this.mode.set(mode);
-        if (mode === 'follower') {
-          // AudioPlayer reacts to mode() and mutes/releases its audio element.
-        }
       });
 
-      // SW → Tab: heartbeat results (stale detection, leadership stand-down).
+      // SW → Tab: heartbeat results (stale session detection only). The SW
+      // already detects genuine cross-device leadership takeovers itself
+      // (comparing its own device id) and broadcasts MODE + STATE_UPDATE
+      // messages when that happens, so there's no separate stand-down check
+      // to do here — comparing `result.leaderInstanceId` (the SW's device id)
+      // against `this.instanceId` (this tab's id) would never match even when
+      // this device is genuinely still leading, incorrectly demoting it.
       this.heartbeatSub = this.syncClient.heartbeatResults.subscribe((result) => {
         if (result.stale) {
           this.syncClient.sendRegister(''); // trigger SW re-registration
-        }
-        if (
-          this.mode() === 'leader' &&
-          result.leaderInstanceId &&
-          result.leaderInstanceId !== this.instanceId
-        ) {
-          this.mode.set('follower');
-          if (result.state) this.applyMirror(result.state);
         }
       });
     } catch {
