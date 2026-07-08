@@ -1,111 +1,50 @@
-// Sync message types and interfaces for tab ↔ service worker communication.
-
+// Sync message types and interfaces
 export type SyncMessageType =
   | 'INIT'
-  | 'USER_ACTION'
-  | 'PLAYBACK_STATE'
-  | 'ANNOUNCEMENT'
   | 'STATE_UPDATE'
-  | 'MODE'
+  | 'USER_ACTION'
+  | 'TOAST'
   | 'HEARTBEAT_RESULT'
   | 'REGISTER';
 
-// ── Tab → SW ─────────────────────────────────────────────────────────────────
+export interface SyncMessage {
+  type: SyncMessageType;
+  payload?: any;
+  id?: string;
+}
 
-/** Sent once per tab to initialise the SW sync engine. */
-export interface InitMessage {
+export interface InitMessage extends SyncMessage {
   type: 'INIT';
   userKey: string;
   instanceId: string;
 }
 
-/** Sent when the user performs a play/pause/skip/track-change action. */
-export interface UserActionMessage {
-  type: 'USER_ACTION';
-  track?: {
-    ID?: number;
-    Title: string;
-    artistName: string;
-    albumName: string;
-    FileKey: string;
-    albumImage: string | null;
-    trackTime: any;
-  } | null;
-  queue?: {
-    ID?: number;
-    Title: string;
-    artistName: string;
-    albumName: string;
-    FileKey: string;
-    albumImage: string | null;
-    trackTime: any;
-  }[];
-  isPlaying?: boolean;
+export interface StateUpdateMessage extends SyncMessage {
+  type: 'STATE_UPDATE';
+  state: any;
 }
 
-/** Periodic position/volume tick from the leader tab. */
-export interface PlaybackStateMessage {
-  type: 'PLAYBACK_STATE';
-  currentTime: number;
-  duration: number;
-  volume: number;
-  muted: boolean;
-  isPlaying: boolean;
-}
-
-/** Announcer just spoke — leader tab forwards the text. */
-export interface AnnouncementMessage {
-  type: 'ANNOUNCEMENT';
+export interface ToastMessage extends SyncMessage {
+  type: 'TOAST';
   text: string;
 }
 
-// ── SW → Tab ─────────────────────────────────────────────────────────────────
-
-/** Full state snapshot broadcast to all tabs. */
-export interface StateUpdateMessage {
-  type: 'STATE_UPDATE';
-  state: {
-    leaderInstanceId: string;
-    updatedAt: number;
-    track: any;
-    queue: any[];
-    isPlaying: boolean;
-    currentTime: number;
-    duration: number;
-    volume: number;
-    muted: boolean;
-    announcement: { text: string; ts: number } | null;
-  };
+export interface UserActionMessage extends SyncMessage {
+  type: 'USER_ACTION';
+  action: string;
+  data?: any;
 }
 
-/** Leadership mode change for a specific tab. */
-export interface ModeMessage {
-  type: 'MODE';
-  mode: 'leader' | 'follower' | 'idle';
-}
-
-/** Heartbeat result forwarded from SW to all tabs (existing). */
-export interface HeartbeatResultMessage {
+/** Sent from the service worker to the client with the result of a heartbeat POST. */
+export interface HeartbeatResultMessage extends SyncMessage {
   type: 'HEARTBEAT_RESULT';
   leaderInstanceId?: string;
   stale?: boolean;
   state?: any;
 }
 
-/** Forward queue URL to SW after re-registration (existing). */
-export interface RegisterMessage {
+/** Sent from the client to the service worker after a successful /sync/register. */
+export interface RegisterMessage extends SyncMessage {
   type: 'REGISTER';
   queueUrl: string;
 }
-
-// ── Union ────────────────────────────────────────────────────────────────────
-
-export type SyncMessage =
-  | InitMessage
-  | UserActionMessage
-  | PlaybackStateMessage
-  | AnnouncementMessage
-  | StateUpdateMessage
-  | ModeMessage
-  | HeartbeatResultMessage
-  | RegisterMessage;
