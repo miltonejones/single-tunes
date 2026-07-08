@@ -66,6 +66,9 @@
   @if (recentlyAdded().length > 0) {
     <div class="section-header">
       <h3><i class="fa-solid fa-compact-disc"></i> Recently Added</h3>
+      <a class="view-all-link" [routerLink]="['/list', 1]">
+        View all <i class="fa-solid fa-chevron-right"></i>
+      </a>
     </div>
     <div class="dash-grid" libCoverflow>
       @for (track of recentlyAdded(); track track.ID) {
