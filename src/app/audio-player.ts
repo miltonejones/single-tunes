@@ -470,6 +470,12 @@ export class AudioPlayer implements OnInit, OnDestroy {
       }
     });
 
+    // Broadcast play/pause state so track lists can reflect it (e.g. pausing
+    // the "now playing" spin animation).
+    effect(() => {
+      this.audioPlayerCommand.setIsPlaying(this.isPlaying());
+    });
+
     // Sync media session position state to lock screen / control center.
     effect(() => {
       if (this.isPlaying()) {

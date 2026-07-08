@@ -70,6 +70,7 @@ export class ListPage implements OnInit, OnDestroy {
   refreshing = signal(false);
   error = signal('');
   currentTrackId = signal<number | null>(null);
+  isPlaying = signal(false);
   bannerImage = signal<string | null>(null);
   bannerName = signal<string | null>(null);
   bannerLabel = computed(() => {
@@ -218,6 +219,9 @@ export class ListPage implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.audioPlayerCommand.currentTrack$.subscribe((track) => {
       this.currentTrackId.set(track?.ID ?? null);
+    });
+    this.audioPlayerCommand.isPlaying$.subscribe((playing) => {
+      this.isPlaying.set(playing);
     });
 
     this.catalogQuery.getPlaylists().then((playlists) => this.playlists.set(playlists));

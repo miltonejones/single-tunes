@@ -281,6 +281,7 @@
         <div
           class="track-row"
           [class.active]="track.ID === currentTrackId()"
+          [class.paused]="track.ID === currentTrackId() && !isPlaying()"
           [class.artist-view]="listType() === 'artist'"
           (click)="playTrack(track)"
         >

@@ -54,6 +54,7 @@ export class SearchPage implements OnInit {
   activeTab = signal<ResultTab>('artists');
   menuTrack = signal<ITrackItem | null>(null);
   currentTrackId = signal<number | null>(null);
+  isPlaying = signal(false);
   searchMode = signal<'keyword' | 'ai'>('keyword');
 
   viewMode = signal<'tabs' | 'list'>(
@@ -108,6 +109,9 @@ export class SearchPage implements OnInit {
   ngOnInit(): void {
     this.audioPlayerCommand.currentTrack$.subscribe((track) => {
       this.currentTrackId.set(track?.ID ?? null);
+    });
+    this.audioPlayerCommand.isPlaying$.subscribe((playing) => {
+      this.isPlaying.set(playing);
     });
 
     // paramMap fires on every navigation to this route (including re-searches)

@@ -152,7 +152,7 @@
       @if (aiTracks().length > 0) {
         <div class="track-list">
           @for (track of aiTracks(); track track.ID) {
-            <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+            <div class="track-row" [class.active]="track.ID === currentTrackId()" [class.paused]="track.ID === currentTrackId() && !isPlaying()" (click)="playTrack(track)">
               <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
               <div class="track-info">
                 <div class="track-title">{{ track.Title }}</div>
@@ -172,7 +172,7 @@
       @if (tracks().length > 0) {
         <div class="track-list">
           @for (track of tracks(); track track.ID) {
-            <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+            <div class="track-row" [class.active]="track.ID === currentTrackId()" [class.paused]="track.ID === currentTrackId() && !isPlaying()" (click)="playTrack(track)">
               <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
               <div class="track-info">
                 <div class="track-title">{{ track.Title }}</div>
@@ -250,7 +250,7 @@
             <h3 class="list-section-heading"><i class="fa-solid fa-music"></i> Tracks</h3>
             <div class="track-list">
               @for (track of aiTracks(); track track.ID) {
-                <div class="track-row" [class.active]="track.ID === currentTrackId()" (click)="playTrack(track)">
+                <div class="track-row" [class.active]="track.ID === currentTrackId()" [class.paused]="track.ID === currentTrackId() && !isPlaying()" (click)="playTrack(track)">
                   <img class="track-icon" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
                   <div class="track-info">
                     <div class="track-title">{{ track.Title }}</div>
