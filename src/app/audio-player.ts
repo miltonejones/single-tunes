@@ -76,6 +76,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private playRequestId = 0;
   private loadingTrack = false;
   private lastReportedTime = -1;
+  private wasLeader = false;
 
   /** The source context (list type + name) of the most recently played track. */
   protected currentSource = computed(() => {
@@ -504,9 +505,17 @@ export class AudioPlayer implements OnInit, OnDestroy {
     });
 
     // Leadership changes: take over audible playback, or mute+release on stand-down.
+    // Only act on an actual idle/follower -> leader *transition* — reading
+    // this.track() unconditionally here would also re-run this effect on every
+    // ordinary track advance while already leading (mode unchanged), racing
+    // and duplicating the load that the currentTrack$ subscription already
+    // does and restarting playback from position 0.
     effect(() => {
       const mode = this.sync.mode();
-      if (mode === 'leader' && this.track() && !this.isCasting() && !this.loadingTrack) {
+      const tookOverLeadership = mode === 'leader' && !this.wasLeader;
+      this.wasLeader = mode === 'leader';
+
+      if (tookOverLeadership && this.track() && !this.isCasting() && !this.loadingTrack) {
         // Resume from the mirrored position when continuing the same track;
         // start from 0 when the user picked a different track.
         const mirrored = this.sync.mirrored();
