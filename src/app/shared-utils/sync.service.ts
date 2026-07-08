@@ -1,5 +1,5 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, skip } from 'rxjs';
 import { AudioPlayerCommandService } from './audio-player-command.service';
 import { ITrackItem } from './models';
 import { UserService } from './user.service';
@@ -91,14 +91,21 @@ export class SyncService {
     // React to local command-service changes — forward to SW as user actions.
     // Any non-mirror emission is treated as a local user action (leadership
     // takeover), since applyMirroredState sets isApplyingMirror around its own
-    // emissions.
+    // emissions. currentTrack$/queue$ are BehaviorSubjects, though, so the
+    // very first emission a subscriber ever sees is just a replay of their
+    // seed value (null / []) — not a real user action. Without skip(1), every
+    // tab claims leadership the instant it starts syncing, before the user
+    // has done anything, and the SW (unlike the old direct-HTTP sync, which
+    // only published when a real track was set) broadcasts that claim
+    // unconditionally — so passive/follower tabs kept fighting the real
+    // leader for the role.
     this.subscriptions.push(
-      this.audioPlayerCommand.currentTrack$.subscribe((track) => {
+      this.audioPlayerCommand.currentTrack$.pipe(skip(1)).subscribe((track) => {
         if (this.isApplyingMirror) return;
         this.onLocalOrigin();
         this.syncClient.sendUserAction({ track: toSyncTrack(track) });
       }),
-      this.audioPlayerCommand.queue$.subscribe((queue) => {
+      this.audioPlayerCommand.queue$.pipe(skip(1)).subscribe((queue) => {
         if (this.isApplyingMirror) return;
         this.onLocalOrigin();
         this.syncClient.sendUserAction({

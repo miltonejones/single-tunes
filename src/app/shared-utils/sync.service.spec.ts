@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { SyncService } from './sync.service';
 import { UserService } from './user.service';
+import { AudioPlayerCommandService } from './audio-player-command.service';
 
 /**
  * Unit tests cover the pure leadership/mirror state-machine. The HTTP
@@ -48,5 +49,28 @@ describe('SyncService state machine', () => {
     // be idle while register is in flight, but it must not crash and the
     // service must remain usable.
     expect(['idle', 'leader', 'follower']).toContain(sync.mode());
+  });
+
+  it('does not claim leadership from the initial currentTrack$/queue$ replay', async () => {
+    // currentTrack$ and queue$ are BehaviorSubjects seeded with null/[]. Every
+    // new subscriber — including SyncService.start()'s own subscription —
+    // immediately receives that seed value per BehaviorSubject semantics.
+    // That replay is not a real user action and must not be treated as one:
+    // otherwise every tab claims leadership the instant sync starts, before
+    // the user has done anything, fighting any genuine leader for the role.
+    const user = TestBed.inject(UserService);
+    const sync = TestBed.inject(SyncService);
+    const command = TestBed.inject(AudioPlayerCommandService);
+
+    // Sanity check: nothing has played yet, so both subjects are still at
+    // their seed values when SyncService subscribes to them.
+    expect(command.currentTrack$.value).toBeNull();
+    expect(command.queue$.value).toEqual([]);
+
+    await user.setName('Tester');
+    TestBed.tick(); // flush the constructor effect that calls start()
+    await Promise.resolve(); // let start()'s synchronous subscription setup run
+
+    expect(sync.mode()).toBe('idle');
   });
 });
