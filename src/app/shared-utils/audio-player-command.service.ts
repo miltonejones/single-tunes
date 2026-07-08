@@ -19,6 +19,13 @@ export class AudioPlayerCommandService {
   readonly queue$ = new BehaviorSubject<ITrackItem[]>([]);
   readonly seekRelative$ = new Subject<number>();
   readonly togglePlayPause$ = new Subject<void>();
+  readonly isPlaying$ = new BehaviorSubject<boolean>(false);
+
+  /** Broadcasts whether the current track is actively playing vs. paused,
+   *  so track lists can reflect pause state (e.g. stop a "now playing" spin). */
+  setIsPlaying(playing: boolean): void {
+    this.isPlaying$.next(playing);
+  }
 
   /** Broadcasts a request to open and play a track, optionally alongside sibling tracks for next/prev. */
   openTrack(track: ITrackItem, queue: ITrackItem[] = [track]): void {

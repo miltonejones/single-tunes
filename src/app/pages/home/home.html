@@ -161,7 +161,7 @@
           </div>
           <div class="ai-track-list">
             @for (track of aiTracks(); track track.ID) {
-              <div class="ai-track-row" [class.active]="track.ID === currentTrackId()" (click)="playAiTrack(track)">
+              <div class="ai-track-row" [class.active]="track.ID === currentTrackId()" [class.paused]="track.ID === currentTrackId() && !isPlaying()" (click)="playAiTrack(track)">
                 <img class="ai-track-thumb" appImgFallback [fallbackSrc]="'https://www.sky-tunes.com/assets/icon-72x72.png'" [src]="track.albumImage" [alt]="track.Title" />
                 <div class="ai-track-info">
                   <div class="ai-track-title">{{ track.Title }}</div>

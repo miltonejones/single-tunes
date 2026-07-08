@@ -64,6 +64,7 @@ export class HomePage implements OnInit, OnDestroy {
   aiAlbums = signal<IGridItem[]>([]);
   aiArtists = signal<IGridItem[]>([]);
   currentTrackId = signal<number | null>(null);
+  isPlaying = signal(false);
 
   topArtists = computed(() => this.topByTrackCount('artist'));
   topAlbums = computed(() => this.topByTrackCount('album'));
@@ -83,6 +84,9 @@ export class HomePage implements OnInit, OnDestroy {
     this.startCarousel();
     this.audioPlayerCommand.currentTrack$.subscribe((track) => {
       this.currentTrackId.set(track?.ID ?? null);
+    });
+    this.audioPlayerCommand.isPlaying$.subscribe((playing) => {
+      this.isPlaying.set(playing);
     });
   }
 
