@@ -10,6 +10,8 @@ import {
   signal,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { NavigationEnd, Router } from '@angular/router';
 import {
   AnnouncementCommandService,
   AudioPlayerCommandService,
@@ -57,6 +59,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private trackDownload = inject(TrackDownloadService);
   private trackDedication = inject(TrackDedicationService);
   protected sync = inject(SyncService);
+  private router = inject(Router);
   protected readonly featureFlags = FEATURE_FLAGS;
   private blobUrl: string | null = null;
   protected queuePanel = inject(TrackQueuePanelService);
@@ -181,6 +184,13 @@ export class AudioPlayer implements OnInit, OnDestroy {
           this.castTransitioning = false;
         }
       }),
+    );
+
+    // Collapse the mobile fullscreen player whenever the user navigates away.
+    this.subscriptions.push(
+      this.router.events
+        .pipe(filter((e) => e instanceof NavigationEnd))
+        .subscribe(() => this.isExpanded.set(false)),
     );
   }
 
