@@ -39,6 +39,16 @@
         </button>
       }
 
+      <button
+        type="button"
+        class="audio-player-bio-btn"
+        [class.audio-player-bio-btn-active]="bioPanel.isOpen()"
+        title="Artist Info"
+        (click)="bioPanel.toggle()"
+      >
+        <i class="fa-solid fa-circle-info"></i>
+      </button>
+
       <button type="button" class="audio-player-queue-btn" (click)="queuePanel.toggle()">
         <i class="fa-solid fa-list"></i>
       </button>

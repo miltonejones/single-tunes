@@ -119,6 +119,11 @@ export interface IDetailResponse {
   };
 }
 
+export interface IArtistBio {
+  messageContent?: string;
+  description?: string;
+}
+
 export interface IPlaylistSummary {
   listKey: string;
   Title: string;

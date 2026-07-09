@@ -21,6 +21,7 @@ import {
 
 const SEARCH_HISTORY_KEY = 'toolbar-search-history';
 const MAX_SEARCH_HISTORY = 10;
+import { ArtistBioPanel } from './artist-bio-panel';
 import { AudioPlayer } from './audio-player';
 import { AudioVisualizer } from './audio-visualizer';
 import { FirstRunGate } from './first-run-gate';
@@ -150,7 +151,7 @@ const routeAnimation = trigger('routeAnimation', [
 @Component({
   selector: 'app-root',
   imports: [
-    RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, TrackQueue, SettingsModal, Toast,
+    RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, ArtistBioPanel, TrackQueue, SettingsModal, Toast,
     PodcastAudioPlayer, EpisodeQueue, FormsModule, RecorderModal, RecorderProgress, ShazamModal, FirstRunGate,
   ],
   templateUrl: './app.html',

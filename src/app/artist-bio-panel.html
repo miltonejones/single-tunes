@@ -1,0 +1,36 @@
+@if (track(); as t) {
+  @if (panel.isOpen()) {
+    <div class="artist-bio-backdrop" (click)="panel.close()"></div>
+  }
+
+  <div class="artist-bio-panel" [class.show]="panel.isOpen()">
+    <div class="artist-bio-peek" (click)="panel.toggle()">
+      <img class="artist-bio-peek-img" [src]="bio()?.messageContent || t.albumImage" [alt]="t.artistName" />
+      <span class="artist-bio-peek-name">{{ t.artistName }}</span>
+      <i class="fa-solid fa-chevron-up artist-bio-chevron"></i>
+      <button
+        type="button"
+        class="btn-close artist-bio-close"
+        aria-label="Close"
+        (click)="panel.close(); $event.stopPropagation()"
+      ></button>
+    </div>
+
+    <div class="artist-bio-body">
+      @if (loading()) {
+        <p class="artist-bio-loading">Loading artist info&hellip;</p>
+      } @else if (bio(); as b) {
+        @if (b.messageContent) {
+          <img class="artist-bio-hero" [src]="b.messageContent" [alt]="t.artistName" />
+        }
+        @if (b.description) {
+          <p class="artist-bio-text" [innerHTML]="b.description"></p>
+        } @else {
+          <p class="artist-bio-empty">No artist info available.</p>
+        }
+      } @else {
+        <p class="artist-bio-empty">No artist info available.</p>
+      }
+    </div>
+  </div>
+}
