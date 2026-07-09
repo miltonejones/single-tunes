@@ -168,4 +168,10 @@ export class GridPage implements OnInit, OnDestroy {
       })
       .finally(() => this.loading.set(false));
   }
+
+  /** Build a router link array, encoding the ID for genre types that may contain '/' */
+  protected detailLink(item: IGridItem): any[] {
+    const id = this.gridType() === 'genre' ? encodeURIComponent(item.ID) : item.ID;
+    return ['/list', this.gridType(), id, 1];
+  }
 }

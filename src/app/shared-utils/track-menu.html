@@ -95,7 +95,7 @@
           @if (track.Genre) {
             <a
               class="track-menu-item"
-              [routerLink]="['/list', 'genre', track.Genre, 1]"
+              [routerLink]="genreLink(track.Genre)"
               (click)="close()"
             >
               <i class="fa-solid fa-tags"></i>

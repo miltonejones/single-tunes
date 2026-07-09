@@ -355,7 +355,7 @@
           @if (track.Genre) {
             <a
               class="track-genre"
-              [routerLink]="['/list', 'genre', track.Genre, 1]"
+              [routerLink]="genreLink(track.Genre)"
               (click)="$event.stopPropagation()"
               >{{ track.Genre }}</a
             >

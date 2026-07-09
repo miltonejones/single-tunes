@@ -690,4 +690,9 @@ export class ListPage implements OnInit, OnDestroy {
     // Navigate to the album
     this.router.navigate(routerLink);
   }
+
+  /** Encode genre names that may contain '/' so Angular's router handles them correctly */
+  protected genreLink(genre: string): any[] {
+    return ['/list', 'genre', encodeURIComponent(genre), 1];
+  }
 }

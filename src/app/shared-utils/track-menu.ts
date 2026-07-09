@@ -180,4 +180,9 @@ export class TrackMenu implements OnInit {
     this.downloadService.remove(track);
     this.close();
   }
+
+  /** Encode genre names that may contain '/' so Angular's router handles them correctly */
+  protected genreLink(genre: string): any[] {
+    return ['/list', 'genre', encodeURIComponent(genre), 1];
+  }
 }

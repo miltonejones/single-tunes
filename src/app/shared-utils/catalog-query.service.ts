@@ -65,9 +65,12 @@ export class CatalogQueryService {
     page: number = 1,
     sort: ISortProp = { field: 'artistName', direction: 'ASC' },
   ): Promise<IDetailResponse> {
+    // Replace forward slashes with asterisks — the API uses * as a
+    // separator-safe stand-in for / in genre names (e.g. "Hip-Hop*Rap")
+    const safeId = id.replace(/\//g, '*');
     return firstValueFrom(
       this.http.get<IDetailResponse>(
-        `${TUNE_API_ENDPOINT}${buildAppendFilterPath('genre', sort, page, id)}`,
+        `${TUNE_API_ENDPOINT}${buildAppendFilterPath('genre', sort, page, safeId)}`,
       ),
     );
   }

@@ -51,7 +51,7 @@
         [eyebrow]="gridType() === 'album' ? (item.artistName ?? null) : null"
         [title]="item.Name"
         [caption]="item.TrackCount + ' tracks'"
-        [routerLink]="['/list', gridType(), item.ID, 1]"
+        [routerLink]="detailLink(item)"
       />
       }
     }
