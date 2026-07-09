@@ -29,6 +29,7 @@ import { AnnouncerSettingsService } from './announcer-settings.service';
 import { AudioAnalyserService } from './audio-analyser.service';
 import { AudioVisualizer } from './audio-visualizer';
 import { AudioVisualizerPanelService } from './audio-visualizer-panel.service';
+import { ArtistBioPanelService } from './artist-bio-panel.service';
 import { CastButton } from './cast-button';
 import { TrackQueuePanelService } from './track-queue-panel.service';
 import { TrackDedicationService } from './track-dedication.service';
@@ -58,6 +59,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private blobUrl: string | null = null;
   protected queuePanel = inject(TrackQueuePanelService);
   protected visualizerPanel = inject(AudioVisualizerPanelService);
+  protected bioPanel = inject(ArtistBioPanelService);
   private subscriptions: Subscription[] = [];
 
   track = signal<ITrackItem | null>(null);

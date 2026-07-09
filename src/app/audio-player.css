@@ -89,7 +89,8 @@
 
 .audio-player-controls button,
 .audio-player-queue-btn,
-.audio-player-visualizer-btn {
+.audio-player-visualizer-btn,
+.audio-player-bio-btn {
   border: none;
   background: none;
   font-size: 1rem;
@@ -106,14 +107,24 @@
 
 .audio-player-controls button:hover,
 .audio-player-queue-btn:hover,
-.audio-player-visualizer-btn:hover {
+.audio-player-visualizer-btn:hover,
+.audio-player-bio-btn:hover {
   background-color: var(--surface-hover);
   color: var(--text);
 }
 
 
-.audio-player-visualizer-btn-active {
+.audio-player-visualizer-btn-active,
+.audio-player-bio-btn-active {
   color: var(--accent);
+}
+
+/* On mobile the artist-bio panel becomes an always-visible peek drawer (see
+   artist-bio-panel.css) rather than a toggleable panel, so this button is redundant. */
+@media (max-width: 768px) {
+  .audio-player-bio-btn {
+    display: none;
+  }
 }
 
 .audio-player-play-btn {

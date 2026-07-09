@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, map } from 'rxjs';
 import { PHOTO_ENDPOINT, TUNE_API_ENDPOINT } from './api-config';
-import { DashItem, IDetailResponse, IGridResponse, IPlaylistSummary, ISortProp, ITrackItem } from './models';
+import { DashItem, IArtistBio, IDetailResponse, IGridResponse, IPlaylistSummary, ISortProp, ITrackItem } from './models';
 import { buildAppendFilterPath, buildSwitchedFilterPath } from './domain/listing';
 import { createKey } from './domain/text';
 
@@ -22,7 +22,8 @@ export class CatalogQueryService {
     return this.dashCache.get(url)!;
   }
 
-  async getExtendedArtistDetail(id: number): Promise<unknown> {
+  /** Fetches an artist's editorial bio + hero image, keyed by the internal artistFk. */
+  async getExtendedArtistDetail(id: number): Promise<IArtistBio> {
     const storageKey = `extendedArtistDetail_${id}`;
 
     const cachedData = localStorage.getItem(storageKey);
@@ -40,7 +41,7 @@ export class CatalogQueryService {
     }
 
     const detailData = await firstValueFrom(
-      this.http.post(`${PHOTO_ENDPOINT}artist`, { id: iArtistID }),
+      this.http.post<IArtistBio>(`${PHOTO_ENDPOINT}artist`, { id: iArtistID }),
     );
 
     localStorage.setItem(storageKey, JSON.stringify(detailData));
