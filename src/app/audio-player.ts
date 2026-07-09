@@ -665,6 +665,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
   closeTrackMenu(): void {
     this.showTrackMenu.set(false);
+    this.isExpanded.set(false);
   }
 
   // ── Template-bound <audio> event handlers ────────────────────────────────────
