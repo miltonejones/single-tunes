@@ -61,8 +61,8 @@ export class PodcastHomePage implements OnInit, OnDestroy {
   currentSlide = computed<IPodcast | null>(() => this.podcasts()[this.carouselIndex()] ?? null);
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-    { label: 'Home', link: ['/'] },
-    { label: 'Podcasts' },
+    { label: 'Home', link: ['/'], icon: 'fa-house' },
+    { label: 'Podcasts', icon: 'fa-podcast' },
   ]);
 
   ngOnInit(): void {

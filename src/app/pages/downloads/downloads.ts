@@ -120,8 +120,8 @@ export class DownloadsPage implements OnInit {
   bannerImage = computed(() => this.tracks().find((t) => t.albumImage)?.albumImage ?? null);
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-    { label: 'Home', link: ['/'] },
-    { label: 'Downloads' },
+    { label: 'Home', link: ['/'], icon: 'fa-house' },
+    { label: 'Downloads', icon: 'fa-download' },
   ]);
 
   ngOnInit(): void {

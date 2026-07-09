@@ -31,9 +31,9 @@ export class PodcastSearchPage {
   searchHistory = signal<string[]>(this.loadHistory());
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-    { label: 'Home', link: ['/'] },
-    { label: 'Podcasts', link: ['/podcasts'] },
-    { label: `Search: "${this.query()}"` },
+    { label: 'Home', link: ['/'], icon: 'fa-house' },
+    { label: 'Podcasts', link: ['/podcasts'], icon: 'fa-podcast' },
+    { label: `Search: "${this.query()}"`, icon: 'fa-magnifying-glass' },
   ]);
 
   constructor() {

@@ -38,6 +38,13 @@ const LIST_TYPE_LABELS: Record<Exclude<ListType, 'library'>, string> = {
   playlist: 'Playlists',
 };
 
+const LIST_TYPE_ICONS: Record<Exclude<ListType, 'library'>, string> = {
+  artist: 'fa-microphone',
+  album: 'fa-compact-disc',
+  genre: 'fa-tags',
+  playlist: 'fa-list-ul',
+};
+
 @Component({
   selector: 'app-list-page',
   imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, SkeletonLoader, TrackMenu, NgTemplateOutlet],
@@ -229,13 +236,14 @@ export class ListPage implements OnInit, OnDestroy {
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     if (this.listType() === 'library') {
-      return [{ label: 'Home', link: ['/'] }, { label: 'Library' }];
+      return [{ label: 'Home', link: ['/'], icon: 'fa-house' }, { label: 'Library', icon: 'fa-music' }];
     }
 
+    const type = this.listType() as Exclude<ListType, 'library'>;
     return [
-      { label: 'Home', link: ['/'] },
-      { label: LIST_TYPE_LABELS[this.listType() as Exclude<ListType, 'library'>], link: ['/grid', this.listType(), 1] },
-      { label: this.currentLabel() },
+      { label: 'Home', link: ['/'], icon: 'fa-house' },
+      { label: LIST_TYPE_LABELS[type], link: ['/grid', type, 1], icon: LIST_TYPE_ICONS[type] },
+      { label: this.currentLabel(), icon: LIST_TYPE_ICONS[type] },
     ];
   });
 

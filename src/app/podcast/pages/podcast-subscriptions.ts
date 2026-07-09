@@ -16,8 +16,8 @@ export class PodcastSubscriptionsPage {
   protected subscriptionsService = inject(PodcastSubscriptionsService);
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-    { label: 'Home', link: ['/'] },
-    { label: 'Podcasts', link: ['/podcasts'] },
-    { label: 'Subscriptions' },
+    { label: 'Home', link: ['/'], icon: 'fa-house' },
+    { label: 'Podcasts', link: ['/podcasts'], icon: 'fa-podcast' },
+    { label: 'Subscriptions', icon: 'fa-rss' },
   ]);
 }

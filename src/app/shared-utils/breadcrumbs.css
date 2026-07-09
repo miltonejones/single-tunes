@@ -45,4 +45,8 @@
   .breadcrumb-current:last-of-type {
     max-width: 40vw;
   }
+
+  .breadcrumbs a .breadcrumb-label {
+    display: none;
+  }
 }

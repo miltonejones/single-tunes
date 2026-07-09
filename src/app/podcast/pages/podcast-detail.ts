@@ -58,9 +58,9 @@ export class PodcastDetailPage {
   pages = computed(() => usePagination(this.sortedEpisodes(), { page: this.page(), pageSize: PAGE_SIZE }));
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-    { label: 'Home', link: ['/'] },
-    { label: 'Podcasts', link: ['/podcasts'] },
-    { label: this.podcast()?.collectionName ?? 'Podcast' },
+    { label: 'Home', link: ['/'], icon: 'fa-house' },
+    { label: 'Podcasts', link: ['/podcasts'], icon: 'fa-podcast' },
+    { label: this.podcast()?.collectionName ?? 'Podcast', icon: 'fa-podcast' },
   ]);
 
   protected readonly formatDuration = formatDuration;

@@ -62,8 +62,8 @@ export class SearchPage implements OnInit {
   );
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-    { label: 'Home', link: ['/'] },
-    { label: `Search: "${this.query()}"` },
+    { label: 'Home', link: ['/'], icon: 'fa-house' },
+    { label: `Search: "${this.query()}"`, icon: 'fa-magnifying-glass' },
   ]);
 
   hasResults = computed(() => {

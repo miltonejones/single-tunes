@@ -24,9 +24,9 @@ export class PodcastCategoriesPage implements OnInit {
   error = signal('');
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-    { label: 'Home', link: ['/'] },
-    { label: 'Podcasts', link: ['/podcasts'] },
-    { label: 'Categories' },
+    { label: 'Home', link: ['/'], icon: 'fa-house' },
+    { label: 'Podcasts', link: ['/podcasts'], icon: 'fa-podcast' },
+    { label: 'Categories', icon: 'fa-folder' },
   ]);
 
   groups = computed(() => {

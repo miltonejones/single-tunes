@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 export interface BreadcrumbItem {
   label: string;
   link?: readonly unknown[];
+  icon?: string; // Font Awesome icon name, e.g. 'fa-house'
 }
 
 @Component({

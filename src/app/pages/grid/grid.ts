@@ -31,6 +31,13 @@ const GRID_TYPE_LABELS: Record<GridType, string> = {
   playlist: 'Playlists',
 };
 
+const GRID_TYPE_ICONS: Record<GridType, string> = {
+  artist: 'fa-microphone',
+  album: 'fa-compact-disc',
+  genre: 'fa-tags',
+  playlist: 'fa-list-ul',
+};
+
 const SORT_DEFAULTS: Record<GridType, ISortProp> = {
   artist: { field: 'Name', direction: 'ASC' },
   album: { field: 'Name', direction: 'ASC' },
@@ -84,8 +91,8 @@ export class GridPage implements OnInit, OnDestroy {
   sortOptions = computed(() => SORT_OPTIONS[this.gridType()]);
 
   breadcrumbItems = computed<BreadcrumbItem[]>(() => [
-    { label: 'Home', link: ['/'] },
-    { label: GRID_TYPE_LABELS[this.gridType()] },
+    { label: 'Home', link: ['/'], icon: 'fa-house' },
+    { label: GRID_TYPE_LABELS[this.gridType()], icon: GRID_TYPE_ICONS[this.gridType()] },
   ]);
 
   ngOnInit(): void {
