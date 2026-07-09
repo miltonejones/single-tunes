@@ -14,6 +14,7 @@ import {
   AnnouncementCommandService,
   AudioPlayerCommandService,
   CastService,
+  FEATURE_FLAGS,
   formatDuration,
   ImgFallbackDirective,
   ITrackItem,
@@ -56,6 +57,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private trackDownload = inject(TrackDownloadService);
   private trackDedication = inject(TrackDedicationService);
   protected sync = inject(SyncService);
+  protected readonly featureFlags = FEATURE_FLAGS;
   private blobUrl: string | null = null;
   protected queuePanel = inject(TrackQueuePanelService);
   protected visualizerPanel = inject(AudioVisualizerPanelService);

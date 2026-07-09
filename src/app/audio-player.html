@@ -19,7 +19,7 @@
             <div class="audio-player-artist audio-player-announcing">
               {{ sync.following() && sync.mirroredAnnouncement() ? sync.mirroredAnnouncement() : 'Announcing&hellip;' }}
             </div>
-          } @else {
+          } @else if (featureFlags.artistInfoOnTrackPlay) {
             <div class="audio-player-artist">{{ track.artistName }}</div>
           }
         </div>
@@ -137,7 +137,7 @@
           <div class="audio-player-fullscreen-artist audio-player-announcing">
             Announcing&hellip;
           </div>
-        } @else {
+        } @else if (featureFlags.artistInfoOnTrackPlay) {
           <div class="audio-player-fullscreen-artist">{{ track.artistName }}</div>
         }
       </div>
