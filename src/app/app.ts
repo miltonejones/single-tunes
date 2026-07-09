@@ -7,6 +7,7 @@ import { filter } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import {
   AudioPlayerCommandService,
+  FEATURE_FLAGS,
   OfflineService,
   PodcastAudioPlayerCommandService,
   RecorderModal,
@@ -171,6 +172,7 @@ export class App {
   protected userService = inject(UserService);
   private syncService = inject(SyncService);
   protected readonly NAV_ITEMS = NAV_ITEMS;
+  protected readonly featureFlags = FEATURE_FLAGS;
   activeSection = signal<NavSection>(resolveNavSection(this.router.url));
   searchOpen = signal(false);
   navDropdownOpen = signal(false);

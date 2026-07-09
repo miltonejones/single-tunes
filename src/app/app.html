@@ -133,7 +133,9 @@
 
   <app-audio-player />
 
-  <app-artist-bio-panel />
+  @if (featureFlags.artistBioPanel) {
+    <app-artist-bio-panel />
+  }
 </div>
 
 <app-track-queue />

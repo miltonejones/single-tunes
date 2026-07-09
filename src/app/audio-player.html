@@ -19,7 +19,7 @@
             <div class="audio-player-artist audio-player-announcing">
               {{ sync.following() && sync.mirroredAnnouncement() ? sync.mirroredAnnouncement() : 'Announcing&hellip;' }}
             </div>
-          } @else if (featureFlags.artistInfoOnTrackPlay) {
+          } @else {
             <div class="audio-player-artist">{{ track.artistName }}</div>
           }
         </div>
@@ -39,15 +39,17 @@
         </button>
       }
 
-      <button
-        type="button"
-        class="audio-player-bio-btn"
-        [class.audio-player-bio-btn-active]="bioPanel.isOpen()"
-        title="Artist Info"
-        (click)="bioPanel.toggle()"
-      >
-        <i class="fa-solid fa-circle-info"></i>
-      </button>
+      @if (featureFlags.artistBioPanel) {
+        <button
+          type="button"
+          class="audio-player-bio-btn"
+          [class.audio-player-bio-btn-active]="bioPanel.isOpen()"
+          title="Artist Info"
+          (click)="bioPanel.toggle()"
+        >
+          <i class="fa-solid fa-circle-info"></i>
+        </button>
+      }
 
       <button type="button" class="audio-player-queue-btn" (click)="queuePanel.toggle()">
         <i class="fa-solid fa-list"></i>
@@ -137,7 +139,7 @@
           <div class="audio-player-fullscreen-artist audio-player-announcing">
             Announcing&hellip;
           </div>
-        } @else if (featureFlags.artistInfoOnTrackPlay) {
+        } @else {
           <div class="audio-player-fullscreen-artist">{{ track.artistName }}</div>
         }
       </div>
