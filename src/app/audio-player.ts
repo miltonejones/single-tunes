@@ -38,6 +38,7 @@ import { TrackQueuePanelService } from './track-queue-panel.service';
 import { TrackDedicationService } from './track-dedication.service';
 
 const ANNOUNCING_VOLUME = 0.3;
+const DEFAULT_ALBUM_COVER = 'https://www.sky-tunes.com/assets/default_album_cover.jpg';
 
 @Component({
   selector: 'app-audio-player',
@@ -455,13 +456,28 @@ export class AudioPlayer implements OnInit, OnDestroy {
 
   private updateMediaSession(track: ITrackItem): void {
     if (!('mediaSession' in navigator)) return;
+
+    // Build the artwork array: prefer the track's albumImage, fall back to
+    // the default album cover so the OS notification panel always shows art.
+    const artwork: MediaImage[] = [];
+    const src = track.albumImage || DEFAULT_ALBUM_COVER;
+    // iTunes artwork URLs contain a size segment like "100x100bb" or
+    // "100x100-200" in the path. Request a larger size for the notification
+    // panel by replacing the dimensions. If the URL isn't an iTunes-style
+    // URL, the replace is a no-op and we fall through to the original src.
+    const hdSrc = src.replace(/\/(\d+)x(\d+)(bb|cc|-?\d+)?\./i, '/600x600bb.');
+    artwork.push({ src: hdSrc, sizes: '600x600', type: 'image/jpeg' });
+    // Also include the original-size image as a fallback for browsers that
+    // can't fetch the larger variant.
+    if (hdSrc !== src) {
+      artwork.push({ src, sizes: '100x100', type: 'image/jpeg' });
+    }
+
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track.Title,
       artist: track.artistName,
       album: track.albumName ?? undefined,
-      artwork: track.albumImage
-        ? [{ src: track.albumImage, sizes: '512x512', type: 'image/jpeg' }]
-        : undefined,
+      artwork,
     });
   }
 
