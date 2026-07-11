@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   PodcastAudioPlayerCommandService,
@@ -45,7 +45,27 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
   durationLabel = computed(() => formatDuration(this.duration()));
 
   constructor() {
-    // Body class toggling is handled by the app component
+    // Sync media session position state to lock screen / control center.
+    effect(() => {
+      if (this.isPlaying()) {
+        this.currentTime();
+        this.duration();
+        this.syncMediaSessionPosition();
+      }
+    });
+
+    // Wire media session action handlers (safe to do even if unsupported).
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => this.play());
+      navigator.mediaSession.setActionHandler('pause', () => this.pause());
+      navigator.mediaSession.setActionHandler('previoustrack', () => this.advanceTrack(-1));
+      navigator.mediaSession.setActionHandler('nexttrack', () => this.advanceTrack(1));
+      navigator.mediaSession.setActionHandler('seekbackward', () => this.skip(-30));
+      navigator.mediaSession.setActionHandler('seekforward', () => this.skip(30));
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime != null) this.seekTo(details.seekTime);
+      });
+    }
   }
 
   ngOnInit(): void {
@@ -75,6 +95,9 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
       this.track.set(track);
       if (track) {
         this.loadAndPlay(track);
+        this.updateMediaSession(track);
+      } else {
+        this.clearMediaSession();
       }
     });
 
@@ -94,6 +117,36 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
     this.audio.pause();
     this.audio.src = '';
     this.releaseBlobUrl();
+  }
+
+  // ── Media Session (lock screen / control center integration) ──────────────
+
+  private updateMediaSession(track: ITrack): void {
+    if (!('mediaSession' in navigator)) return;
+    const artwork = this.podcastArt();
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: track.title,
+      artist: this.podcastName(),
+      album: this.podcastName(),
+      artwork: artwork ? [{ src: artwork, sizes: '600x600', type: 'image/jpeg' }] : undefined,
+    });
+  }
+
+  private clearMediaSession(): void {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.metadata = null;
+  }
+
+  /** Sync playback position to the OS media controls. */
+  private syncMediaSessionPosition(): void {
+    if (!('mediaSession' in navigator)) return;
+    const dur = this.duration();
+    if (!dur || !isFinite(dur)) return;
+    navigator.mediaSession.setPositionState({
+      duration: dur,
+      playbackRate: 1,
+      position: Math.min(this.currentTime(), dur),
+    });
   }
 
   private releaseBlobUrl(): void {
@@ -186,6 +239,18 @@ export class PodcastAudioPlayer implements OnInit, OnDestroy {
   /** Seek relative to the current position. */
   seekRelative(seconds: number): void {
     this.skip(seconds);
+  }
+
+  seekTo(time: number): void {
+    if (isFinite(this.audio.duration)) {
+      this.audio.currentTime = Math.max(0, Math.min(time, this.audio.duration));
+    }
+  }
+
+  advanceTrack(offset: number): void {
+    if (!this.audioPlayerCommand.advance(offset)) {
+      this.close();
+    }
   }
 
   close(): void {
