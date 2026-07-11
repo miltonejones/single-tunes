@@ -174,6 +174,13 @@ export class ListPage implements OnInit, OnDestroy {
   });
   tracks = computed(() => {
     const records = this.detail()?.related.records ?? [];
+    if (this.listType() === 'playlist') {
+      // The playlist detail endpoint ignores the page segment and always
+      // returns every track in the playlist, so pagination is applied
+      // client-side to the already-complete result.
+      const start = (this.pageNum() - 1) * PAGE_SIZE;
+      return records.slice(start, start + PAGE_SIZE);
+    }
     if (this.listType() !== 'album') return records;
     const sorted = [...records].sort((a, b) => {
       const discA = a.discNumber ?? 0;
@@ -353,7 +360,11 @@ export class ListPage implements OnInit, OnDestroy {
   }
 
   enterEditMode(): void {
-    this.orderedTracks.set([...this.tracks()]);
+    // Reorder against the full playlist, not just the current page's slice,
+    // so saving doesn't drop tracks that live on other pages.
+    const source =
+      this.listType() === 'playlist' ? this.detail()?.related.records ?? [] : this.tracks();
+    this.orderedTracks.set([...source]);
     this.editMode.set(true);
   }
 
