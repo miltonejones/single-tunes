@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject, firstValueFrom } from 'rxjs';
-import { RECORDER_API_ENDPOINT } from './api-config';
+import { RECORDER_API_ENDPOINT, LOCAL_RECORDER_API_ENDPOINT } from './api-config';
 
 /** One YouTube search hit, shaped as a ready-to-record job. */
 export interface RecorderResult {
@@ -57,6 +57,17 @@ function batchRunning(batch: RecorderBatch): boolean {
 export class RecorderService {
   private http = inject(HttpClient);
 
+  /** Current recorder mode — 'aws' (cloud API + SQS) or 'local' (sandbox EC2 + file queue). */
+  private readonly _mode = signal<'aws' | 'local'>(
+    (localStorage.getItem('recorderMode') as 'aws' | 'local') || 'aws',
+  );
+  readonly mode = this._mode.asReadonly();
+
+  /** Endpoint selected by the current mode. */
+  private readonly endpoint = computed(() =>
+    this._mode() === 'local' ? LOCAL_RECORDER_API_ENDPOINT : RECORDER_API_ENDPOINT,
+  );
+
   private readonly _batches = signal<RecorderBatch[]>(this.load());
   readonly batches = this._batches.asReadonly();
   readonly hasRunning = computed(() => this._batches().some(batchRunning));
@@ -71,9 +82,18 @@ export class RecorderService {
     if (this._batches().some(batchRunning)) this.ensurePolling();
   }
 
+  /** Toggle between AWS and local recorder mode. */
+  toggleMode(): void {
+    this._mode.update((m) => {
+      const next = m === 'aws' ? 'local' : 'aws';
+      localStorage.setItem('recorderMode', next);
+      return next;
+    });
+  }
+
   /** YouTube search; `duration` (seconds) overrides each clip's full length. */
   async search(term: string, count = 5, duration?: number): Promise<RecorderResult[]> {
-    const url = `${RECORDER_API_ENDPOINT}/search/${encodeURIComponent(term)}/${count}`;
+    const url = `${this.endpoint()}/search/${encodeURIComponent(term)}/${count}`;
     const res = await firstValueFrom(this.http.get<{ results: RecorderResult[] }>(url));
     const results = res.results ?? [];
     return duration ? results.map((r) => ({ ...r, duration })) : results;
@@ -83,7 +103,7 @@ export class RecorderService {
   async submit(jobs: RecorderResult[], label: string): Promise<string> {
     const res = await firstValueFrom(
       this.http.post<{ batchId: string; jobs: RecorderJob[] }>(
-        `${RECORDER_API_ENDPOINT}/record`,
+        `${this.endpoint()}/record`,
         { jobs },
       ),
     );
@@ -122,7 +142,7 @@ export class RecorderService {
     this.persist();
     try {
       await firstValueFrom(
-        this.http.post(`${RECORDER_API_ENDPOINT}/record/${encodeURIComponent(batchId)}/cancel`, {}),
+        this.http.post(`${this.endpoint()}/record/${encodeURIComponent(batchId)}/cancel`, {}),
       );
     } catch {
       // Optimistic update already applied — the next poll tick will reconcile.
@@ -133,7 +153,7 @@ export class RecorderService {
     try {
       const res = await firstValueFrom(
         this.http.get<{ jobs: RecorderJob[] }>(
-          `${RECORDER_API_ENDPOINT}/record/${encodeURIComponent(batchId)}`,
+          `${this.endpoint()}/record/${encodeURIComponent(batchId)}`,
         ),
       );
       let finished: RecorderBatch | null = null;

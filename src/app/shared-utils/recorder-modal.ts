@@ -17,7 +17,7 @@ import { formatDuration } from './domain/track';
 })
 export class RecorderModal {
   protected panel = inject(RecorderPanelService);
-  private recorder = inject(RecorderService);
+  protected recorder = inject(RecorderService);
   private toast = inject(ToastService);
 
   protected readonly formatDuration = formatDuration;
@@ -116,6 +116,10 @@ export class RecorderModal {
     this.results.set([]);
     this.error.set('');
     this.selected.set(new Map());
+  }
+
+  toggleMode(): void {
+    this.recorder.toggleMode();
   }
 
   displayName(output: string): string {
