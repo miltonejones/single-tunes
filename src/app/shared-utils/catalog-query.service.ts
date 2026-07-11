@@ -161,26 +161,34 @@ export class CatalogQueryService {
     );
   }
 
+  /**
+   * Unlike the other `*Grid` endpoints, the playlist endpoint ignores the page
+   * segment and always returns every playlist in one response, so pagination
+   * has to be applied client-side to the full result instead of trusting the
+   * server's `count`/`records` for the requested page.
+   */
   getPlaylistGrid(
     page: number = 1,
     sort: ISortProp = { field: 'Title', direction: 'ASC' },
+    pageSize: number = 100,
   ): Promise<IGridResponse> {
     return firstValueFrom(
       this.http
         .get<{
           count: number;
           records: Array<{ Title: string; image: string | null; TrackCount: number; listKey?: string }>;
-        }>(`${TUNE_API_ENDPOINT}${buildSwitchedFilterPath('playlist', sort, page)}`)
+        }>(`${TUNE_API_ENDPOINT}${buildSwitchedFilterPath('playlist', sort, 1)}`)
         .pipe(
-          map(({ count, records }) => ({
-            count,
-            records: records.map(({ Title, image, TrackCount, listKey }) => ({
+          map(({ records }) => {
+            const mapped = records.map(({ Title, image, TrackCount, listKey }) => ({
               ID: listKey || createKey(Title),
               Name: Title,
               Thumbnail: image,
               TrackCount,
-            })),
-          })),
+            }));
+            const start = (page - 1) * pageSize;
+            return { count: mapped.length, records: mapped.slice(start, start + pageSize) };
+          }),
         ),
     );
   }
