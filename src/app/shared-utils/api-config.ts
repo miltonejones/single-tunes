@@ -12,10 +12,13 @@ export const AI_SEARCH_ENDPOINT = 'https://ohb29b452e.execute-api.us-east-1.amaz
 // the browser calls the proxy on the AI gateway, so no secret ships to clients.
 export const RECORDER_API_ENDPOINT = `${AI_SEARCH_ENDPOINT}/recorder`;
 
-// Local recorder API server running on the sandbox EC2. Used when the user
+// Local recorder API server running on the home machine. Used when the user
 // toggles the recorder to "Local" mode — jobs go to a file-based queue
 // instead of SQS, processed by poller-local.sh on the same machine.
-export const LOCAL_RECORDER_API_ENDPOINT = 'http://54.87.242.226:3001/recorder';
+// NOTE: requires port 3001 forwarded on your router for the single-tunes
+// Angular app (served from CloudFront) to reach it. Works directly when
+// using the recorder web UI at http://localhost:3000.
+export const LOCAL_RECORDER_API_ENDPOINT = 'http://72.107.192.213:3001/recorder';
 
 // Shazam song recognition. The Bearer key lives only in the shazam-proxy
 // Lambda (see terraform/main.tf); the browser calls the proxy on the AI
