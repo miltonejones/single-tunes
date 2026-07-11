@@ -45,6 +45,11 @@
                     <div class="rp-job-bar-fill" [style.width.%]="job.progress"></div>
                   </div>
                 }
+                @if (job.status === 'recording' && job.duration) {
+                  <div class="rp-job-bar">
+                    <div class="rp-job-bar-fill" [style.width.%]="recordingProgress(job)"></div>
+                  </div>
+                }
               }
             </div>
           </div>
