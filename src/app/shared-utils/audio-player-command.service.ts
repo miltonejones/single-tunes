@@ -15,6 +15,12 @@ export class AudioPlayerCommandService {
   // current track changes, so it's always recomputed relative to "now playing".
   private nextInsertIndex: number | null = null;
 
+  // Supplied by openTrack() when the queue represents one page of a larger,
+  // paginated list. Called when playback runs off the end of `queue` so the
+  // next page can be fetched and appended instead of stopping.
+  private fetchNextPage: (() => Promise<ITrackItem[]>) | null = null;
+  private fetchingNextPage = false;
+
   readonly currentTrack$ = new BehaviorSubject<ITrackItem | null>(null);
   readonly queue$ = new BehaviorSubject<ITrackItem[]>([]);
   readonly seekRelative$ = new Subject<number>();
@@ -27,9 +33,19 @@ export class AudioPlayerCommandService {
     this.isPlaying$.next(playing);
   }
 
-  /** Broadcasts a request to open and play a track, optionally alongside sibling tracks for next/prev. */
-  openTrack(track: ITrackItem, queue: ITrackItem[] = [track]): void {
+  /**
+   * Broadcasts a request to open and play a track, optionally alongside sibling
+   * tracks for next/prev. `fetchNextPage`, if given, is called when playback
+   * reaches the end of `queue` — its result (if non-empty) is appended and
+   * playback continues instead of stopping.
+   */
+  openTrack(
+    track: ITrackItem,
+    queue: ITrackItem[] = [track],
+    fetchNextPage?: () => Promise<ITrackItem[]>,
+  ): void {
     this.queue = queue;
+    this.fetchNextPage = fetchNextPage ?? null;
     this.queue$.next(queue);
     this.setCurrentTrack(track);
   }
@@ -70,9 +86,38 @@ export class AudioPlayerCommandService {
     return true;
   }
 
+  /**
+   * Like `advance()`, but when moving forward (offset 1) off the end of the
+   * queue and a `fetchNextPage` provider is registered, fetches the next page
+   * and appends it before giving up. Returns false only once there's truly
+   * nothing left (either no provider, or the provider returned no tracks).
+   */
+  async advanceOrFetch(offset: number): Promise<boolean> {
+    if (this.advance(offset)) return true;
+    if (offset !== 1 || !this.fetchNextPage || this.fetchingNextPage) return false;
+
+    const provider = this.fetchNextPage;
+    this.fetchingNextPage = true;
+    try {
+      const nextTracks = await provider();
+      // The queue may have been replaced (new track opened, queue cleared)
+      // while this fetch was in flight — discard a stale result.
+      if (this.fetchNextPage !== provider || nextTracks.length === 0) return false;
+
+      this.queue = [...this.queue, ...nextTracks];
+      this.queue$.next(this.queue);
+      return this.advance(offset);
+    } catch {
+      return false;
+    } finally {
+      this.fetchingNextPage = false;
+    }
+  }
+
   /** Clears the queue and broadcasts that nothing is playing. */
   clearQueue(): void {
     this.queue = [];
+    this.fetchNextPage = null;
     this.queue$.next([]);
     this.setCurrentTrack(null);
   }
@@ -96,6 +141,7 @@ export class AudioPlayerCommandService {
    */
   applyMirroredState(state: SyncState): void {
     this.queue = state.queue.map(fromSyncTrack);
+    this.fetchNextPage = null;
     this.queue$.next(this.queue);
     this.setCurrentTrack(state.track ? fromSyncTrack(state.track) : null);
   }

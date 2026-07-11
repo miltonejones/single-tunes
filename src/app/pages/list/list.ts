@@ -310,7 +310,7 @@ export class ListPage implements OnInit, OnDestroy {
 
   playTrack(track: ITrackItem): void {
     this.recordPlay(track);
-    this.audioPlayerCommand.openTrack(track, this.tracks());
+    this.audioPlayerCommand.openTrack(track, this.tracks(), this.fetchNextPageTracks);
   }
 
   togglePlayList(): void {
@@ -320,7 +320,7 @@ export class ListPage implements OnInit, OnDestroy {
       const tracks = this.tracks();
       if (tracks.length > 0) {
         this.recordPlay(tracks[0]);
-        this.audioPlayerCommand.openTrack(tracks[0], tracks);
+        this.audioPlayerCommand.openTrack(tracks[0], tracks, this.fetchNextPageTracks);
       }
     }
   }
@@ -333,9 +333,57 @@ export class ListPage implements OnInit, OnDestroy {
     }
     if (tracks.length > 0) {
       this.recordPlay(tracks[0]);
-      this.audioPlayerCommand.openTrack(tracks[0], tracks);
+      // Tracks fetched from later pages are appended in server order, not shuffled.
+      this.audioPlayerCommand.openTrack(tracks[0], tracks, this.fetchNextPageTracks);
     }
   }
+
+  /**
+   * Supplied to AudioPlayerCommandService.openTrack() so playback can carry on
+   * into the next page once the current page's queue is exhausted. Advances
+   * this page's own pagination state (pageNum/detail) to match, so the
+   * visible list and pager follow what's actually playing.
+   */
+  private fetchNextPageTracks = async (): Promise<ITrackItem[]> => {
+    const nextPage = this.pageNum() + 1;
+    if (nextPage > this.totalPages()) return [];
+
+    if (this.listType() === 'playlist') {
+      // Already fully loaded — just reveal the next client-side slice.
+      const records = this.detail()?.related.records ?? [];
+      const start = (nextPage - 1) * PAGE_SIZE;
+      const nextTracks = records.slice(start, start + PAGE_SIZE);
+      if (nextTracks.length === 0) return [];
+      this.pageNum.set(nextPage);
+      return nextTracks;
+    }
+
+    const listId = this.listId();
+    let request: Promise<IDetailResponse>;
+    switch (this.listType()) {
+      case 'artist':
+        request = this.catalogQuery.getArtistDetail(Number(listId), nextPage);
+        break;
+      case 'genre':
+        request = this.catalogQuery.getGenreDetail(listId, nextPage);
+        break;
+      case 'library':
+        request = this.catalogQuery.getLibrary(nextPage);
+        break;
+      default:
+        request = this.catalogQuery.getAlbumDetail(Number(listId), nextPage);
+    }
+
+    try {
+      const res = await request;
+      if (res.related.records.length === 0) return [];
+      this.detail.set(res);
+      this.pageNum.set(nextPage);
+      return res.related.records;
+    } catch {
+      return [];
+    }
+  };
 
   downloadAllTracks(): void {
     this.downloadService.downloadAll(this.tracks());
