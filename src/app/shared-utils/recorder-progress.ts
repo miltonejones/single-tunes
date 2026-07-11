@@ -8,6 +8,8 @@ const STATUS_ICON: Record<RecorderJobStatus, string> = {
   downloading: 'fa-download',
   processing: 'fa-gears',
   recording: 'fa-video',
+  validating: 'fa-waveform',
+  verifying: 'fa-file-circle-check',
   uploading: 'fa-cloud-arrow-up',
   done: 'fa-circle-check',
   failed: 'fa-circle-xmark',

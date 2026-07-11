@@ -17,6 +17,8 @@ export type RecorderJobStatus =
   | 'downloading'
   | 'processing'
   | 'recording'
+  | 'validating'
+  | 'verifying'
   | 'uploading'
   | 'done'
   | 'failed'
