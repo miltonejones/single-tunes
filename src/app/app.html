@@ -114,6 +114,16 @@
 
   <button
     type="button"
+    class="btn recorder-toggle"
+    aria-label="Record tracks from YouTube"
+    title="Record tracks from YouTube"
+    (click)="recorderPanel.open()"
+  >
+    <i class="fa-solid fa-plus"></i>
+  </button>
+
+  <button
+    type="button"
     class="btn settings-toggle"
     aria-label="Settings"
     (click)="settingsPanel.toggle()"
