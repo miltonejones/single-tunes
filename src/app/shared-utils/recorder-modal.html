@@ -5,11 +5,6 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title"><i class="fa-solid fa-circle-plus me-2"></i> Record from YouTube</h5>
-        <div class="recorder-mode-toggle" (click)="toggleMode()" role="button" tabindex="0"
-             [title]="recorder.mode() === 'aws' ? 'Switch to local recorder' : 'Switch to AWS recorder'">
-          <span class="mode-pill" [class.active]="recorder.mode() === 'aws'">AWS</span>
-          <span class="mode-pill" [class.active]="recorder.mode() === 'local'">Local</span>
-        </div>
         <button type="button" class="btn-close" (click)="close()"></button>
       </div>
       <div class="modal-body">

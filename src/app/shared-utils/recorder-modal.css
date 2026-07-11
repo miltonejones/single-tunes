@@ -85,31 +85,3 @@
 .row-remove:hover {
   color: #dc3545;
 }
-
-/* ── Mode toggle pill ─────────────────────────────────────────────── */
-.recorder-mode-toggle {
-  display: inline-flex;
-  gap: 0;
-  margin-right: 12px;
-  border: 1px solid var(--border, #dee2e6);
-  border-radius: 6px;
-  overflow: hidden;
-  cursor: pointer;
-  user-select: none;
-}
-
-.mode-pill {
-  padding: 3px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--text-secondary, #6c757d);
-  background: transparent;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.mode-pill.active {
-  color: #fff;
-  background: var(--accent, #0d6efd);
-}
