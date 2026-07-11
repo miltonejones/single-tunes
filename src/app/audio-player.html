@@ -180,6 +180,40 @@
         <button type="button" (click)="stop()"><i class="fa-solid fa-stop"></i></button>
       </div>
 
+      @if (isCasting()) {
+        <div class="audio-player-fullscreen-cast-row">
+          @if (confirmingCastDisconnect()) {
+            <span class="audio-player-cast-confirm-label">Stop casting?</span>
+            <button
+              type="button"
+              class="audio-player-cast-confirm-yes"
+              title="Stop casting"
+              (click)="cancelCasting()"
+            >
+              <i class="fa-solid fa-check"></i>
+            </button>
+            <button
+              type="button"
+              class="audio-player-cast-confirm-no"
+              title="Keep casting"
+              (click)="confirmingCastDisconnect.set(false)"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="audio-player-fullscreen-cast-btn"
+              title="Stop casting"
+              (click)="confirmingCastDisconnect.set(true)"
+            >
+              <i class="fa-solid fa-tv"></i>
+              <span>Casting to {{ castDeviceName() }}</span>
+            </button>
+          }
+        </div>
+      }
+
       <div class="audio-player-fullscreen-visualizer">
         <app-audio-visualizer />
       </div>
