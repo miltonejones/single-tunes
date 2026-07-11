@@ -74,6 +74,8 @@ export class AudioPlayer implements OnInit, OnDestroy {
   duration = signal(0);
   isExpanded = signal(false);
   protected isCasting = signal(false);
+  protected castDeviceName = signal('');
+  protected confirmingCastDisconnect = signal(false);
   protected showTrackMenu = signal(false);
   protected volume = signal(1);
   protected dominantColor = signal<string | null>(null);
@@ -151,8 +153,14 @@ export class AudioPlayer implements OnInit, OnDestroy {
         } else if (!connected && previouslyCasting) {
           // User just disconnected / session ended while Cast was playing.
           this.onCastDisconnected();
+          this.confirmingCastDisconnect.set(false);
         }
       }),
+    );
+
+    // Track the connected Cast device's name for the "Casting to ..." indicator.
+    this.subscriptions.push(
+      this.castService.deviceName$.subscribe((name) => this.castDeviceName.set(name)),
     );
 
     // During Cast, drive UI from CastService observables instead of <audio> events.
@@ -490,6 +498,11 @@ export class AudioPlayer implements OnInit, OnDestroy {
       this.audioPlayerCommand.setIsPlaying(this.isPlaying());
     });
 
+    // Reset the cast-disconnect confirmation gate whenever the fullscreen player closes.
+    effect(() => {
+      if (!this.isExpanded()) this.confirmingCastDisconnect.set(false);
+    });
+
     // Sync media session position state to lock screen / control center.
     effect(() => {
       if (this.isPlaying()) {
@@ -645,6 +658,12 @@ export class AudioPlayer implements OnInit, OnDestroy {
     if (this.sync.mode() === 'leader' && !this.isMuted()) {
       this.sync.reportPlayback({ volume: this.audioEl.volume, muted: false });
     }
+  }
+
+  /** Ends the Cast session after the user confirms via the confirmation gate. */
+  cancelCasting(): void {
+    this.castService.disconnect();
+    this.confirmingCastDisconnect.set(false);
   }
 
   advanceTrack(offset: number): void {
