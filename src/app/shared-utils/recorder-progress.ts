@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { RecorderService, RecorderBatch, RecorderJob, RecorderJobStatus } from './recorder.service';
 
 const STATUS_ICON: Record<RecorderJobStatus, string> = {
@@ -26,7 +26,7 @@ const TERMINAL: RecorderJobStatus[] = ['done', 'failed', 'cancelled'];
   templateUrl: './recorder-progress.html',
   styleUrl: './recorder-progress.css',
 })
-export class RecorderProgress {
+export class RecorderProgress implements OnDestroy {
   private recorder = inject(RecorderService);
   protected readonly STATUS_ICON = STATUS_ICON;
 
@@ -36,6 +36,60 @@ export class RecorderProgress {
 
   hasBatches = computed(() => this.batches().length > 0);
   cancelling = signal<Set<string>>(new Set());
+
+  // ── Recording countdown ──────────────────────────────────────────────────
+  /** Tracks when each job first entered `recording` status (client timestamp). */
+  private recordingStartedAt = new Map<string, number>();
+  /** Previous status per job, so we can detect transitions into `recording`. */
+  private prevStatuses = new Map<string, RecorderJobStatus>();
+  /** Reactive "now" updated every 500ms while any job is recording. */
+  private recordingNow = signal(Date.now());
+  private recordingTimer?: ReturnType<typeof setInterval>;
+
+  constructor() {
+    // Watch for jobs entering/leaving `recording` status on each poll tick.
+    effect(() => {
+      const batches = this.batches();
+      let hasRecording = false;
+
+      for (const batch of batches) {
+        for (const job of batch.jobs) {
+          const prev = this.prevStatuses.get(job.jobId);
+          this.prevStatuses.set(job.jobId, job.status);
+
+          if (job.status === 'recording' && prev !== 'recording') {
+            this.recordingStartedAt.set(job.jobId, Date.now());
+          }
+          if (job.status !== 'recording') {
+            this.recordingStartedAt.delete(job.jobId);
+          }
+          if (job.status === 'recording') {
+            hasRecording = true;
+          }
+        }
+      }
+
+      if (hasRecording && !this.recordingTimer) {
+        this.recordingTimer = setInterval(() => this.recordingNow.set(Date.now()), 500);
+      } else if (!hasRecording && this.recordingTimer) {
+        clearInterval(this.recordingTimer);
+        this.recordingTimer = undefined;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.recordingTimer);
+    this.recordingTimer = undefined;
+  }
+
+  /** Returns 0–100 progress for a job in `recording` status, or 0 if unknown. */
+  recordingProgress(job: RecorderJob): number {
+    const startedAt = this.recordingStartedAt.get(job.jobId);
+    if (!startedAt || !job.duration || job.duration <= 0) return 0;
+    const elapsed = (this.recordingNow() - startedAt) / 1000;
+    return Math.min(100, Math.round((elapsed / job.duration) * 100));
+  }
 
   dismiss(batchId: string): void {
     this.recorder.dismiss(batchId);
@@ -98,6 +152,9 @@ export class RecorderProgress {
   phaseLabel(job: RecorderJob): string {
     if (job.status === 'downloading' && job.progress != null) {
       return `downloading ${job.progress}%`;
+    }
+    if (job.status === 'recording' && job.duration) {
+      return `recording ${this.recordingProgress(job)}%`;
     }
     return job.status;
   }
