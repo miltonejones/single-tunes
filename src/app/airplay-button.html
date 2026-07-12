@@ -1,0 +1,11 @@
+@if (isAvailable()) {
+  <button
+    type="button"
+    class="airplay-button"
+    [class.airplay-button--active]="isConnected()"
+    [title]="isConnected() ? 'AirPlay connected' : 'AirPlay to device'"
+    (click)="showPicker()"
+  >
+    <i class="fa-solid fa-tv"></i>
+  </button>
+}

@@ -1,0 +1,30 @@
+.airplay-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--surface-3);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  line-height: 1;
+}
+
+.airplay-button:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border-color: var(--accent-from);
+}
+
+.airplay-button--active {
+  color: var(--accent-from, #6366f1);
+  border-color: var(--accent-from, #6366f1);
+  background: color-mix(in srgb, var(--accent-from, #6366f1) 10%, var(--surface-1));
+}
+
+.airplay-button--active:hover {
+  background: color-mix(in srgb, var(--accent-from, #6366f1) 18%, var(--surface-1));
+}
