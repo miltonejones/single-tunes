@@ -88,6 +88,16 @@
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
           }
+          @if (listType() === 'album' || listType() === 'artist') {
+            <button
+              type="button"
+              class="banner-share-btn"
+              title="Share to KTunes"
+              (click)="shareCurrentList()"
+            >
+              <i class="fa-solid fa-share-nodes"></i>
+            </button>
+          }
         </div>
       </div>
     </div>
@@ -409,5 +419,9 @@
   }
 
   <app-track-menu [track]="menuTrack()" (closed)="closeMenu()" (trackUpdated)="onTrackUpdated($event)" (playlistToggled)="onPlaylistToggled($event)" />
+
+  @if (sharing(); as ctx) {
+    <app-share-modal [context]="ctx" (closed)="sharing.set(null)" />
+  }
 
   <router-outlet />

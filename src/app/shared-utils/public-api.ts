@@ -91,6 +91,10 @@ export type { UserProfile } from './user.service';
 export { SyncService } from './sync.service';
 export type { SyncState, SyncTrack, SyncMode } from './sync.service';
 
+export { ShareService } from './share.service';
+export type { KtunesUser, ShareRequest, ShareResult, ShareContext } from './share.service';
+export { ShareModal } from './share-modal';
+
 // ── Sync Service Worker exports ──────────────────────────────────────────
 
 export * from './sync-sw';

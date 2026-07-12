@@ -1,0 +1,90 @@
+<div class="share-backdrop" (click)="close()"></div>
+<div class="share-modal" (click)="$event.stopPropagation()">
+  <div class="share-header">
+    <h5 class="share-title">
+      <i class="fa-solid fa-share-nodes"></i>
+      Share to KTunes
+    </h5>
+    <button class="share-close" type="button" (click)="close()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <div class="share-body">
+    @if (!isLoggedIn()) {
+      <p class="share-context">Log in to your KTunes account to share <strong>{{ context().label }}</strong>.</p>
+      <div class="share-field">
+        <label>Email</label>
+        <input
+          type="email"
+          [value]="email()"
+          (input)="email.set($any($event.target).value)"
+          placeholder="you@example.com"
+        />
+      </div>
+      <div class="share-field">
+        <label>Password</label>
+        <input
+          type="password"
+          [value]="password()"
+          (input)="password.set($any($event.target).value)"
+          placeholder="••••••••"
+          (keydown.enter)="doLogin()"
+        />
+      </div>
+      @if (loginError()) {
+        <p class="share-error">{{ loginError() }}</p>
+      }
+      <button class="share-btn" type="button" [disabled]="loginBusy()" (click)="doLogin()">
+        @if (loginBusy()) {
+          <i class="fa-solid fa-spinner fa-spin"></i> Signing in…
+        } @else {
+          Sign in
+        }
+      </button>
+    } @else if (shareResult()) {
+      <div class="share-success">
+        <i class="fa-solid fa-circle-check"></i>
+        <p><strong>{{ shareResult()!.shared }}</strong> track(s) shared successfully.</p>
+        @if (shareResult()!.skipped > 0) {
+          <p class="share-skipped">{{ shareResult()!.skipped }} already existed and were skipped.</p>
+        }
+      </div>
+      <div class="share-actions">
+        <button class="share-btn" type="button" (click)="close()">Done</button>
+      </div>
+    } @else {
+      <p class="share-context">Share <strong>{{ context().label }}</strong> to a KTunes user's library.</p>
+      <div class="share-field">
+        <label>Select user</label>
+        <select
+          [value]="selectedUserId() ?? ''"
+          (change)="selectedUserId.set(+$any($event.target).value || null)"
+        >
+          <option value="">— pick a user —</option>
+          @for (user of users(); track user.Id) {
+            <option [value]="user.Id">{{ user.Name }} ({{ user.Email }})</option>
+          }
+        </select>
+      </div>
+      @if (shareError()) {
+        <p class="share-error">{{ shareError() }}</p>
+      }
+      <div class="share-actions">
+        <button
+          class="share-btn"
+          type="button"
+          [disabled]="!selectedUserId() || shareBusy()"
+          (click)="doShare()"
+        >
+          @if (shareBusy()) {
+            <i class="fa-solid fa-spinner fa-spin"></i> Sharing…
+          } @else {
+            <i class="fa-solid fa-share-nodes"></i> Share
+          }
+        </button>
+        <button class="share-btn-ghost" type="button" (click)="logout()">Not you? Log out</button>
+      </div>
+    }
+  </div>
+</div>

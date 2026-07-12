@@ -1,0 +1,168 @@
+.share-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1040;
+}
+
+.share-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, 94vw);
+  background: var(--surface, #1e1e2e);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-lg, 0 24px 60px rgba(0, 0, 0, 0.5));
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.share-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+}
+
+.share-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text, #fff);
+}
+
+.share-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.share-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.share-context {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.share-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.share-field label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.55));
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.share-field input,
+.share-field select {
+  background: var(--surface-2, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-md, 6px);
+  color: var(--text, #fff);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  width: 100%;
+  outline: none;
+}
+
+.share-field input:focus,
+.share-field select:focus {
+  border-color: var(--accent, #6c63ff);
+}
+
+.share-field select option {
+  background: var(--surface, #1e1e2e);
+  color: var(--text, #fff);
+}
+
+.share-error {
+  color: var(--danger, #f87171);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.share-skipped {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.55));
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.share-btn {
+  background: var(--accent, #6c63ff);
+  border: none;
+  border-radius: var(--radius-md, 6px);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.6rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: opacity 0.15s;
+}
+
+.share-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.share-btn-ghost {
+  background: none;
+  border: none;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+  text-decoration: underline;
+}
+
+.share-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.share-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.share-success i {
+  font-size: 2rem;
+  color: var(--success, #34d399);
+}
+
+.share-success p {
+  margin: 0;
+  color: var(--text, #fff);
+}

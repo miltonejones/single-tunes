@@ -25,6 +25,8 @@ import {
   TrackDownloadService,
   TrackMenu,
   TrackQueryService,
+  ShareModal,
+  ShareContext,
 } from 'shared-utils';
 
 const PAGE_SIZE = 100;
@@ -47,7 +49,7 @@ const LIST_TYPE_ICONS: Record<Exclude<ListType, 'library'>, string> = {
 
 @Component({
   selector: 'app-list-page',
-  imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, SkeletonLoader, TrackMenu, NgTemplateOutlet],
+  imports: [RouterOutlet, RouterLink, ImgFallbackDirective, Breadcrumbs, SkeletonLoader, TrackMenu, NgTemplateOutlet, ShareModal],
   templateUrl: './list.html',
   styleUrl: './list.css',
 })
@@ -135,6 +137,7 @@ export class ListPage implements OnInit, OnDestroy {
   playlists = signal<IPlaylistSummary[]>([]);
 
   menuTrack = signal<ITrackItem | null>(null);
+  sharing = signal<ShareContext | null>(null);
   editMode = signal(false);
   orderedTracks = signal<ITrackItem[]>([]);
   savingOrder = signal(false);
@@ -405,6 +408,16 @@ export class ListPage implements OnInit, OnDestroy {
 
   closeMenu(): void {
     this.menuTrack.set(null);
+  }
+
+  shareCurrentList(): void {
+    const type = this.listType();
+    if (type !== 'album' && type !== 'artist') return;
+    const entityId = this.entity()?.ID;
+    const id = typeof entityId === 'number' ? entityId : Number(this.listId());
+    const label = this.entity()?.Name ?? this.listId();
+    if (!id) return;
+    this.sharing.set({ type: type as 'album' | 'artist', id, label });
   }
 
   enterEditMode(): void {

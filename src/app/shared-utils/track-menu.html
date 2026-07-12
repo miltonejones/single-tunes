@@ -129,6 +129,11 @@
             <span class="track-menu-label">Report an Issue</span>
             <span class="track-menu-caption">File a GitHub issue about this track</span>
           </button>
+          <button type="button" class="track-menu-item" (click)="shareTrack()">
+            <i class="fa-solid fa-share-nodes"></i>
+            <span class="track-menu-label">Share to KTunes</span>
+            <span class="track-menu-caption">Copy to a KTunes user's library</span>
+          </button>
         </div>
       } @else {
         <button type="button" class="track-menu-back" (click)="menuView.set('main')">
@@ -192,4 +197,11 @@
 
 @if (showReportIssueModal()) {
   <app-report-issue-modal (closed)="closeReportIssueModal()" />
+}
+
+@if (showShareModal() && track()) {
+  <app-share-modal
+    [context]="{ type: 'track', id: track()!.ID!, label: track()!.Title }"
+    (closed)="showShareModal.set(false)"
+  />
 }

@@ -71,7 +71,8 @@
 .banner-shuffle-btn,
 .banner-download-btn,
 .banner-edit-btn,
-.banner-search-btn {
+.banner-search-btn,
+.banner-share-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,6 +88,7 @@
 }
 .banner-shuffle-btn:hover,
 .banner-edit-btn:hover,
+.banner-share-btn:hover,
 .banner-download-btn:hover:not(:disabled),
 .banner-search-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);

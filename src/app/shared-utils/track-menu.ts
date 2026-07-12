@@ -10,6 +10,7 @@ import { TrackCommandService } from './track-command.service';
 import { ItunesSearchModal } from './itunes-search-modal';
 import { TrackEditModal } from './track-edit-modal';
 import { ReportIssueModal } from './report-issue-modal';
+import { ShareModal } from './share-modal';
 import { FEATURE_FLAGS } from './feature-flags';
 import { TrackDownloadService } from './track-download.service';
 import { createKey } from './domain/text';
@@ -18,7 +19,7 @@ type MenuView = 'main' | 'playlists';
 
 @Component({
   selector: 'app-track-menu',
-  imports: [RouterLink, ImgFallbackDirective, ItunesSearchModal, TrackEditModal, ReportIssueModal],
+  imports: [RouterLink, ImgFallbackDirective, ItunesSearchModal, TrackEditModal, ReportIssueModal, ShareModal],
   templateUrl: './track-menu.html',
   styleUrl: './track-menu.css',
 })
@@ -44,6 +45,7 @@ export class TrackMenu implements OnInit {
   showTrackEditModal = signal(false);
   editTrackItemProps = signal<ITrackItem | null>(null);
   showReportIssueModal = signal(false);
+  showShareModal = signal(false);
   newPlaylistName = signal('');
   showNewPlaylistInput = signal(false);
 
@@ -165,6 +167,13 @@ export class TrackMenu implements OnInit {
 
   closeReportIssueModal(): void {
     this.showReportIssueModal.set(false);
+  }
+
+  shareTrack(): void {
+    const track = this.track();
+    if (!track?.ID) return;
+    this.close();
+    this.showShareModal.set(true);
   }
 
   downloadTrack(): void {
