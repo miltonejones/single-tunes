@@ -37,10 +37,10 @@ declare namespace cast.framework {
 
   interface CastSession {
     getSessionId(): string;
+    getCastDevice(): { friendlyName: string };
     loadMedia(loadRequest: chrome.cast.media.LoadRequest): Promise<void>;
     addMessageListener(namespace: string, listener: (ns: string, msg: string) => void): void;
     addEventListener(type: string, handler: (event: any) => void): void;
-    receiver: { friendlyName: string };
   }
 
   interface RemotePlayer {
@@ -201,7 +201,8 @@ export class CastService {
       event.sessionState === cast.framework.SessionState.SESSION_RESUMED;
     this.isConnected$.next(connected);
     if (connected) {
-      const friendlyName = (event.session as any)?.receiver?.friendlyName ?? '';
+      const session = (event.session as cast.framework.CastSession | undefined) ?? getContext()?.getCurrentSession();
+      const friendlyName = session?.getCastDevice()?.friendlyName ?? '';
       this.deviceName$.next(friendlyName);
       if (friendlyName) this.toast.show(`Casting to ${friendlyName}`);
     } else {
