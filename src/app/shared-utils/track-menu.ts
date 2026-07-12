@@ -46,6 +46,7 @@ export class TrackMenu implements OnInit {
   editTrackItemProps = signal<ITrackItem | null>(null);
   showReportIssueModal = signal(false);
   showShareModal = signal(false);
+  shareContext = signal<{ type: 'track'; id: number; label: string } | null>(null);
   newPlaylistName = signal('');
   showNewPlaylistInput = signal(false);
 
@@ -172,6 +173,7 @@ export class TrackMenu implements OnInit {
   shareTrack(): void {
     const track = this.track();
     if (!track?.ID) return;
+    this.shareContext.set({ type: 'track', id: track.ID, label: track.Title });
     this.close();
     this.showShareModal.set(true);
   }

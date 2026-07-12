@@ -199,9 +199,9 @@
   <app-report-issue-modal (closed)="closeReportIssueModal()" />
 }
 
-@if (showShareModal() && track()) {
+@if (showShareModal() && shareContext()) {
   <app-share-modal
-    [context]="{ type: 'track', id: track()!.ID!, label: track()!.Title }"
-    (closed)="showShareModal.set(false)"
+    [context]="shareContext()!"
+    (closed)="showShareModal.set(false); shareContext.set(null)"
   />
 }
