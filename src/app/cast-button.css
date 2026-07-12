@@ -28,11 +28,3 @@
 .cast-button--active:hover {
   background: color-mix(in srgb, var(--accent-from, #6366f1) 18%, var(--surface-1));
 }
-
-.cast-button__name {
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8rem;
-}
