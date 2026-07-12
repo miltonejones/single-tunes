@@ -187,7 +187,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
         if (this.isCasting() && state === 'IDLE' && this.castService.isConnected$.value) {
           if (!this.castTransitioning) {
             this.castTransitioning = true;
-            this.advanceTrack(1);
+            void this.advanceTrack(1);
           }
         } else if (state === 'PLAYING' || state === 'BUFFERING') {
           this.castTransitioning = false;
@@ -532,8 +532,8 @@ export class AudioPlayer implements OnInit, OnDestroy {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', () => this.play());
       navigator.mediaSession.setActionHandler('pause', () => this.pause());
-      navigator.mediaSession.setActionHandler('previoustrack', () => this.advanceTrack(-1));
-      navigator.mediaSession.setActionHandler('nexttrack', () => this.advanceTrack(1));
+      navigator.mediaSession.setActionHandler('previoustrack', () => void this.advanceTrack(-1));
+      navigator.mediaSession.setActionHandler('nexttrack', () => void this.advanceTrack(1));
       navigator.mediaSession.setActionHandler('seekto', (details) => {
         if (details.seekTime != null) this.seekTo(details.seekTime);
       });
@@ -682,8 +682,8 @@ export class AudioPlayer implements OnInit, OnDestroy {
     this.confirmingCastDisconnect.set(false);
   }
 
-  advanceTrack(offset: number): void {
-    if (!this.audioPlayerCommand.advance(offset)) {
+  async advanceTrack(offset: number): Promise<void> {
+    if (!(await this.audioPlayerCommand.advanceOrFetch(offset))) {
       this.stop();
     }
   }
@@ -732,7 +732,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   }
 
   onEnded(): void {
-    if (!this.isCasting()) this.advanceTrack(1);
+    if (!this.isCasting()) void this.advanceTrack(1);
   }
 
   onTimeUpdate(): void {
