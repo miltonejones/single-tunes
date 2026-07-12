@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   Component,
   ElementRef,
   OnDestroy,
@@ -13,6 +14,7 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { NavigationEnd, Router } from '@angular/router';
 import {
+  AirplayService,
   AnnouncementCommandService,
   AudioPlayerCommandService,
   CastService,
@@ -33,6 +35,7 @@ import { AudioAnalyserService } from './audio-analyser.service';
 import { AudioVisualizer } from './audio-visualizer';
 import { AudioVisualizerPanelService } from './audio-visualizer-panel.service';
 import { ArtistBioPanelService } from './artist-bio-panel.service';
+import { AirplayButton } from './airplay-button';
 import { CastButton } from './cast-button';
 import { TrackQueuePanelService } from './track-queue-panel.service';
 import { TrackDedicationService } from './track-dedication.service';
@@ -42,11 +45,11 @@ const DEFAULT_ALBUM_COVER = 'https://www.sky-tunes.com/assets/default_album_cove
 
 @Component({
   selector: 'app-audio-player',
-  imports: [CastButton, ImgFallbackDirective, AudioVisualizer, TrackMenu],
+  imports: [AirplayButton, CastButton, ImgFallbackDirective, AudioVisualizer, TrackMenu],
   templateUrl: './audio-player.html',
   styleUrl: './audio-player.css',
 })
-export class AudioPlayer implements OnInit, OnDestroy {
+export class AudioPlayer implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('audioEl') private audioElRef!: ElementRef<HTMLAudioElement>;
 
   private audioPlayerCommand = inject(AudioPlayerCommandService);
@@ -56,6 +59,7 @@ export class AudioPlayer implements OnInit, OnDestroy {
   private speechPlayback = inject(SpeechPlaybackService);
   private audioAnalyser = inject(AudioAnalyserService);
   private castService = inject(CastService);
+  private airplayService = inject(AirplayService);
   private playHistory = inject(PlayHistoryService);
   private trackDownload = inject(TrackDownloadService);
   private trackDedication = inject(TrackDedicationService);
@@ -201,6 +205,10 @@ export class AudioPlayer implements OnInit, OnDestroy {
         .pipe(filter((e) => e instanceof NavigationEnd))
         .subscribe(() => this.isExpanded.set(false)),
     );
+  }
+
+  ngAfterViewInit(): void {
+    this.airplayService.registerAudioElement(this.audioEl);
   }
 
   ngOnDestroy(): void {
