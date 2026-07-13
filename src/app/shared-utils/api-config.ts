@@ -1,4 +1,5 @@
 export const ANNOUNCE_ENDPOINT = 'https://ismvqzlyrf.execute-api.us-east-1.amazonaws.com';
+export const TRIVIA_ENDPOINT = `${ANNOUNCE_ENDPOINT}/trivia`;
 export const TUNE_API_ENDPOINT = 'https://u8m0btl997.execute-api.us-east-1.amazonaws.com';
 export const KTUNES_API_ENDPOINT = 'https://i078471s6j.execute-api.us-east-1.amazonaws.com';
 export const PHOTO_ENDPOINT = 'https://swkwp5a4m0.execute-api.us-east-1.amazonaws.com/';

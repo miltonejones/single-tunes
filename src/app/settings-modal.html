@@ -82,6 +82,37 @@
               </select>
               <div class="form-text">English voices available on this device.</div>
             </div>
+
+            <hr class="my-2" />
+
+            <h6 class="section-label"><i class="fa-solid fa-lightbulb"></i> Song Trivia</h6>
+
+            <div class="mb-3">
+              <label for="triviaFrequency" class="form-label">Trivia Frequency</label>
+              <select
+                class="form-select"
+                id="triviaFrequency"
+                [value]="triviaForm().frequency"
+                (change)="setTriviaField('frequency', $event)"
+              >
+                <option value="always">Always — every song</option>
+                <option value="often">Often</option>
+                <option value="sometimes">Sometimes — about half the songs</option>
+                <option value="seldom">Seldom</option>
+                <option value="never">Never</option>
+              </select>
+            </div>
+
+            <div class="mb-3 form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="triviaSpoken"
+                [checked]="triviaForm().spokenEnabled"
+                (change)="setTriviaField('spokenEnabled', $event)"
+              />
+              <label for="triviaSpoken" class="form-check-label">Speak trivia aloud</label>
+            </div>
           </div>
 
           <div class="settings-column">

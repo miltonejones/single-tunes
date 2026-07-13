@@ -17,6 +17,7 @@ import {
   AirplayService,
   AnnouncementCommandService,
   AudioPlayerCommandService,
+  buildAnnounceProps,
   CastService,
   FEATURE_FLAGS,
   formatDuration,
@@ -24,11 +25,13 @@ import {
   ITrackItem,
   LocationService,
   PlayHistoryService,
+  shouldAnnounce,
   shouldAnnounceForFrequency,
   SpeechPlaybackService,
   SyncService,
   TrackDownloadService,
   TrackMenu,
+  TriviaQueryService,
 } from 'shared-utils';
 import { AnnouncerSettingsService } from './announcer-settings.service';
 import { AudioAnalyserService } from './audio-analyser.service';
@@ -39,6 +42,8 @@ import { AirplayButton } from './airplay-button';
 import { CastButton } from './cast-button';
 import { TrackQueuePanelService } from './track-queue-panel.service';
 import { TrackDedicationService } from './track-dedication.service';
+import { TriviaPanelService } from './trivia-panel.service';
+import { TriviaSettingsService } from './trivia-settings.service';
 
 const ANNOUNCING_VOLUME = 0.3;
 const DEFAULT_ALBUM_COVER = 'https://www.sky-tunes.com/assets/default_album_cover.jpg';
@@ -63,6 +68,9 @@ export class AudioPlayer implements OnInit, AfterViewInit, OnDestroy {
   private playHistory = inject(PlayHistoryService);
   private trackDownload = inject(TrackDownloadService);
   private trackDedication = inject(TrackDedicationService);
+  private triviaQuery = inject(TriviaQueryService);
+  private triviaPanel = inject(TriviaPanelService);
+  private triviaSettings = inject(TriviaSettingsService);
   protected sync = inject(SyncService);
   private router = inject(Router);
   protected readonly featureFlags = FEATURE_FLAGS;
@@ -322,6 +330,9 @@ export class AudioPlayer implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async loadAndPlayInner(track: ITrackItem, requestId: number): Promise<void> {
+    // Trivia from the previous track should never linger into the next one.
+    this.triviaPanel.close();
+
     if (this.isCasting()) {
       // Suppress the auto-advance guard: the Cast device may briefly go IDLE
       // while transitioning to the new track, and we don't want that to
@@ -341,6 +352,11 @@ export class AudioPlayer implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
+      let resolveAnnouncementSpoken!: () => void;
+      const announcementSpoken = new Promise<void>((resolve) => {
+        resolveAnnouncementSpoken = resolve;
+      });
+
       if (shouldAnnounceForFrequency(settings.frequency)) {
         this.announcing.set(true);
         await this.announcementCommand.announceTrackChange(
@@ -353,12 +369,19 @@ export class AudioPlayer implements OnInit, AfterViewInit, OnDestroy {
           (_e, messageContent) => {
             this.setVolume(this.originalVolume);
             if (messageContent) this.sync.reportAnnouncement(messageContent);
+            resolveAnnouncementSpoken();
           },
-          () => this.setVolume(this.originalVolume),
+          () => {
+            this.setVolume(this.originalVolume);
+            resolveAnnouncementSpoken();
+          },
         );
+      } else {
+        resolveAnnouncementSpoken();
       }
 
       this.announcing.set(false);
+      void this.maybeShowTrivia(track, announcerName, requestId, announcementSpoken);
       return;
     }
 
@@ -390,6 +413,11 @@ export class AudioPlayer implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+    let resolveAnnouncementSpoken!: () => void;
+    const announcementSpoken = new Promise<void>((resolve) => {
+      resolveAnnouncementSpoken = resolve;
+    });
+
     if (shouldAnnounceForFrequency(settings.frequency)) {
       this.announcing.set(true);
       await this.announcementCommand.announceTrackChange(
@@ -402,9 +430,15 @@ export class AudioPlayer implements OnInit, AfterViewInit, OnDestroy {
         (_e, messageContent) => {
           this.setVolume(this.originalVolume);
           if (messageContent) this.sync.reportAnnouncement(messageContent);
+          resolveAnnouncementSpoken();
         },
-        () => this.setVolume(this.originalVolume),
+        () => {
+          this.setVolume(this.originalVolume);
+          resolveAnnouncementSpoken();
+        },
       );
+    } else {
+      resolveAnnouncementSpoken();
     }
 
     if (requestId !== this.playRequestId) return;
@@ -412,6 +446,66 @@ export class AudioPlayer implements OnInit, AfterViewInit, OnDestroy {
     this.announcing.set(false);
     this.play();
     this.sync.reportPlayback({ isPlaying: true, duration: this.audioEl.duration || 0 });
+    void this.maybeShowTrivia(track, announcerName, requestId, announcementSpoken);
+  }
+
+  /**
+   * Randomly (per the user's trivia-frequency setting) fetches and displays song
+   * trivia for the track that just started, speaking it aloud unless the user has
+   * muted trivia speech. Waits for the DJ announcer's speech to finish first (if
+   * it's speaking) so only one voice talks at a time.
+   */
+  private async maybeShowTrivia(
+    track: ITrackItem,
+    chatName: string,
+    requestId: number,
+    announcementSpoken: Promise<void>,
+  ): Promise<void> {
+    if (!shouldAnnounceForFrequency(this.triviaSettings.settings().frequency)) return;
+    if (!shouldAnnounce(track.trackTime)) return;
+
+    const props = buildAnnounceProps(
+      track.artistName,
+      track.Title,
+      chatName,
+      this.locationService.resolvedZip(),
+    );
+
+    let text: string;
+    try {
+      text = await this.triviaQuery.fetchTrivia(props);
+    } catch (error) {
+      console.error('Trivia fetch failed:', error);
+      return;
+    }
+    if (!text || requestId !== this.playRequestId) return;
+
+    this.triviaPanel.open(text);
+
+    if (!this.triviaSettings.settings().spokenEnabled) {
+      setTimeout(() => {
+        if (requestId === this.playRequestId) this.triviaPanel.close();
+      }, 8000);
+      return;
+    }
+
+    // Queue behind the DJ announcer, if it's still talking.
+    await announcementSpoken;
+    if (requestId !== this.playRequestId || !this.triviaPanel.isOpen()) return;
+
+    this.originalVolume = this.isCasting() ? this.castService.getVolume() : this.audioEl.volume;
+    this.setVolume(ANNOUNCING_VOLUME);
+    this.speechPlayback.speak(
+      text,
+      undefined,
+      () => {
+        this.setVolume(this.originalVolume);
+        setTimeout(() => {
+          if (requestId === this.playRequestId) this.triviaPanel.close();
+        }, 2000);
+      },
+      this.announcerSettings.settings().voiceURI,
+    );
   }
 
   /** Load a track on the native <audio> element, optionally seeking to a position. */

@@ -1,0 +1,20 @@
+<div class="trivia-modal" [class.show]="panel.isOpen()">
+  <i class="fa-solid fa-lightbulb trivia-modal-icon"></i>
+  <p class="trivia-modal-text">{{ panel.text() }}</p>
+  <div class="trivia-modal-actions">
+    <button
+      type="button"
+      class="trivia-modal-btn"
+      [attr.aria-label]="triviaSettings.settings().spokenEnabled ? 'Mute trivia' : 'Unmute trivia'"
+      [title]="triviaSettings.settings().spokenEnabled ? 'Mute trivia' : 'Unmute trivia'"
+      (click)="toggleSpoken()"
+    >
+      <i
+        class="fa-solid"
+        [class.fa-volume-high]="triviaSettings.settings().spokenEnabled"
+        [class.fa-volume-xmark]="!triviaSettings.settings().spokenEnabled"
+      ></i>
+    </button>
+    <button type="button" class="btn-close trivia-modal-close" aria-label="Close" (click)="close()"></button>
+  </div>
+</div>
