@@ -2,6 +2,7 @@ import { Component, effect, inject, OnDestroy, signal } from '@angular/core';
 import { AnnouncerSettings, AnnouncerSettingsService } from './announcer-settings.service';
 import { SettingsPanelService } from './settings-panel.service';
 import { ThemeService, THEMES } from './theme.service';
+import { TriviaSettings, TriviaSettingsService } from './trivia-settings.service';
 import { LocationService, SpeechPlaybackService } from 'shared-utils';
 
 @Component({
@@ -12,6 +13,7 @@ import { LocationService, SpeechPlaybackService } from 'shared-utils';
 })
 export class SettingsModal implements OnDestroy {
   private announcerSettings = inject(AnnouncerSettingsService);
+  private triviaSettings = inject(TriviaSettingsService);
   private speechPlayback = inject(SpeechPlaybackService);
   protected locationService = inject(LocationService);
   protected panel = inject(SettingsPanelService);
@@ -19,6 +21,7 @@ export class SettingsModal implements OnDestroy {
   protected readonly themes = THEMES;
 
   form = signal<AnnouncerSettings>(this.announcerSettings.settings());
+  triviaForm = signal<TriviaSettings>(this.triviaSettings.settings());
   voices = signal<SpeechSynthesisVoice[]>(this.speechPlayback.getEnglishVoices());
 
   private onVoicesChanged = () => this.voices.set(this.speechPlayback.getEnglishVoices());
@@ -27,6 +30,7 @@ export class SettingsModal implements OnDestroy {
     effect(() => {
       if (this.panel.isOpen()) {
         this.form.set(this.announcerSettings.settings());
+        this.triviaForm.set(this.triviaSettings.settings());
         this.voices.set(this.speechPlayback.getEnglishVoices());
       }
     });
@@ -44,6 +48,12 @@ export class SettingsModal implements OnDestroy {
     this.form.update((current) => ({ ...current, [key]: value }) as AnnouncerSettings);
   }
 
+  setTriviaField<K extends keyof TriviaSettings>(key: K, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    this.triviaForm.update((current) => ({ ...current, [key]: value }) as TriviaSettings);
+  }
+
   setTheme(event: Event): void {
     const key = (event.target as HTMLSelectElement).value;
     const theme = THEMES.find((t) => t.key === key);
@@ -52,6 +62,7 @@ export class SettingsModal implements OnDestroy {
 
   save(): void {
     this.announcerSettings.update(this.form());
+    this.triviaSettings.update(this.triviaForm());
     this.panel.close();
   }
 

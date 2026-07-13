@@ -29,6 +29,7 @@ import { FirstRunGate } from './first-run-gate';
 import { SettingsModal } from './settings-modal';
 import { SettingsPanelService } from './settings-panel.service';
 import { TrackQueue } from './track-queue';
+import { TriviaModal } from './trivia-modal';
 import { PodcastAudioPlayer } from './podcast/podcast-audio-player';
 import { EpisodeQueue } from './podcast/episode-queue';
 
@@ -154,6 +155,7 @@ const routeAnimation = trigger('routeAnimation', [
   imports: [
     RouterLink, RouterOutlet, AudioPlayer, AudioVisualizer, ArtistBioPanel, TrackQueue, SettingsModal, Toast,
     PodcastAudioPlayer, EpisodeQueue, FormsModule, RecorderModal, RecorderProgress, ShazamModal, FirstRunGate,
+    TriviaModal,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',

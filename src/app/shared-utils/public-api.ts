@@ -12,6 +12,7 @@ export * from './domain/listing';
 export { AnnouncementQueryService } from './announcement-query.service';
 export { AnnouncementCommandService } from './announcement-command.service';
 export { SpeechPlaybackService } from './speech-playback.service';
+export { TriviaQueryService } from './trivia-query.service';
 
 export { TrackQueryService } from './track-query.service';
 export { TrackCommandService } from './track-command.service';
