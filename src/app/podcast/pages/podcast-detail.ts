@@ -23,6 +23,26 @@ import {
 type SortField = 'title' | 'pubDate';
 
 const PAGE_SIZE = 10;
+const SORT_STORAGE_KEY = 'podcast-detail-sort';
+
+interface StoredSort {
+  field: SortField;
+  ascOffset: 1 | -1;
+}
+
+function loadSortPreference(): StoredSort {
+  try {
+    const raw = localStorage.getItem(SORT_STORAGE_KEY);
+    if (!raw) return { field: 'title', ascOffset: 1 };
+    const parsed = JSON.parse(raw);
+    return {
+      field: parsed.field === 'pubDate' ? 'pubDate' : 'title',
+      ascOffset: parsed.ascOffset === -1 ? -1 : 1,
+    };
+  } catch {
+    return { field: 'title', ascOffset: 1 };
+  }
+}
 
 @Component({
   selector: 'app-podcast-detail',
@@ -44,8 +64,9 @@ export class PodcastDetailPage {
   loading = signal(false);
   error = signal('');
 
-  sortField = signal<SortField>('title');
-  ascOffset = signal<1 | -1>(1);
+  private readonly storedSort = loadSortPreference();
+  sortField = signal<SortField>(this.storedSort.field);
+  ascOffset = signal<1 | -1>(this.storedSort.ascOffset);
   page = signal(1);
   expandedNodes = signal<Record<string, boolean>>({});
 
@@ -102,6 +123,10 @@ export class PodcastDetailPage {
   setSort(field: SortField): void {
     this.sortField.set(field);
     this.ascOffset.set((this.ascOffset() * -1) as 1 | -1);
+    localStorage.setItem(
+      SORT_STORAGE_KEY,
+      JSON.stringify({ field: this.sortField(), ascOffset: this.ascOffset() }),
+    );
   }
 
   toggleExpand(guid: string): void {
