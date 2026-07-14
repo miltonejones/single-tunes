@@ -5,9 +5,11 @@ import {
   AiSearchQueryService,
   AiSearchStatus,
   AudioPlayerCommandService,
+  CatalogQueryService,
   CoverflowDirective,
   DashItem,
   formatDuration,
+  IDetailRow,
   IGridItem,
   ImgFallbackDirective,
   IPlaylistSummary,
@@ -21,6 +23,9 @@ import {
 const TRACK_COUNT_PATTERN = /(\d+)\s*tracks?/i;
 const CAROUSEL_INTERVAL_MS = 5000;
 const FEATURED_PLAYLIST_COUNT = 8;
+const FAVORITE_PLAYLIST_SAMPLE = 6;
+
+type FavoriteItem = IDetailRow & { from: string };
 
 function trackCountOf(item: DashItem): number {
   const match = item.Caption?.match(TRACK_COUNT_PATTERN);
@@ -50,13 +55,17 @@ export class HomePage implements OnInit, OnDestroy {
   protected playHistory = inject(PlayHistoryService);
   private aiSearch = inject(AiSearchQueryService);
   private audioPlayerCommand = inject(AudioPlayerCommandService);
+  private catalogQuery = inject(CatalogQueryService);
   private carouselTimer?: ReturnType<typeof setInterval>;
   private touchStartX = 0;
   private touchStartY = 0;
 
   dashItems = signal<DashItem[]>([]);
+  allPlaylists = signal<IPlaylistSummary[]>([]);
   featuredPlaylists = signal<IPlaylistSummary[]>([]);
   recentlyAdded = signal<ITrackItem[]>([]);
+  favoriteAlbums = signal<FavoriteItem[]>([]);
+  favoriteArtists = signal<FavoriteItem[]>([]);
   carouselIndex = signal(0);
 
   aiStatus = signal<AiSearchStatus>('idle');
@@ -79,9 +88,11 @@ export class HomePage implements OnInit, OnDestroy {
   ngOnInit(): void {
     const data = this.route.snapshot.data['home'] as HomeResolvedData;
     this.dashItems.set(data.dashItems);
+    this.allPlaylists.set(data.playlists);
     this.featuredPlaylists.set(pickRandom(data.playlists, FEATURED_PLAYLIST_COUNT));
     this.recentlyAdded.set(data.recentlyAdded);
     this.startCarousel();
+    this.loadFavorites();
     this.audioPlayerCommand.currentTrack$.subscribe((track) => {
       this.currentTrackId.set(track?.ID ?? null);
     });
@@ -148,6 +159,40 @@ export class HomePage implements OnInit, OnDestroy {
 
   private startCarousel(): void {
     this.carouselTimer = setInterval(() => this.nextSlide(), CAROUSEL_INTERVAL_MS);
+  }
+
+  private async loadFavorites(): Promise<void> {
+    const playlists = pickRandom(this.allPlaylists(), FAVORITE_PLAYLIST_SAMPLE);
+    const albums: FavoriteItem[] = [];
+    const artists: FavoriteItem[] = [];
+
+    for (const playlist of playlists) {
+      try {
+        const detail = await this.catalogQuery.getPlaylistDetail(playlist.listKey);
+        const tracks = detail.related.records;
+
+        const albumTracks = tracks.filter((t) => t.albumFk && t.artistName);
+        if (albumTracks.length > 0) {
+          const pick = albumTracks[Math.floor(Math.random() * albumTracks.length)];
+          const albumDetail = await this.catalogQuery.getAlbumDetail(pick.albumFk);
+          const row = albumDetail.row[0];
+          if (row) albums.push({ ...row, artistName: pick.artistName, from: playlist.Title });
+        }
+
+        const artistTracks = tracks.filter((t) => t.artistFk);
+        if (artistTracks.length > 0) {
+          const pick = artistTracks[Math.floor(Math.random() * artistTracks.length)];
+          const artistDetail = await this.catalogQuery.getArtistDetail(pick.artistFk!);
+          const row = artistDetail.row[0];
+          if (row) artists.push({ ...row, from: playlist.Title });
+        }
+      } catch {
+        // skip this playlist on error, continue with the rest
+      }
+    }
+
+    this.favoriteAlbums.set(albums);
+    this.favoriteArtists.set(artists);
   }
 
   private topByTrackCount(type: string): DashItem[] {

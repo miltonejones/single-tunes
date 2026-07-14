@@ -16,4 +16,5 @@ export class MediaCard {
   subtitle = input<string | null>(null);
   caption = input<string | null>(null);
   routerLink = input<readonly unknown[] | null>(null);
+  shape = input<'square' | 'circle'>('square');
 }

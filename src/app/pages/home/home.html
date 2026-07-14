@@ -225,10 +225,28 @@
         [title]="item.Name"
         [eyebrow]="item.Type"
         [caption]="item.Caption"
+        [shape]="'circle'"
         [routerLink]="['/list', item.Type, item.ID, 1]"
       />
     }
   </div>
+
+  @if (favoriteArtists().length > 0) {
+    <div class="section-header">
+      <h3><i class="fa-solid fa-heart"></i> Artists from your favorites</h3>
+    </div>
+    <div class="dash-grid" libCoverflow>
+      @for (item of favoriteArtists(); track item.ID) {
+        <lib-media-card
+          [thumbnail]="item.Thumbnail ?? null"
+          [title]="item.Name ?? null"
+          [caption]="'From &quot;' + item.from + '&quot;'"
+          [shape]="'circle'"
+          [routerLink]="['/list', 'artist', item.ID, 1]"
+        />
+      }
+    </div>
+  }
 
   <div class="section-header">
     <h3><i class="fa-solid fa-compact-disc"></i> Top Albums</h3>
@@ -247,5 +265,22 @@
       />
     }
   </div>
+
+  @if (favoriteAlbums().length > 0) {
+    <div class="section-header">
+      <h3><i class="fa-solid fa-heart"></i> Albums from your favorites</h3>
+    </div>
+    <div class="dash-grid" libCoverflow>
+      @for (item of favoriteAlbums(); track item.ID) {
+        <lib-media-card
+          [thumbnail]="item.Thumbnail ?? null"
+          [title]="item.Name ?? null"
+          [subtitle]="item.artistName ?? null"
+          [caption]="'From &quot;' + item.from + '&quot;'"
+          [routerLink]="['/list', 'album', item.ID, 1]"
+        />
+      }
+    </div>
+  }
 
 <router-outlet />

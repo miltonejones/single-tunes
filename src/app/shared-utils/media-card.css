@@ -48,6 +48,15 @@
   transform: scale(1.08);
 }
 
+.media-card--circle .media-card-art {
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+.media-card--circle .media-card-art img {
+  border-radius: 50%;
+}
+
 .media-card-play {
   position: absolute;
   right: 0.5rem;

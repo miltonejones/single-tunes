@@ -1,4 +1,4 @@
-<a class="media-card" [routerLink]="routerLink()">
+<a class="media-card" [class.media-card--circle]="shape() === 'circle'" [routerLink]="routerLink()">
   <div class="media-card-art">
     <img appImgFallback [src]="thumbnail()" [alt]="alt() ?? title()" />
     <span class="media-card-play"><i class="fa-solid fa-play"></i></span>
