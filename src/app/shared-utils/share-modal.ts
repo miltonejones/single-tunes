@@ -64,10 +64,14 @@ export class ShareModal implements OnInit {
     this.shareResult.set(null);
     try {
       const ctx = this.context();
-      const result =
-        ctx.type === 'playlist'
-          ? await this.shareService.shareTracks(ctx.trackIds ?? [], targetUserId)
-          : await this.shareService.share({ type: ctx.type, id: ctx.id!, targetUserId });
+      const result = await this.shareService.share({
+        type: ctx.type,
+        id: ctx.id,
+        trackIds: ctx.trackIds,
+        name: ctx.name,
+        listKey: ctx.listKey,
+        targetUserId,
+      });
       this.shareResult.set(result);
     } catch (e: any) {
       const msg = e?.error?.error || e?.message || 'Share failed';

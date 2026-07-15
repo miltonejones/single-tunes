@@ -13,9 +13,14 @@ export interface KtunesUser {
 }
 
 export interface ShareRequest {
-  type: 'track' | 'album' | 'artist';
-  id: number;
+  type: 'track' | 'album' | 'artist' | 'playlist';
   targetUserId: number;
+  /** track/album/artist share */
+  id?: number;
+  /** playlist share: the tracks to copy, its display name, and its listKey */
+  trackIds?: number[];
+  name?: string;
+  listKey?: string;
 }
 
 export interface ShareResult {
@@ -27,6 +32,8 @@ export interface ShareContext {
   type: 'track' | 'album' | 'artist' | 'playlist';
   id?: number;
   trackIds?: number[];
+  name?: string;
+  listKey?: string;
   label: string;
 }
 
@@ -73,18 +80,5 @@ export class ShareService {
         headers: { Authorization: `Bearer ${this.token()}` },
       }),
     );
-  }
-
-  /** Shares an entire playlist by sharing each of its tracks individually,
-   *  since KTunes has no concept of a playlist as a shareable entity. */
-  async shareTracks(trackIds: number[], targetUserId: number): Promise<ShareResult> {
-    let shared = 0;
-    let skipped = 0;
-    for (const id of trackIds) {
-      const result = await this.share({ type: 'track', id, targetUserId });
-      shared += result.shared;
-      skipped += result.skipped;
-    }
-    return { shared, skipped };
   }
 }
