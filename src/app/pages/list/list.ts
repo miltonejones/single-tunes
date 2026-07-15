@@ -412,6 +412,14 @@ export class ListPage implements OnInit, OnDestroy {
 
   shareCurrentList(): void {
     const type = this.listType();
+    if (type === 'playlist') {
+      const trackIds = (this.detail()?.related.records ?? [])
+        .map((t) => t.ID)
+        .filter((id): id is number => typeof id === 'number');
+      if (trackIds.length === 0) return;
+      this.sharing.set({ type: 'playlist', trackIds, label: this.currentLabel() });
+      return;
+    }
     if (type !== 'album' && type !== 'artist') return;
     const entityId = this.entity()?.ID;
     const id = typeof entityId === 'number' ? entityId : Number(this.listId());
