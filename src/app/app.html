@@ -91,7 +91,7 @@
     <button type="button" class="btn search-back" (click)="closeSearch()">
       <i class="fa-solid fa-arrow-left"></i>
     </button>
-    <input #searchInput type="search" class="form-control" placeholder="Search..." list="toolbar-search-history" autocomplete="off" (input)="onSearchInput(searchInput.value)" />
+    <input #searchInput type="search" class="form-control" placeholder="Search..." list="toolbar-search-history" autocomplete="off" />
     <datalist id="toolbar-search-history">
       @for (term of searchHistory(); track term) {
         <option [value]="term"></option>
