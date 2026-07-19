@@ -184,8 +184,6 @@ export class App {
   protected searchHistory = signal<string[]>(this.loadSearchHistory());
   private navDirection = signal<'forward' | 'back'>('forward');
   private previousUrl = this.router.url;
-  private searchDebounceTimer?: ReturnType<typeof setTimeout>;
-  private readonly SEARCH_DEBOUNCE_MS = 400;
 
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
 
@@ -236,17 +234,6 @@ export class App {
 
   closeSearch(): void {
     this.searchOpen.set(false);
-  }
-
-  protected onSearchInput(query: string): void {
-    clearTimeout(this.searchDebounceTimer);
-    const trimmed = query.trim();
-    if (trimmed.length >= 2) {
-      this.searchDebounceTimer = setTimeout(() => {
-        this.saveSearchHistory(trimmed);
-        this.router.navigate(['/search', trimmed]);
-      }, this.SEARCH_DEBOUNCE_MS);
-    }
   }
 
   onSearch(event: Event, query: string): void {
