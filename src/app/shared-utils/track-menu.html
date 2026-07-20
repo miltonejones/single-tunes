@@ -32,7 +32,7 @@
             <span class="track-menu-label">Edit Track</span>
             <span class="track-menu-caption">Update metadata from iTunes</span>
           </button>
-          @if (featureFlags.trackEditModal) {
+          @if (featureFlags.trackEditModal()) {
             <button type="button" class="track-menu-item" (click)="editTrackProperties()">
               <i class="fa-solid fa-sliders"></i>
               <span class="track-menu-label">Edit Properties</span>
