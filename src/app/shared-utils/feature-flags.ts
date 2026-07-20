@@ -1,3 +1,5 @@
+import { signal } from '@angular/core';
+
 /**
  * Feature flags for toggling in-progress features on/off without deploying code changes.
  *
@@ -5,7 +7,7 @@
  */
 export const FEATURE_FLAGS = {
   /** Track Edit Properties modal — direct form-based editing of track metadata */
-  trackEditModal: false,
+  trackEditModal: signal(false),
   /** Artist Bio Panel — peek bar with artist image, bio, and info button in the audio player */
-  artistBioPanel: false,
+  artistBioPanel: signal(false),
 };

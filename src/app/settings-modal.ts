@@ -3,6 +3,7 @@ import { AnnouncerSettings, AnnouncerSettingsService } from './announcer-setting
 import { SettingsPanelService } from './settings-panel.service';
 import { ThemeService, THEMES } from './theme.service';
 import { TriviaSettings, TriviaSettingsService } from './trivia-settings.service';
+import { FEATURE_FLAGS } from 'shared-utils';
 import { LocationService, SpeechPlaybackService } from 'shared-utils';
 
 @Component({
@@ -23,6 +24,7 @@ export class SettingsModal implements OnDestroy {
   form = signal<AnnouncerSettings>(this.announcerSettings.settings());
   triviaForm = signal<TriviaSettings>(this.triviaSettings.settings());
   voices = signal<SpeechSynthesisVoice[]>(this.speechPlayback.getEnglishVoices());
+  featureFlags = signal({ ...FEATURE_FLAGS });
 
   private onVoicesChanged = () => this.voices.set(this.speechPlayback.getEnglishVoices());
 
@@ -52,6 +54,11 @@ export class SettingsModal implements OnDestroy {
     const target = event.target as HTMLInputElement;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     this.triviaForm.update((current) => ({ ...current, [key]: value }) as TriviaSettings);
+  }
+
+  setFeatureFlag<K extends keyof typeof FEATURE_FLAGS>(key: K, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    FEATURE_FLAGS[key].set(target.checked);
   }
 
   setTheme(event: Event): void {

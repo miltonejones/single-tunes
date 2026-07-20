@@ -113,6 +113,34 @@
               />
               <label for="triviaSpoken" class="form-check-label">Speak trivia aloud</label>
             </div>
+
+            <hr class="my-2" />
+
+            <h6 class="section-label"><i class="fa-solid fa-toggle-on"></i> Feature Flags</h6>
+
+            <div class="mb-3 form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="flagTrackEdit"
+                [checked]="featureFlags().trackEditModal()"
+                (change)="setFeatureFlag('trackEditModal', $event)"
+              />
+              <label for="flagTrackEdit" class="form-check-label">Track Edit Modal</label>
+              <div class="form-text">Direct form-based editing of track metadata.</div>
+            </div>
+
+            <div class="mb-3 form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="flagArtistBio"
+                [checked]="featureFlags().artistBioPanel()"
+                (change)="setFeatureFlag('artistBioPanel', $event)"
+              />
+              <label for="flagArtistBio" class="form-check-label">Artist Bio Panel</label>
+              <div class="form-text">Peek bar with artist image, bio, and info button in the audio player.</div>
+            </div>
           </div>
 
           <div class="settings-column">
