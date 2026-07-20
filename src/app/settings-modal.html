@@ -123,7 +123,7 @@
                 type="checkbox"
                 class="form-check-input"
                 id="flagTrackEdit"
-                [checked]="featureFlags().trackEditModal()"
+                [checked]="featureFlags.trackEditModal()"
                 (change)="setFeatureFlag('trackEditModal', $event)"
               />
               <label for="flagTrackEdit" class="form-check-label">Track Edit Modal</label>
@@ -135,7 +135,7 @@
                 type="checkbox"
                 class="form-check-input"
                 id="flagArtistBio"
-                [checked]="featureFlags().artistBioPanel()"
+                [checked]="featureFlags.artistBioPanel()"
                 (change)="setFeatureFlag('artistBioPanel', $event)"
               />
               <label for="flagArtistBio" class="form-check-label">Artist Bio Panel</label>

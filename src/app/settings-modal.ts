@@ -24,7 +24,7 @@ export class SettingsModal implements OnDestroy {
   form = signal<AnnouncerSettings>(this.announcerSettings.settings());
   triviaForm = signal<TriviaSettings>(this.triviaSettings.settings());
   voices = signal<SpeechSynthesisVoice[]>(this.speechPlayback.getEnglishVoices());
-  featureFlags = signal({ ...FEATURE_FLAGS });
+  protected readonly featureFlags = FEATURE_FLAGS;
 
   private onVoicesChanged = () => this.voices.set(this.speechPlayback.getEnglishVoices());
 
